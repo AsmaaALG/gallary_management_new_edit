@@ -6,7 +6,6 @@ import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/custom_text_field.dart';
 
-
 class SignUpScreen extends StatefulWidget {
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -79,7 +78,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (created) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) =>ControlPanel()),
+        MaterialPageRoute(builder: (context) => ControlPanel()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,105 +90,91 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFFCC40),
-      body: ModalProgressHUD(
-        inAsyncCall: showSpinner,
-        progressIndicator: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation<Color>(primaryColor), // تغيير اللون هنا
-        ),
-        child: Column(
-          children: [
-            SizedBox(height: 50),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.black, size: 28),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 50,
+          ),
+          Text(
+            "إنشاء حساب جديد",
+            style: TextStyle(
+              fontFamily: mainFont,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
             ),
-            Text(
-              "إنشاء حساب جديد",
-              style: TextStyle(
-                fontFamily: mainFont,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              "يرجى ملء البيانات لإنشاء حساب جديد",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontFamily: mainFont, fontSize: 14, color: Colors.black),
-            ),
-            SizedBox(height: 50),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(50),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40),
-                  ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "يرجى ملء البيانات لإنشاء حساب جديد",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontFamily: mainFont, fontSize: 14, color: Colors.black),
+          ),
+          // SizedBox(height: 50),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(50),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      CustomTextField(
-                        hintText: "الاسم الأول",
-                        controller: firstNameController,
-                      ),
-                      SizedBox(height: 10),
-                      CustomTextField(
-                        hintText: "اسم العائلة",
-                        controller: lastNameController,
-                      ),
-                      SizedBox(height: 10),
-                      CustomTextField(
-                        hintText: "البريد الإلكتروني",
-                        controller: emailController,
-                      ),
-                      SizedBox(height: 10),
-                      CustomTextField(
-                        hintText: "كلمة المرور",
-                        obscureText: true,
-                        controller: passwordController,
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _signUp,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    CustomTextField(
+                      hintText: "الاسم الأول",
+                      controller: firstNameController,
+                    ),
+                    SizedBox(height: 10),
+                    CustomTextField(
+                      hintText: "اسم العائلة",
+                      controller: lastNameController,
+                    ),
+                    SizedBox(height: 10),
+                    CustomTextField(
+                      hintText: "البريد الإلكتروني",
+                      controller: emailController,
+                    ),
+                    SizedBox(height: 10),
+                    CustomTextField(
+                      hintText: "كلمة المرور",
+                      obscureText: true,
+                      controller: passwordController,
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _signUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: secondaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        child: Text(
-                          "إنشاء الحساب",
-                          style: TextStyle(
-                              fontFamily: mainFont,
-                              color: cardBackground,
-                              fontSize: 18),
-                        ),
+                        padding: EdgeInsets.symmetric(vertical: 14),
                       ),
-                    ],
-                  ),
+                      child: Text(
+                        "إنشاء الحساب",
+                        style: TextStyle(
+                            fontFamily: mainFont,
+                            color: cardBackground,
+                            fontSize: 18),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
