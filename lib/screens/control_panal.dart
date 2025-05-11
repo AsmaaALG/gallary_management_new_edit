@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/screens/ads_screen.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
@@ -50,7 +51,7 @@ class _ControlPanelState extends State<ControlPanel> {
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(30.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,8 +77,9 @@ class _ControlPanelState extends State<ControlPanel> {
                 child: ListView(
                   children: [
                     AdminCard(
-                      title: 'إدارة المستودعات',
-                      description: 'يمكنك إدارة المستودعات ومتابعة المخزون.',
+                      title: 'إدارة االمسؤولين',
+                      description:
+                          'يمكنك إدارة المسؤولين ومتابعة جميع بياناتهم.',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -86,7 +88,8 @@ class _ControlPanelState extends State<ControlPanel> {
                     ),
                     AdminCard(
                       title: 'إدارة المعارض',
-                      description: 'يمكنك إدارة المعارض وتنسيق الفعاليات.',
+                      description:
+                          'يمكنك إدارة المعارض لاضافة وتعجيل وحذف اي من المعارض .',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -95,22 +98,23 @@ class _ControlPanelState extends State<ControlPanel> {
                     ),
                     AdminCard(
                       title: 'إدارة الإعلانات',
-                      description: 'يمكنك إدارة الإعلانات والترويج للمعارض.',
+                      description:
+                          'يمكنك إدارة الإعلانات والترويج للمعارض التي ستقام قريبا ',
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => GalleryManagementScreen()),
+                        MaterialPageRoute(builder: (context) => AdsScreen()),
                       ),
                     ),
                     AdminCard(
-                      title: 'إدارة طلبات التوظيف',
-                      description: 'يمكنك إدارة طلبات التوظيف والتوظيف.',
+                      title: 'إدارة طلبات حجز مساحة',
+                      description: 'يمكنك إدارة طلبات حجز مساحة داخل المعارض.',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => GalleryManagementScreen()),
                       ),
                     ),
+                    SizedBox(height: 20),
                     TextButton(
                         onPressed: () {
                           Auth().signOut(context);
@@ -124,7 +128,9 @@ class _ControlPanelState extends State<ControlPanel> {
                         child: Text(
                           "تسجيل الخروج",
                           style: TextStyle(
-                              fontFamily: mainFont, color: primaryColor),
+                              fontFamily: mainFont,
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold),
                         ))
                   ],
                 ),
@@ -151,7 +157,7 @@ class AdminCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 10),
       child: ListTile(
         title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(
             title,
             style: TextStyle(

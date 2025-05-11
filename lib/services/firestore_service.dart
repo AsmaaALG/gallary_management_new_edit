@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
@@ -18,7 +19,8 @@ class FirestoreService {
     return querySnapshot.docs.isNotEmpty;
   }
 
-  // Sign up باستخدام Auth
+  /////////////////////////////////////////////////////////////////////////////////////
+  //sign up
   Future<bool> createUser({
     required String firstName,
     required String lastName,
@@ -27,11 +29,8 @@ class FirestoreService {
   }) async {
     try {
       // إنشاء المستخدم في Firebase Auth
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       // جلب UID الخاص بالمستخدم
       String uid = userCredential.user!.uid;
@@ -51,4 +50,43 @@ class FirestoreService {
       return false;
     }
   }
+
+  //////////////////////////////////////////////////////////////////////////
+  ///ادارة الاعلانــــــــــــــات
+  // جلب جميع الإعلانات
+  Stream<QuerySnapshot> getAds() {
+    return _firestore.collection('ads').snapshots();
+  }
+
+  // إضافة إعلان جديد
+  Future<void> addAd(Map<String, dynamic> adData) async {
+    await _firestore.collection('ads').add(adData);
+  }
+
+  // تحديث إعلان موجود
+  Future<void> updateAd(String id, Map<String, dynamic> updatedData) async {
+    await _firestore.collection('ads').doc(id).update(updatedData);
+  }
+
+  // حذف إعلان
+  Future<void> deleteAd(String id) async {
+    await _firestore.collection('ads').doc(id).delete();
+  }
+
+  // أضف هذه الدالة إلى ملف firestore_service.dart
+  Future<Map<String, dynamic>?> getAdById(String id) async {
+    try {
+      final doc = await _firestore.collection('ads').doc(id).get();
+      if (doc.exists) {
+        return doc.data();
+      }
+      return null;
+    } catch (e) {
+      print("Error getting ad: $e");
+      return null;
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////
+  ///
 }
