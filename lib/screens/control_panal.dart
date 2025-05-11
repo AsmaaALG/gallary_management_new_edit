@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/screens/admin_management_screen.dart';
 import 'package:gallery_management/screens/ads_screen.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
@@ -77,13 +78,14 @@ class _ControlPanelState extends State<ControlPanel> {
                 child: ListView(
                   children: [
                     AdminCard(
-                      title: 'إدارة االمسؤولين',
+                      title: 'إدارة المسؤولين',
                       description:
                           'يمكنك إدارة المسؤولين ومتابعة جميع بياناتهم.',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => GalleryManagementScreen()),
+                          builder: (context) => const AdminManagementScreen(),
+                        ),
                       ),
                     ),
                     AdminCard(

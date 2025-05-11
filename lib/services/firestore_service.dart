@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 
 class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
@@ -19,8 +18,7 @@ class FirestoreService {
     return querySnapshot.docs.isNotEmpty;
   }
 
-  /////////////////////////////////////////////////////////////////////////////////////
-  //sign up
+  // Sign up باستخدام Auth
   Future<bool> createUser({
     required String firstName,
     required String lastName,
@@ -29,8 +27,11 @@ class FirestoreService {
   }) async {
     try {
       // إنشاء المستخدم في Firebase Auth
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
       // جلب UID الخاص بالمستخدم
       String uid = userCredential.user!.uid;
@@ -51,7 +52,7 @@ class FirestoreService {
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
   ///ادارة الاعلانــــــــــــــات
   // جلب جميع الإعلانات
   Stream<QuerySnapshot> getAds() {
@@ -88,5 +89,38 @@ class FirestoreService {
   }
 
   //////////////////////////////////////////////////////////////////
-  ///
+  ///المسؤوليـــــــــــن
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+// جلب المسؤولين
+  Stream<QuerySnapshot> getAdmins() {
+    return _db.collection('admin').snapshots();
+  }
+
+// إضافة مسؤول
+  Future<void> addAdmin(
+      String email, String firstName, String lastName, String id) async {
+    await _db.collection('admin').add({
+      'email': email,
+      'first_name': firstName,
+      'last_name': lastName,
+      'id': id,
+    });
+  }
+
+// تحديث مسؤول
+  Future<void> updateAdmin(String adminId, String email, String firstName,
+      String lastName, String id) async {
+    await _db.collection('admin').doc(adminId).update({
+      'email': email,
+      'first_name': firstName,
+      'last_name': lastName,
+      'id': id,
+    });
+  }
+
+// حذف مسؤول
+  Future<void> deleteAdmin(String adminId) async {
+    await _db.collection('admin').doc(adminId).delete();
+  }
 }
