@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 
 class EditAdsScreen extends StatefulWidget {
   final String adId;
@@ -44,7 +44,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         _locationController.text = adData['location'] ?? '';
         _imageUrlController.text = adData['image url'] ?? '';
 
-        final dateFormat = DateFormat('dd-MM-yyyy');
+        final dateFormat = intl.DateFormat('dd-MM-yyyy');
         _startDate = adData['start date'] != null
             ? dateFormat.parse(adData['start date'])
             : null;
@@ -128,9 +128,9 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         'description': _descriptionController.text,
         'location': _locationController.text,
         'image url': _imageUrlController.text,
-        'start date': DateFormat('dd-MM-yyyy').format(_startDate!),
-        'end date': DateFormat('dd-MM-yyyy').format(_endDate!),
-        'stopAd': DateFormat('dd-MM-yyyy').format(_stopDate!),
+        'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
+        'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
+        'stopAd': intl.DateFormat('dd-MM-yyyy').format(_stopDate!),
       };
 
       await _firestoreService.updateAd(widget.adId, updatedData);
@@ -152,7 +152,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: rtl,
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -371,7 +371,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
           children: [
             Text(
               date != null
-                  ? DateFormat('dd-MM-yyyy').format(date)
+                  ? intl.DateFormat('dd-MM-yyyy').format(date)
                   : 'اختر التاريخ',
             ),
             const Icon(Icons.calendar_today),

@@ -1,23 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/add_ads_screen.dart';
-import 'package:gallery_management/screens/add_gallery_screen.dart';
-import 'package:gallery_management/screens/edit_gallery_screen.dart';
-import 'package:gallery_management/screens/gallery_suite_screen.dart';
+import 'package:gallery_management/screens/booking_requests_screen.dart';
+import 'package:gallery_management/screens/edit_ads_screen.dart';
 import 'package:gallery_management/screens/main_screen.dart';
-import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:gallery_management/widgets/main_card.dart';
 
-class GalleryManagementScreen extends StatefulWidget {
-  const GalleryManagementScreen({super.key});
+class AdsScreen2 extends StatefulWidget {
+  const AdsScreen2({super.key});
 
   @override
-  State<GalleryManagementScreen> createState() =>
-      _GalleryManagementScreenState();
+  State<AdsScreen2> createState() => _AdsScreen2State();
 }
 
-class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
+class _AdsScreen2State extends State<AdsScreen2> {
   final FirestoreService _firestoreService = FirestoreService();
 
   List<Map<String, dynamic>> _galleries = [];
@@ -42,7 +39,7 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
     return Directionality(
         textDirection: TextDirection.rtl,
         child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('2').snapshots(),
+            stream: FirebaseFirestore.instance.collection('ads').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
@@ -66,7 +63,7 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                GallerySuiteScreen(galleryId: documentId),
+                                EditAdsScreen(adId: documentId),
                           ),
                         );
                       },
@@ -74,13 +71,13 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                     {
                       'icon': Icons.delete_rounded,
                       'action': () {
-                        confirmDelete(context, '2', documentId);
+                        confirmDelete(context, 'ads', documentId);
                       },
                     },
                     {
                       'icon': Icons.messenger_rounded,
                       'action': () {
-                        confirmDelete(context, '2', documentId);
+                        BookingRequestsScreen(adId: documentId);
                       },
                     },
                   ],
@@ -88,10 +85,10 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
               }).toList();
 
               return MainScreen(
-                title: 'إدارة المعارض',
-                description: 'قم بإدارة المعارض من هنا.',
+                title: 'إدارة الإعلانات',
+                description: 'قم بإدارة الإعلانات من هنا.',
                 cards: cards,
-                addScreen: AddGalleryScreen(),
+                addScreen: AddAdsScreen(),
               );
             }));
   }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gallery_management/constants.dart';
@@ -27,7 +28,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (email.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('يرجى إدخال الاسم وكلمة المرور')),
+        SnackBar(content: Text('يرجى إدخال البريد الإلكتروني وكلمة المرور')),
       );
       setState(() {
         showSpinner = false;
@@ -35,20 +36,44 @@ class _SignInScreenState extends State<SignInScreen> {
       return;
     }
 
-    bool isValid = await Auth().signIn(emailController, passwordController);
+    try {
+      bool isValid = await Auth().signIn(emailController, passwordController);
 
-    if (isValid) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => ControlPanel()),
-      );
-      setState(() {
-        showSpinner = false;
-      });
-    } else {
+      // البحث في مجموعة admin عن مستخدم بهذا البريد الإلكتروني
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('admin')
+          .where('email',
+              isEqualTo: email) // نفترض أن هناك حقل 'email' في المستندات
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('البريد الإلكتروني ليس مسجلاً كمسؤول')),
+        );
+        setState(() {
+          showSpinner = false;
+        });
+        return;
+      }
+
+      // إذا وجدنا المستند، نتابع عملية تسجيل الدخول
+
+      if (isValid) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ControlPanel()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
+        SnackBar(content: Text('حدث خطأ أثناء محاولة تسجيل الدخول: $e')),
       );
+    } finally {
       setState(() {
         showSpinner = false;
       });
@@ -75,7 +100,7 @@ class _SignInScreenState extends State<SignInScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(height: 40),
-              Text(
+              const Text(
                 "تسجيل الدخول",
                 style: TextStyle(
                   fontFamily: mainFont,

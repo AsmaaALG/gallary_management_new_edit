@@ -1,9 +1,8 @@
-// screens/ads_management/add_ads_screen.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 
 class AddAdsScreen extends StatefulWidget {
   const AddAdsScreen({super.key});
@@ -87,12 +86,12 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
         'description': _descriptionController.text,
         'location': _locationController.text,
         'image url': _imageUrlController.text, // تغيير من category إلى imageUrl
-        'start date': DateFormat('dd-MM-yyyy').format(_startDate!),
-        'end date': DateFormat('dd-MM-yyyy').format(_endDate!),
-        'stopAd': DateFormat('dd-MM-yyyy').format(_stopDate!),
+        'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
+        'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
+        'stopAd': intl.DateFormat('dd-MM-yyyy').format(_stopDate!),
       };
 
-      await _firestoreService.addAd(adData);
+      await _firestoreService.addData('ads', adData);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تمت إضافة الإعلان بنجاح')),
@@ -111,7 +110,7 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: rtl,
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -327,7 +326,7 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
           children: [
             Text(
               date != null
-                  ? DateFormat('dd-MM-yyyy').format(date)
+                  ? intl.DateFormat('dd-MM-yyyy').format(date)
                   : 'اختر التاريخ',
             ),
             const Icon(Icons.calendar_today),

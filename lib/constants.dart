@@ -10,5 +10,4 @@ const titleSize = 20.0;
 //fonts
 const mainFont = 'Kufam';
 
-// constants.dart
-const rtl = TextDirection.rtl;
+

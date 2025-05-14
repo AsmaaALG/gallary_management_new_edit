@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/admin_management_screen.dart';
+import 'package:gallery_management/screens/admin_management_screen2.dart';
 import 'package:gallery_management/screens/ads_screen.dart';
+import 'package:gallery_management/screens/ads_screen2.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
@@ -84,7 +86,7 @@ class _ControlPanelState extends State<ControlPanel> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AdminManagementScreen(),
+                          builder: (context) => const AdminManagementScreen2(),
                         ),
                       ),
                     ),
@@ -104,7 +106,7 @@ class _ControlPanelState extends State<ControlPanel> {
                           'يمكنك إدارة الإعلانات والترويج للمعارض التي ستقام قريبا ',
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AdsScreen()),
+                        MaterialPageRoute(builder: (context) => AdsScreen2()),
                       ),
                     ),
                     AdminCard(
