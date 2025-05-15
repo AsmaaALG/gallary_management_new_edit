@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -21,7 +22,10 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
+  final TextEditingController _qrCodeController = TextEditingController();
 
+  String? _selectedClassification; // للتصنيف المختار
+  List<Classification> _classifications = []; // قائمة التصنيفات
   DateTime? _startDate;
   DateTime? _endDate;
   DateTime? _stopDate;
@@ -31,7 +35,27 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchClassifications();
+
     _loadAdData();
+  }
+
+  Future<void> _fetchClassifications() async {
+    try {
+      List<Map<String, dynamic>> classificationsData =
+          await _firestoreService.getAllData('classification');
+      setState(() {
+        _classifications = classificationsData.map((data) {
+          return Classification(
+            id: data['documentId'], // تعيين المعرف
+            name: data['name'], // تعيين الاسم
+          );
+        }).toList();
+        print('التصنيفات: $_classifications');
+      });
+    } catch (e) {
+      print('حدث خطأ أثناء جلب التصنيفات: $e');
+    }
   }
 
   Future<void> _loadAdData() async {
@@ -43,6 +67,11 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         _descriptionController.text = adData['description'] ?? '';
         _locationController.text = adData['location'] ?? '';
         _imageUrlController.text = adData['image url'] ?? '';
+        _qrCodeController.text = adData['QR code'] ?? '';
+
+        var classificationRef =
+            adData['classification id'] as DocumentReference?;
+        _selectedClassification = classificationRef?.id; // تعيين المعرف مباشرة
 
         final dateFormat = intl.DateFormat('dd-MM-yyyy');
         _startDate = adData['start date'] != null
@@ -119,15 +148,35 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       );
       return;
     }
-
+    if (_selectedClassification == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى اختيار تصنيف')),
+      );
+      return;
+    }
     setState(() => _isLoading = true);
 
     try {
+      final classificationRef = FirebaseFirestore.instance
+          .collection('classification')
+          .doc(_selectedClassification); // استخدام المعرف مباشرة
+
+      DocumentSnapshot classificationDoc = await classificationRef.get();
+
+      if (!classificationDoc.exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('التصنيف غير صالح')),
+        );
+        return;
+      }
+
       final updatedData = {
         'title': _titleController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
         'image url': _imageUrlController.text,
+        'QR code': _qrCodeController.text,
+        'classification id': classificationRef,
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
         'stopAd': intl.DateFormat('dd-MM-yyyy').format(_stopDate!),
@@ -220,6 +269,32 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _qrCodeController,
+                          decoration: InputDecoration(
+                            labelText: 'رمز QR',
+                            hintText: 'أدخل رمز QR من هنا',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: BorderSide(color: primaryColor),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'يرجى إدخال اسم الإعلان';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
 
                         // حقل الموقع
                         TextFormField(
@@ -269,6 +344,43 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'يرجى إدخال رابط الصورة';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<Classification>(
+                          value: _classifications.isNotEmpty
+                              ? _classifications.firstWhere(
+                                  (c) => c.id == _selectedClassification,
+                                  orElse: () => _classifications[
+                                      0], // إرجاع أول تصنيف إذا لم يتم العثور على تصنيف مطابق
+                                )
+                              : null,
+                          decoration: InputDecoration(
+                            labelText: 'التصنيف',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                          ),
+                          items: _classifications.map((classification) {
+                            return DropdownMenuItem<Classification>(
+                              value: classification,
+                              child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(classification.name)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedClassification =
+                                  value?.id; // استخدم المعرف
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'يرجى اختيار التصنيف';
                             }
                             return null;
                           },

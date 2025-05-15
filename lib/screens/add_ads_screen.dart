@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:gallery_management/models/classification.dart';
 
 class AddAdsScreen extends StatefulWidget {
   const AddAdsScreen({super.key});
@@ -20,7 +21,10 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
+  final TextEditingController _qrCodeController = TextEditingController();
 
+  Classification? _selectedClassification;
+  List<Classification> _classifications = [];
   DateTime? _startDate;
   DateTime? _endDate;
   DateTime? _stopDate;
@@ -33,6 +37,30 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
     _locationController.dispose();
     _imageUrlController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchClassifications(); // جلب التصنيفات عند بدء الشاشة
+  }
+
+  Future<void> _fetchClassifications() async {
+    try {
+      List<Map<String, dynamic>> classificationsData =
+          await _firestoreService.getAllData('classification');
+      setState(() {
+        _classifications = classificationsData.map((data) {
+          return Classification(
+            id: data['documentId'], // تعيين المعرف
+            name: data['name'], // تعيين الاسم
+          );
+        }).toList();
+        print('التصنيفات: $_classifications');
+      });
+    } catch (e) {
+      print('حدث خطأ أثناء جلب التصنيفات: $e');
+    }
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
@@ -77,15 +105,35 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
       );
       return;
     }
+    if (_selectedClassification == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى اختيار تصنيف')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
+      final classificationRef = FirebaseFirestore.instance
+          .collection('classification')
+          .doc(_selectedClassification!.id); // استخدام المعرف
+
+      DocumentSnapshot classificationDoc = await classificationRef.get();
+
+      if (!classificationDoc.exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('التصنيف غير صالح')),
+        );
+        return;
+      }
       final adData = {
         'title': _titleController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
         'image url': _imageUrlController.text, // تغيير من category إلى imageUrl
+        'classification id': classificationRef, // تخزين المرجع
+        'qr code': _qrCodeController.text,
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
         'stopAd': intl.DateFormat('dd-MM-yyyy').format(_stopDate!),
@@ -104,6 +152,85 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
       );
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _addNewClassification() async {
+    String? newClassification = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        final TextEditingController newClassificationController =
+            TextEditingController();
+
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text(
+              'إضافة تصنيف جديد',
+              style: TextStyle(
+                  fontFamily: mainFont,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor),
+            ),
+            content: TextField(
+              controller: newClassificationController,
+              decoration: const InputDecoration(hintText: 'أدخل اسم التصنيف'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(newClassificationController.text);
+                },
+                child: const Text(
+                  'إضافة',
+                  style: TextStyle(
+                    fontFamily: mainFont,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: mainFont,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (newClassification != null && newClassification.isNotEmpty) {
+      try {
+        // إضافة التصنيف الجديد إلى Firestore
+        await FirebaseFirestore.instance
+            .collection('classification')
+            .add({'name': newClassification});
+        setState(() {
+          _classifications.add(Classification(
+              id: 'new_id', name: newClassification)); // استخدم معرفًا جديدًا
+        });
+        // إظهار رسالة نجاح
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تمت إضافة التصنيف بنجاح')),
+        );
+      } catch (e) {
+        // إظهار رسالة فشل
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في إضافة التصنيف: ${e.toString()}')),
+        );
+      }
+    } else {
+      // إظهار رسالة إذا كان التصنيف فارغًا
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال اسم التصنيف')),
+      );
     }
   }
 
@@ -177,6 +304,26 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _qrCodeController,
+                    decoration: InputDecoration(
+                      labelText: 'رمز QR',
+                      hintText: 'أدخل رمز QR هنا',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(40),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(40),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(40),
+                        borderSide: BorderSide(color: primaryColor),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // حقل الموقع
                   TextFormField(
@@ -230,8 +377,57 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  // قائمة التصنيفات
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        // استخدم Expanded لجعل القائمة تأخذ المساحة المتاحة
+                        child: DropdownButtonFormField<Classification>(
+                          value: _selectedClassification,
+                          decoration: InputDecoration(
+                            labelText: 'التصنيف',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: BorderSide(color: primaryColor),
+                            ),
+                          ),
+                          items: _classifications
+                              .map((Classification classification) {
+                            return DropdownMenuItem<Classification>(
+                              value: classification,
+                              child: Align(
+                                alignment: Alignment
+                                    .centerRight, // محاذاة النص إلى اليمين
+                                child: Text(classification.name),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (Classification? newValue) {
+                            setState(() {
+                              _selectedClassification = newValue;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(
+                          width: 10), // إضافة مسافة بين القائمة والزِر
+                      ElevatedButton(
+                        onPressed: _addNewClassification,
+                        child: const Text('+'),
+                      ),
+                    ],
+                  ),
 
+                  const SizedBox(height: 20),
                   // حقول التواريخ
                   _buildDateField('تاريخ البدء', _startDate,
                       () => _selectDate(context, true)),
@@ -269,8 +465,8 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
 
+                  const SizedBox(height: 20),
                   // زر الإضافة
                   ElevatedButton(
                     onPressed: _isLoading ? null : _addAd,

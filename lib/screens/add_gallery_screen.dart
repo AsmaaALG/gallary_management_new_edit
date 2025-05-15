@@ -351,6 +351,55 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                     hint: 'أدخل رمز QR هنا',
                   ),
                   const SizedBox(height: 16),
+                  // قائمة التصنيفات
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        // استخدم Expanded لجعل القائمة تأخذ المساحة المتاحة
+                        child: DropdownButtonFormField<Classification>(
+                          value: _selectedClassification,
+                          decoration: InputDecoration(
+                            labelText: 'التصنيف',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: BorderSide(color: primaryColor),
+                            ),
+                          ),
+                          items: _classifications
+                              .map((Classification classification) {
+                            return DropdownMenuItem<Classification>(
+                              value: classification,
+                              child: Align(
+                                alignment: Alignment
+                                    .centerRight, // محاذاة النص إلى اليمين
+                                child: Text(classification.name),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (Classification? newValue) {
+                            setState(() {
+                              _selectedClassification = newValue;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(
+                          width: 10), // إضافة مسافة بين القائمة والزِر
+                      ElevatedButton(
+                        onPressed: _addNewClassification,
+                        child: const Text('+'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
                   // حقول التواريخ
                   _buildDateField('تاريخ البدء', _startDate,
@@ -359,51 +408,6 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                   _buildDateField('تاريخ الانتهاء', _endDate,
                       () => _selectDate(context, false)),
                   const SizedBox(height: 20),
-
-                  // قائمة التصنيفات
-                  DropdownButtonFormField<Classification>(
-                    value: _selectedClassification,
-                    decoration: InputDecoration(
-                      labelText: 'التصنيف',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
-                        borderSide: const BorderSide(color: Colors.grey),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
-                        borderSide: BorderSide(color: primaryColor),
-                      ),
-                    ),
-                    items:
-                        _classifications.map((Classification classification) {
-                      return DropdownMenuItem<Classification>(
-                        value: classification,
-                        child: Align(
-                          alignment:
-                              Alignment.centerRight, // محاذاة النص إلى اليمين
-                          child: Text(classification.name),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (Classification? newValue) {
-                      setState(() {
-                        _selectedClassification = newValue;
-                      });
-                    },
-                    isExpanded: true, // التأكد من أن القائمة تمتد
-                  ),
-                  const SizedBox(height: 16),
-
-                  // زر إضافة تصنيف جديد
-                  ElevatedButton(
-                    onPressed: _addNewClassification,
-                    child: const Text('إضافة تصنيف جديد'),
-                  ),
-                  const SizedBox(height: 20),
-
                   // زر الإضافة
                   ElevatedButton(
                     onPressed: _isLoading ? null : _addGallery,
