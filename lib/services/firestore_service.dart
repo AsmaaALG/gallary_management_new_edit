@@ -44,6 +44,7 @@ class FirestoreService {
         'first_name': firstName,
         'last_name': lastName,
         'email': email,
+        'password':password
       });
       return true;
     } catch (e) {
