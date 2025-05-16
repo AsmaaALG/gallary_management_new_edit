@@ -75,9 +75,15 @@ class _AdsScreen2State extends State<AdsScreen2> {
                       },
                     },
                     {
-                      'icon': Icons.messenger_rounded,
+                      'icon': Icons.list_alt,
                       'action': () {
-                        BookingRequestsScreen(adId: documentId);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                BookingRequestsScreen(adId: documentId),
+                          ),
+                        );
                       },
                     },
                   ],
@@ -86,7 +92,8 @@ class _AdsScreen2State extends State<AdsScreen2> {
 
               return MainScreen(
                 title: 'إدارة الإعلانات',
-                description: 'قم بإدارة الإعلانات من هنا.',
+                description:
+                    'يمكنك من خلال هذه الواجهة بإدارة جميع الإعلانات  .',
                 cards: cards,
                 addScreen: AddAdsScreen(),
               );

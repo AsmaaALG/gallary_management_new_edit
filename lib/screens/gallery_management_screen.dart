@@ -6,6 +6,7 @@ import 'package:gallery_management/screens/add_gallery_screen.dart';
 import 'package:gallery_management/screens/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/gallery_suite_screen.dart';
 import 'package:gallery_management/screens/main_screen.dart';
+import 'package:gallery_management/screens/review_management_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 
@@ -80,7 +81,14 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                     {
                       'icon': Icons.messenger_rounded,
                       'action': () {
-                        confirmDelete(context, '2', documentId);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ReviewManagementScreen(
+                              galleryId: documentId,
+                            ),
+                          ),
+                        );
                       },
                     },
                   ],

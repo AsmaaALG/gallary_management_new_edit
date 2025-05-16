@@ -1,9 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/admin_management_screen.dart';
 import 'package:gallery_management/screens/admin_management_screen2.dart';
-import 'package:gallery_management/screens/ads_screen.dart';
 import 'package:gallery_management/screens/ads_screen2.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
@@ -18,21 +17,49 @@ class ControlPanel extends StatefulWidget {
 
 class _ControlPanelState extends State<ControlPanel> {
   User? _user;
+  int _userState = 0; // 0 = لا يملك صلاحيات, 1 = يملك صلاحيات
 
+  @override
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    if (_user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('admin')
+          .doc(_user!.uid)
+          .get();
+      if (userDoc.exists) {
+        setState(() {
+          _userState = userDoc.get('state') ?? 0;
+        });
+      }
+    }
+  }
+
+  void _showPermissionDeniedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'ليس لديك صلاحيات لإدارة المسؤولين',
+          style: TextStyle(fontFamily: mainFont),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl, // تعيين اتجاه النص إلى RTL
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
           automaticallyImplyLeading: false,
-          // title: Image.asset("images/logo.png"),
           title: Image.asset(
             "images/white_logo.png",
             height: 800,
@@ -83,12 +110,16 @@ class _ControlPanelState extends State<ControlPanel> {
                       title: 'إدارة المسؤولين',
                       description:
                           'يمكنك إدارة المسؤولين ومتابعة جميع بياناتهم.',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AdminManagementScreen2(),
-                        ),
-                      ),
+                      onTap: _userState == 1
+                          ? () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AdminManagementScreen2(),
+                                ),
+                              )
+                          : _showPermissionDeniedMessage,
+                      isEnabled: _userState == 1,
                     ),
                     AdminCard(
                       title: 'إدارة المعارض',
@@ -99,6 +130,7 @@ class _ControlPanelState extends State<ControlPanel> {
                         MaterialPageRoute(
                             builder: (context) => GalleryManagementScreen()),
                       ),
+                      isEnabled: true,
                     ),
                     AdminCard(
                       title: 'إدارة الإعلانات',
@@ -108,15 +140,7 @@ class _ControlPanelState extends State<ControlPanel> {
                         context,
                         MaterialPageRoute(builder: (context) => AdsScreen2()),
                       ),
-                    ),
-                    AdminCard(
-                      title: 'إدارة طلبات حجز مساحة',
-                      description: 'يمكنك إدارة طلبات حجز مساحة داخل المعارض.',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => GalleryManagementScreen()),
-                      ),
+                      isEnabled: true,
                     ),
                     SizedBox(height: 20),
                     TextButton(
@@ -125,8 +149,7 @@ class _ControlPanelState extends State<ControlPanel> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    SignInScreen()), // تأكد من توجيه المستخدم إلى شاشة تسجيل الدخول
+                                builder: (context) => SignInScreen()),
                           );
                         },
                         child: Text(
@@ -149,34 +172,44 @@ class _ControlPanelState extends State<ControlPanel> {
 
 class AdminCard extends StatelessWidget {
   final String title;
-  final String description; // إضافة وصف
+  final String description;
   final VoidCallback onTap;
+  final bool isEnabled;
 
-  const AdminCard(
-      {required this.title, required this.description, required this.onTap});
+  const AdminCard({
+    required this.title,
+    required this.description,
+    required this.onTap,
+    this.isEnabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 10),
+      color: isEnabled ? null : Colors.grey[200],
       child: ListTile(
         title: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(
             title,
             style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                fontFamily: mainFont,
-                color: primaryColor), // استخدام mainFont
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              fontFamily: mainFont,
+              color: isEnabled ? primaryColor : Colors.grey,
+            ),
           ),
         ),
         subtitle: Text(
           description,
-          style:
-              TextStyle(fontSize: 14, fontFamily: mainFont), // استخدام mainFont
+          style: TextStyle(
+            fontSize: 14,
+            fontFamily: mainFont,
+            color: isEnabled ? null : Colors.grey,
+          ),
         ),
-        onTap: onTap,
+        onTap: isEnabled ? onTap : null,
       ),
     );
   }
