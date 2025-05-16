@@ -287,12 +287,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                               borderSide: BorderSide(color: primaryColor),
                             ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يرجى إدخال اسم الإعلان';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 16),
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
+import 'package:gallery_management/screens/suite_management_screen.dart';
 
 class GallerySuiteScreen extends StatelessWidget {
   final String galleryId;
@@ -99,7 +100,10 @@ class GallerySuiteScreen extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => GalleryManagementScreen()),
+                    builder: (context) =>
+                        SuiteManagementScreen(galleryId: galleryId),
+                  ),
+                  //الاجراء عند النقر
                 ), // الإجراء عند النقر
                 child: Container(
                   decoration: BoxDecoration(

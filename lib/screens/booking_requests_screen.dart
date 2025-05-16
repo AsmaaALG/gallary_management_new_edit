@@ -28,6 +28,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text(
           'تأكيد الحذف',
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 18,
             fontFamily: mainFont,
@@ -36,9 +37,10 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
           ),
         ),
         content: const Text(
-          'هل أنت متأكد أنك تريد حذف هذا الطلب؟',
+          'هل أنت متأكد من عملية الحذف؟',
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontFamily: mainFont,
             color: Color.fromARGB(255, 45, 44, 44),
           ),
@@ -48,6 +50,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text(
               'إلغاء',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
                 fontFamily: mainFont,
@@ -67,6 +70,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
             },
             child: const Text(
               'حذف',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
                 fontFamily: mainFont,
@@ -94,7 +98,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
           style: TextStyle(
             fontSize: 16,
             fontFamily: mainFont,
-            color: Color.fromARGB(255, 255, 255, 255),
+            color: Colors.white,
           ),
         ),
       ),
@@ -115,7 +119,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
             ),
             const SizedBox(height: 15),
             const Text(
-              'من خلال هذه اللوحة يمكنكتتبع جميع طلبات الحجز للمعرض المحدد      ',
+              'من خلال هذه اللوحة يمكنك تتبع جميع طلبات الحجز للمعرض المحدد',
               style: TextStyle(
                 fontSize: 15,
                 fontFamily: mainFont,
@@ -124,8 +128,6 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
               textAlign: TextAlign.right,
             ),
             const SizedBox(height: 16),
-
-            // مربع البحث
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 3),
               child: Directionality(
@@ -175,7 +177,6 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
               ),
             ),
             const SizedBox(height: 10),
-
             Expanded(
               child: FutureBuilder<List<Map<String, dynamic>>>(
                 future: _requestsFuture,
@@ -186,9 +187,17 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                     return const Center(
                         child: Text('حدث خطأ أثناء تحميل الطلبات'));
                   } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('لا توجد طلبات حجز'));
+                    return const Center(
+                      child: Text(
+                        'لا توجد طلبات حجز لهذا المعرض',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontFamily: mainFont,
+                          color: Color.fromARGB(255, 117, 116, 116),
+                        ),
+                      ),
+                    );
                   } else {
-                    // فلترة الطلبات حسب البريد أو المؤسسة
                     final filteredRequests = snapshot.data!.where((data) {
                       final email = (data['email'] ?? '').toLowerCase();
                       final org = (data['organization'] ?? '').toLowerCase();

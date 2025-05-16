@@ -2,14 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 
-class AddAdminScreen extends StatelessWidget {
+class AddAdminScreen extends StatefulWidget {
   final FirestoreService firestoreService;
+
+  const AddAdminScreen({Key? key, required this.firestoreService})
+      : super(key: key);
+
+  @override
+  State<AddAdminScreen> createState() => _AddAdminScreenState();
+}
+
+class _AddAdminScreenState extends State<AddAdminScreen> {
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController idController = TextEditingController();
 
-  AddAdminScreen({Key? key, required this.firestoreService}) : super(key: key);
+  int selectedState = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +29,10 @@ class AddAdminScreen extends StatelessWidget {
           title: const Text(
             'إضافة مسؤول جديد',
             style: TextStyle(
-                fontSize: 16, fontFamily: mainFont, color: Colors.white),
+              fontSize: 16,
+              fontFamily: mainFont,
+              color: Colors.white,
+            ),
           ),
           backgroundColor: primaryColor,
           leading: IconButton(
@@ -34,62 +46,82 @@ class AddAdminScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  child: const Text(
-                    'يمكنك من خلال هذه الواجهة إضافة مسؤول جديد عبر تعبئة الحقول التالية',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: mainFont,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor,
-                    ),
+                const Text(
+                  'يمكنك من خلال هذه الواجهة إضافة مسؤول جديد عبر تعبئة الحقول التالية',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: mainFont,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // حقل البريد الإلكتروني
                 _buildTextField(emailController, 'البريد الإلكتروني',
                     'أدخل البريد الإلكتروني هنا'),
                 const SizedBox(height: 16),
-
-                // حقل الاسم الأول
+                _buildTextField(
+                    passwordController, 'كلمة المرور', 'أدخل كلمة المرور هنا'),
+                const SizedBox(height: 16),
                 _buildTextField(
                     firstNameController, 'الاسم الأول', 'أدخل الاسم الأول هنا'),
                 const SizedBox(height: 16),
-
-                // حقل الاسم الأخير
                 _buildTextField(lastNameController, 'الاسم الأخير',
                     'أدخل الاسم الأخير هنا'),
                 const SizedBox(height: 16),
-
-                // حقل المعرف
-                _buildTextField(idController, 'المعرف', 'أدخل المعرف هنا'),
+                const Text(
+                  'الصلاحيات',
+                  style: TextStyle(
+                      fontFamily: mainFont, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<int>(
+                  value: selectedState,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(40)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                        value: 0, child: Text('0 - صلاحيات محدودة')),
+                    DropdownMenuItem(
+                        value: 1, child: Text('1 - صلاحيات كاملة')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedState = value ?? 0;
+                    });
+                  },
+                ),
                 const SizedBox(height: 30),
-
-                // زر الإضافة
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (emailController.text.isNotEmpty &&
+                        passwordController.text.isNotEmpty &&
                         firstNameController.text.isNotEmpty &&
-                        lastNameController.text.isNotEmpty &&
-                        idController.text.isNotEmpty) {
-                      firestoreService.addAdmin(
-                        emailController.text.trim(),
-                        firstNameController.text.trim(),
-                        lastNameController.text.trim(),
-                        idController.text.trim(),
-                      );
-                      Navigator.pop(context); // أغلق النافذة بعد الإضافة
+                        lastNameController.text.isNotEmpty) {
+                      try {
+                        await widget.firestoreService
+                            .addAdminWithPasswordAndState(
+                          emailController.text.trim(),
+                          passwordController.text.trim(),
+                          firstNameController.text.trim(),
+                          lastNameController.text.trim(),
+                          selectedState,
+                        );
+                        Navigator.pop(context);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('حدث خطأ أثناء الإضافة: $e')),
+                        );
+                      }
                     } else {
-                      // معالجة خطأ إذا كانت الحقول فارغة
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('يرجى ملء جميع الحقول')),
                       );
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    iconColor: primaryColor,
+                    backgroundColor: primaryColor,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -97,12 +129,12 @@ class AddAdminScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'إضافة',
-                    style: TextStyle(fontSize: 16, fontFamily: mainFont),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: mainFont,
+                        color: Color.fromARGB(255, 255, 255, 255)),
                   ),
                 ),
-                const SizedBox(height: 10),
-
-                // زر إلغاء
               ],
             ),
           ),
@@ -125,15 +157,9 @@ class AddAdminScreen extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(40),
-          borderSide: BorderSide(color: primaryColor),
+          borderSide: const BorderSide(color: primaryColor),
         ),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'يرجى إدخال $label';
-        }
-        return null;
-      },
     );
   }
 }

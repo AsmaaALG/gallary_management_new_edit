@@ -9,12 +9,12 @@ class MainScreen extends StatefulWidget {
     required this.title,
     required this.description,
     required this.cards,
-    required this.addScreen, // قائمة من MainCard
+    required this.addScreen,
   });
 
   final String title;
   final String description;
-  final List<MainCard> cards; // قائمة MainCard
+  final List<MainCard> cards;
   final Widget addScreen;
 
   @override
@@ -56,7 +56,6 @@ class _MainScreenState extends State<MainScreen> {
                 background: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: cardPadding,
-                    // vertical: screenWidth * 0.05,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,11 +86,15 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
             ),
+            // ← مسافة بين الوصف ومربع البحث
+            SliverToBoxAdapter(
+              child: SizedBox(height: 20),
+            ),
             // مربع البحث
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: cardPadding.clamp(35, 35),
+                  horizontal: cardPadding.clamp(40, 40),
                 ),
                 child: Directionality(
                   textDirection: TextDirection.rtl,

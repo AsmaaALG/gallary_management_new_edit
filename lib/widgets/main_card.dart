@@ -17,9 +17,9 @@ class MainCard extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        margin: EdgeInsets.symmetric(horizontal: 35, vertical: 15),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50), // شكل بيضاوي
+          borderRadius: BorderRadius.circular(60), // شكل بيضاوي
           side: BorderSide(
             color: const Color.fromARGB(255, 218, 142, 146).withOpacity(0.5),
             width: 1.5,
@@ -40,7 +40,7 @@ class MainCard extends StatelessWidget {
                   color: primaryColor,
                 ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: buttons.map((button) {
@@ -61,7 +61,8 @@ class MainCard extends StatelessWidget {
   }
 }
 
-Future<void> confirmDelete(BuildContext context,String collection, String documentId) async {
+Future<void> confirmDelete(
+    BuildContext context, String collection, String documentId) async {
   final screenWidth = MediaQuery.of(context).size.width;
   final FirestoreService _firestoreService = FirestoreService();
 
