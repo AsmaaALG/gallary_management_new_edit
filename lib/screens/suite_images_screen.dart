@@ -132,27 +132,12 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: primaryColor,
-          automaticallyImplyLeading: false,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                'تعديل صور الجناح',
-                style: TextStyle(
-                  fontFamily: mainFont,
-                  fontSize: 15,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(width: 8),
-              IconButton(
-                icon: Icon(Icons.arrow_forward, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        ),
+            backgroundColor: primaryColor,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            )),
 
         // زر الإضافة العائم
         floatingActionButton: FloatingActionButton(
@@ -169,7 +154,16 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
         body: Padding(
           padding: const EdgeInsets.all(20.0), // Padding من جميع الجهات
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'تعديل صور الجناح',
+                style: TextStyle(
+                    fontFamily: mainFont,
+                    fontSize: 15,
+                    color: primaryColor,
+                    fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 10),
               Center(
                 child: Text(

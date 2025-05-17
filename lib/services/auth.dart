@@ -34,4 +34,7 @@ class Auth {
       SnackBar(content: Text('تم تسجيل الخروج بنجاح')),
     );
   }
+
+  //delete
+  
 }

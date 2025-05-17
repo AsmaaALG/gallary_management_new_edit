@@ -22,6 +22,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
   final TextEditingController _imageUrlController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _qrCodeController = TextEditingController();
+  final TextEditingController _mapController = TextEditingController();
 
   Classification? _selectedClassification;
   List<Classification> _classifications = [];
@@ -43,6 +44,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
     _imageUrlController.dispose();
     _phoneController.dispose();
     _qrCodeController.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -96,6 +98,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
         'location': _locationController.text,
         'image url': _imageUrlController.text,
         'phone': _phoneController.text,
+        'map': _mapController.text,
         'classification id': classificationRef, // تخزين المرجع
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
@@ -339,7 +342,13 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                   // حقل رابط الصورة
                   _buildTextField(
                     controller: _imageUrlController,
-                    label: 'رابط الصورة',
+                    label: 'رابط صورة الغلاف',
+                    hint: 'أدخل رابط الصورة هنا',
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _mapController,
+                    label: 'رابط صورة خارطة المعرض',
                     hint: 'أدخل رابط الصورة هنا',
                   ),
                   const SizedBox(height: 16),

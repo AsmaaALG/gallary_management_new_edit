@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/add_admin_screen.dart';
@@ -47,6 +48,7 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                   'icon': Icons.delete_rounded,
                   'action': () {
                     confirmDelete(context, 'admin', documentId);
+                    
                   },
                 },
               ],
@@ -146,11 +148,15 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                       items: const [
                         DropdownMenuItem(
                           value: 1,
-                          child: Text('صلاحيات كاملة'),
+                          child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text('صلاحيات كاملة')),
                         ),
                         DropdownMenuItem(
                           value: 0,
-                          child: Text('صلاحيات محدودة'),
+                          child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text('صلاحيات محدودة')),
                         ),
                       ],
                       onChanged: (value) {

@@ -22,6 +22,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
   final TextEditingController _qrCodeController = TextEditingController();
+  final TextEditingController _mapController = TextEditingController();
 
   String? _selectedClassification; // للتصنيف المختار
   DateTime? _startDate;
@@ -66,6 +67,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
         _locationController.text = data['location'] ?? '';
         _imageUrlController.text = data['image url'] ?? '';
         _qrCodeController.text = data['QR code'] ?? '';
+        _mapController.text = data['map'] ?? '';
 
         var classificationRef = data['classification id'] as DocumentReference?;
         _selectedClassification = classificationRef?.id; // تعيين المعرف مباشرة
@@ -123,6 +125,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
         'location': _locationController.text,
         'image url': _imageUrlController.text,
         'QR code': _qrCodeController.text,
+        'map': _mapController.text,
         'classification id': classificationRef, // تخزين المرجع
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
@@ -130,7 +133,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
 
       await _firestoreService.updateGallery(widget.galleryId, updatedData);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم تحديث الإعلان بنجاح')),
+        const SnackBar(content: Text('تم تحديث البيانات بنجاح')),
       );
 
       Navigator.pop(context);
@@ -214,6 +217,10 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         _buildTextField(_imageUrlController,
                             'رابط صورة غلاف المعرض', 'يرجى إدخال رابط الصورة'),
                         const SizedBox(height: 16),
+                        _buildTextField(_mapController,
+                            'رابط صورة خارطة المعرض', 'يرجى إدخال رابط الصورة'),
+
+                        const SizedBox(height: 16),
                         _buildDateField('تاريخ البدء', _startDate,
                             () => _selectDate(context, true)),
                         const SizedBox(height: 16),
@@ -261,7 +268,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         const SizedBox(height: 16),
 
                         _buildTextField(_descriptionController, 'الوصف',
-                            'يرجى إدخال وصف الإعلان',
+                            'يرجى إدخال وصف المعرض',
                             maxLines: 3),
                         const SizedBox(height: 30),
                         ElevatedButton(

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/edit_suite_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:gallery_management/widgets/main_card.dart';
 
 class SuiteManagementScreen extends StatefulWidget {
   final String galleryId;
@@ -34,7 +35,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("إضافة جناح جديد",
+                const Text("إضافة جناح جديد",
                     style: TextStyle(
                         fontFamily: mainFont, fontWeight: FontWeight.bold)),
                 SizedBox(height: 10),
@@ -104,88 +105,37 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
     );
   }
 
-  void _showDeleteDialog(String suiteId) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Color.fromARGB(255, 250, 230, 230),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("هل أنت متأكد من حذف هذا الجناح؟",
-                  style: TextStyle(fontFamily: mainFont)),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  TextButton(
-                    onPressed: () async {
-                      await _firestoreService.deleteSuiteAndImages(suiteId);
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('تم حذف الجناح وصوره بنجاح'),
-                          backgroundColor: primaryColor,
-                        ),
-                      );
-                    },
-                    child: Text("حذف",
-                        style: TextStyle(
-                            color: primaryColor,
-                            fontFamily: mainFont,
-                            fontWeight: FontWeight.bold)),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text("إلغاء",
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 56, 56, 56),
-                            fontFamily: mainFont,
-                            fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: primaryColor,
-          automaticallyImplyLeading: false,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text('تعديل الجناح',
-                  style: TextStyle(
-                    fontFamily: mainFont,
-                    fontSize: 15,
-                    color: Colors.white,
-                  )),
-              SizedBox(width: 8),
-              IconButton(
-                icon: Icon(Icons.arrow_forward, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: primaryColor,
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Text('تعديل الجناح',
+                style: TextStyle(
+                  fontFamily: mainFont,
+                  fontSize: 15,
+                  color: Colors.white,
+                )),
+            SizedBox(width: 8),
+            IconButton(
+              icon: Icon(Icons.arrow_forward, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: primaryColor,
-          onPressed: _showAddSuiteDialog,
-          child: Icon(Icons.add, color: Colors.white, size: 25),
-        ),
-        body: Padding(
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryColor,
+        onPressed: _showAddSuiteDialog,
+        child: Icon(Icons.add, color: Colors.white, size: 25),
+      ),
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Padding(
           padding: const EdgeInsets.all(27.0),
           child: Column(
             children: [
@@ -232,67 +182,31 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                         .toList();
 
                     return ListView.builder(
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final data = filtered[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30.0, vertical: 10),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: cardBackground,
-                              borderRadius: BorderRadius.circular(50),
-                              border: Border.all(
-                                  color: Color.fromARGB(255, 237, 202, 202)),
-                            ),
-                            child: Column(
-                              children: [
-                                Center(
-                                  child: Text(
-                                    data['name'],
-                                    style: TextStyle(
-                                      fontFamily: mainFont,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: primaryColor,
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final data = filtered[index];
+                          return MainCard(title: data['name'], buttons: [
+                            {
+                              'icon': Icons.edit,
+                              'action': () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditSuiteScreen(
+                                      suiteId: data.id,
                                     ),
                                   ),
-                                ),
-                                SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.edit,
-                                          color: secondaryColor),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => EditSuiteScreen(
-                                              suiteId: data.id,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    SizedBox(width: 10),
-                                    IconButton(
-                                      onPressed: () =>
-                                          _showDeleteDialog(data.id),
-                                      icon: Icon(Icons.delete,
-                                          color: secondaryColor),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
+                                );
+                              },
+                            },
+                            {
+                              'icon': Icons.delete_rounded,
+                              'action': () {
+                                confirmDelete(context, 'suite', data.id);
+                              },
+                            },
+                          ]);
+                        });
                   },
                 ),
               ),

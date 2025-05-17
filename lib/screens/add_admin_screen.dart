@@ -56,17 +56,17 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                _buildTextField(emailController, 'البريد الإلكتروني',
-                    'أدخل البريد الإلكتروني هنا'),
-                const SizedBox(height: 16),
-                _buildTextField(
-                    passwordController, 'كلمة المرور', 'أدخل كلمة المرور هنا'),
-                const SizedBox(height: 16),
                 _buildTextField(
                     firstNameController, 'الاسم الأول', 'أدخل الاسم الأول هنا'),
                 const SizedBox(height: 16),
                 _buildTextField(lastNameController, 'الاسم الأخير',
                     'أدخل الاسم الأخير هنا'),
+                const SizedBox(height: 16),
+                _buildTextField(emailController, 'البريد الإلكتروني',
+                    'أدخل البريد الإلكتروني هنا'),
+                const SizedBox(height: 16),
+                _buildTextField(
+                    passwordController, 'كلمة المرور', 'أدخل كلمة المرور هنا'),
                 const SizedBox(height: 16),
                 const Text(
                   'الصلاحيات',
@@ -94,21 +94,37 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton(
+                  ////تعديل زر الاضافة بحيت يتم اضافته في auth
                   onPressed: () async {
                     if (emailController.text.isNotEmpty &&
                         passwordController.text.isNotEmpty &&
                         firstNameController.text.isNotEmpty &&
                         lastNameController.text.isNotEmpty) {
                       try {
-                        await widget.firestoreService
-                            .addAdminWithPasswordAndState(
-                          emailController.text.trim(),
-                          passwordController.text.trim(),
-                          firstNameController.text.trim(),
-                          lastNameController.text.trim(),
-                          selectedState,
+                        final success =
+                            await widget.firestoreService.createUser(
+                          firstName: firstNameController.text.trim(),
+                          lastName: lastNameController.text.trim(),
+                          email: emailController.text.trim(),
+                          password: passwordController.text.trim(),
                         );
-                        Navigator.pop(context);
+
+                        if (success) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('تمت إضافة المسؤول بنجاح'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('فشل في إضافة المسؤول'),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          );
+                        }
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('حدث خطأ أثناء الإضافة: $e')),
@@ -120,6 +136,7 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                       );
                     }
                   },
+//////
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     minimumSize: const Size(double.infinity, 50),

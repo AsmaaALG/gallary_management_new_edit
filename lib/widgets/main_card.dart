@@ -34,6 +34,7 @@ class MainCard extends StatelessWidget {
             children: [
               Text(
                 title,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontFamily: mainFont,
@@ -140,7 +141,7 @@ Future<void> confirmDelete(
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'تم حذف الإعلان بنجاح',
+          'تم الحذف بنجاح',
           style: TextStyle(fontFamily: mainFont),
         ),
         backgroundColor: Color.fromARGB(255, 146, 149, 146),
