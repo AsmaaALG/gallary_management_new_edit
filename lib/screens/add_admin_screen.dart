@@ -82,9 +82,17 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                   ),
                   items: const [
                     DropdownMenuItem(
-                        value: 0, child: Text('0 - صلاحيات محدودة')),
+                      value: 1,
+                      child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text('صلاحيات كاملة')),
+                    ),
                     DropdownMenuItem(
-                        value: 1, child: Text('1 - صلاحيات كاملة')),
+                      value: 0,
+                      child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text('صلاحيات محدودة')),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {

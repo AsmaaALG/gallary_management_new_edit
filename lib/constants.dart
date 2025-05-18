@@ -10,4 +10,5 @@ const titleSize = 20.0;
 //fonts
 const mainFont = 'Kufam';
 
-
+const textDirectionRTL = TextDirection.rtl;
+const TextAlign textAlignRight = TextAlign.right;

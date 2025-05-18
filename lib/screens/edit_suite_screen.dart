@@ -110,26 +110,18 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
+          title: const Text(
+            'تعديل بيانات الجناح',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: mainFont,
+              color: Colors.white,
+            ),
+          ),
           backgroundColor: primaryColor,
-          automaticallyImplyLeading: false,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text(
-                'تعديل بيانات الجناح',
-                style: TextStyle(
-                  fontFamily: mainFont,
-                  fontSize: 15,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              // زر الرجوع
-              IconButton(
-                icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
         // عرض مؤشر تحميل إذا لم يتم جلب البيانات بعد

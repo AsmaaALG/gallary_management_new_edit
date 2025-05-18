@@ -27,7 +27,8 @@ class Auth {
       return false; // إعادة false في حالة حدوث خطأ
     }
   }
-   Future<void> signOut(BuildContext context) async {
+
+  Future<void> signOut(BuildContext context) async {
     final FirebaseAuth _auth = FirebaseAuth.instance;
     await _auth.signOut();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -36,5 +37,4 @@ class Auth {
   }
 
   //delete
-  
 }

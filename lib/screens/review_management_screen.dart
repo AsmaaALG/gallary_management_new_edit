@@ -25,26 +25,18 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 255, 251, 251),
         appBar: AppBar(
+          title: const Text(
+            'إدارة التعليقات ',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: mainFont,
+              color: Colors.white,
+            ),
+          ),
           backgroundColor: primaryColor,
-          automaticallyImplyLeading: false,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text(
-                'ادارة التعليقات',
-                style: TextStyle(
-                  fontFamily: mainFont,
-                  fontSize: 15,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
         body: Padding(
@@ -59,8 +51,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
 
               // مربع البحث العادي
               Container(
-                width: MediaQuery.of(context).size.width *
-                    0.75, // عرض نسبي أقل من كامل الشاشة
+                width: MediaQuery.of(context).size.width * 0.75,
                 height: 50,
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 228, 226, 226),
@@ -74,7 +65,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
                     fontFamily: mainFont,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'ابحث باسم المستخدم أو التعليق',
+                    hintText: 'ابحث بالتعليق',
                     hintStyle: TextStyle(
                       color: Colors.grey[500],
                       fontSize: 12,
@@ -117,6 +108,18 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
                           .contains(_searchController.text.toLowerCase());
                     }).toList();
 
+                    if (filtered.isEmpty) {
+                      return const Center(
+                          child: Text(
+                        'لا يوجد تعليقات لهذا المعرض',
+                        style: TextStyle(
+                          fontFamily: mainFont,
+                          fontSize: 13,
+                          color: Color.fromARGB(255, 128, 127, 127),
+                        ),
+                      ));
+                    }
+
                     return ListView.builder(
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
@@ -144,8 +147,6 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
                             final username = userData != null
                                 ? "${userData['first_name']} ${userData['last_name']}"
                                 : "مستخدم غير معروف";
-
-                            // ... تابع باقي تصميم واجهة التعليق
 
                             return Container(
                               margin: const EdgeInsets.symmetric(
@@ -200,11 +201,10 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
                                               TextButton(
                                                 child: const Text('حذف',
                                                     style: TextStyle(
-                                                      fontFamily: mainFont,
-                                                      color: primaryColor,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    )),
+                                                        fontFamily: mainFont,
+                                                        color: primaryColor,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
                                                 onPressed: () => Navigator.pop(
                                                     context, true),
                                               ),

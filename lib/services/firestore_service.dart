@@ -44,7 +44,7 @@ class FirestoreService {
         'first_name': firstName,
         'last_name': lastName,
         'email': email,
-        'password':password
+        'password': password
       });
       return true;
     } catch (e) {
@@ -364,5 +364,51 @@ class FirestoreService {
       print('حدث خطأ أثناء حذف الجناح وصوره: $e');
     }
   }
+
+  Future<void> addDocument(String collection, Map<String, dynamic> data) async {
+    try {
+      await FirebaseFirestore.instance.collection(collection).add(data);
+      print('Document added successfully to $collection');
+    } catch (e) {
+      print('Error adding document to $collection: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDocumentsByQuery(
+    String collectionPath, {
+    List<Map<String, dynamic>>? whereFields,
+  }) async {
+    try {
+      Query query = _db.collection(collectionPath);
+
+      // Apply where conditions if provided
+      if (whereFields != null) {
+        for (var condition in whereFields) {
+          String field = condition['field'];
+          dynamic value = condition['value'];
+          query = query.where(field, isEqualTo: value);
+        }
+      }
+
+      QuerySnapshot querySnapshot = await query.get();
+      return querySnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      print('Error getting documents: $e');
+      return [];
+    }
+  }
 ///////////
+  ///////////Future<void> addSectionToAd(
+  ///////////  String adId, Map<String, dynamic> sectionData) async {
+  /////////// final sectionRef = FirebaseFirestore.instance
+///////////.collection('ads')
+  ///////////  .doc(adId)
+  ///////////  .collection('sections')
+  ///////////  .doc(); // auto-generated ID
+
+  ///////////await sectionRef.set(sectionData);
+  /////////// }
 }

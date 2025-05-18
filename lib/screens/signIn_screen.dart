@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/control_panal.dart';
-import 'package:gallery_management/screens/sign_up_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/widgets/custom_text_field.dart';
 import 'package:gallery_management/widgets/social_button.dart';
@@ -99,19 +98,32 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 40),
-              const Text(
-                "تسجيل الدخول",
+              SizedBox(height: 50),
+              Text(
+                "مرحبا يك في لوحة تحكم المعارض",
+                style: TextStyle(
+                    fontFamily: mainFont,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                "ادارة معارضك تبدأ من هنا",
                 style: TextStyle(
                   fontFamily: mainFont,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor,
+                  fontSize: 15,
                 ),
+              ),
+              SizedBox(height: 60),
+              Image.asset(
+                'images/logo.png', // استبدل بمسار الشعار الفعلي
+                height: 170,
               ),
               SizedBox(height: 40),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30),
+                padding: EdgeInsets.symmetric(horizontal: 45),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -127,20 +139,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       controller: passwordController,
                     ),
                     SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "هل نسيت كلمة المرور؟",
-                          style: TextStyle(
-                              fontFamily: mainFont,
-                              color: primaryColor,
-                              fontSize: 14),
-                        ),
-                      ),
-                    ),
                     SizedBox(height: 10),
+                    SizedBox(height: 30),
                     ElevatedButton(
                       onPressed: _signIn,
                       style: ElevatedButton.styleFrom(
@@ -159,44 +159,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      textDirection: TextDirection.rtl,
-                      children: [
-                        Text(
-                          "ليس لديك حساب؟ ",
-                          style: TextStyle(fontFamily: mainFont, fontSize: 14),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignUpScreen()),
-                            );
-                          },
-                          child: Text(
-                            "سجل من هنا",
-                            style: TextStyle(
-                              fontFamily: mainFont,
-                              fontSize: 14,
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                     SizedBox(height: 20),
-                    Divider(thickness: 1, color: Colors.grey[400]),
-                    SizedBox(height: 10),
-                    SocialButton(
-                      icon: FontAwesomeIcons.google,
-                      text: "التسجيل باستخدام جوجل",
-                      color: cardBackground,
-                      textColor: Colors.black,
-                      iconColor: primaryColor,
-                    ),
                   ],
                 ),
               ),

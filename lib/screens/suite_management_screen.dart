@@ -4,12 +4,17 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/edit_suite_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
+import 'package:intl/intl.dart';
 
 class SuiteManagementScreen extends StatefulWidget {
   final String galleryId;
+  final Map<String, dynamic>? initialSuiteData;
 
-  const SuiteManagementScreen({Key? key, required this.galleryId})
-      : super(key: key);
+  const SuiteManagementScreen({
+    Key? key,
+    required this.galleryId,
+    this.initialSuiteData,
+  }) : super(key: key);
 
   @override
   _SuiteManagementScreenState createState() => _SuiteManagementScreenState();
@@ -20,9 +25,12 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
   final FirestoreService _firestoreService = FirestoreService();
 
   void _showAddSuiteDialog() {
-    final _nameController = TextEditingController();
-    final _descController = TextEditingController();
-    final _imageController = TextEditingController();
+    final _nameController =
+        TextEditingController(text: widget.initialSuiteData?['name'] ?? '');
+    final _descController = TextEditingController(
+        text: widget.initialSuiteData?['description'] ?? '');
+    final _imageController =
+        TextEditingController(text: widget.initialSuiteData?['imageUrl'] ?? '');
 
     showDialog(
       context: context,
@@ -30,7 +38,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
         backgroundColor: const Color.fromARGB(255, 248, 243, 243),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: textDirectionRTL,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -114,7 +122,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text('تعديل الجناح',
+            const Text('تعديل الاجنحة',
                 style: TextStyle(
                   fontFamily: mainFont,
                   fontSize: 15,
@@ -133,8 +141,9 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
         onPressed: _showAddSuiteDialog,
         child: Icon(Icons.add, color: Colors.white, size: 25),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       body: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: textDirectionRTL,
         child: Padding(
           padding: const EdgeInsets.all(27.0),
           child: Column(
@@ -150,7 +159,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'البحث',
+                      hintText: 'ابحث باسم الجناح',
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -182,31 +191,32 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                         .toList();
 
                     return ListView.builder(
-                        itemCount: filtered.length,
-                        itemBuilder: (context, index) {
-                          final data = filtered[index];
-                          return MainCard(title: data['name'], buttons: [
-                            {
-                              'icon': Icons.edit,
-                              'action': () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditSuiteScreen(
-                                      suiteId: data.id,
-                                    ),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final data = filtered[index];
+                        return MainCard(title: data['name'], buttons: [
+                          {
+                            'icon': Icons.edit,
+                            'action': () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditSuiteScreen(
+                                    suiteId: data.id,
                                   ),
-                                );
-                              },
+                                ),
+                              );
                             },
-                            {
-                              'icon': Icons.delete_rounded,
-                              'action': () {
-                                confirmDelete(context, 'suite', data.id);
-                              },
+                          },
+                          {
+                            'icon': Icons.delete_rounded,
+                            'action': () {
+                              confirmDelete(context, 'suite', data.id);
                             },
-                          ]);
-                        });
+                          },
+                        ]);
+                      },
+                    );
                   },
                 ),
               ),
