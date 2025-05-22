@@ -245,6 +245,17 @@ class FirestoreService {
         }
       });
 
+      // حذف الشركاء المرتبطين بالمعرض
+      await _firestore
+          .collection('partners')
+          .where('gallery id', isEqualTo: galleryId)
+          .get()
+          .then((snapshot) {
+        for (var doc in snapshot.docs) {
+          doc.reference.delete(); // حذف كل شريك مرتبط بالمعرض
+        }
+      });
+
       // حذف المعرض نفسه
       await _firestore.collection('2').doc(galleryId).delete();
 
@@ -400,6 +411,39 @@ class FirestoreService {
       return [];
     }
   }
+
+  /*================  الشركاء partners ================*/
+  Stream<QuerySnapshot> getPartnersForGallery(String galleryId) {
+    return _firestore
+        .collection('partners')
+        .where('gallery id', isEqualTo: galleryId)
+        .snapshots();
+  }
+
+  Future<void> addPartner({
+    required String name,
+    required String imageUrl,
+    required String galleryId,
+  }) async {
+    await _firestore.collection('partners').add({
+      'name': name,
+      'image': imageUrl,
+      'gallery id': galleryId,
+    });
+  }
+
+  Future<void> updatePartner(String partnerId,
+      {required String name, required String imageUrl}) async {
+    await _firestore.collection('partners').doc(partnerId).update({
+      'name': name,
+      'image': imageUrl,
+    });
+  }
+
+  Future<void> deletePartner(String partnerId) async {
+    await _firestore.collection('partners').doc(partnerId).delete();
+  }
+
 ///////////
   ///////////Future<void> addSectionToAd(
   ///////////  String adId, Map<String, dynamic> sectionData) async {
