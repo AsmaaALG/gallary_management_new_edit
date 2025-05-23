@@ -3,6 +3,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
 import 'package:gallery_management/screens/suite_management_screen.dart';
+import 'package:gallery_management/screens/partner_management_screen.dart';
 
 class GallerySuiteScreen extends StatelessWidget {
   final String galleryId;
@@ -137,6 +138,59 @@ class GallerySuiteScreen extends StatelessWidget {
                         SizedBox(height: 10),
                         Text(
                           'من خلال هذه اللوحة يمكنك رؤية جميع الجنحة التابعة للمعرض والتعديل عليها',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontFamily: mainFont,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        PartnerManagementScreen(galleryId: galleryId),
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 250, 237, 237),
+                    border: Border.all(
+                      color: const Color.fromARGB(255, 218, 142, 146)
+                          .withOpacity(0.5),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          textAlign: TextAlign.right,
+                          'التعديل على الشركاء',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: mainFont,
+                            color: primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'من خلال هذه اللوحة يمكنك تعديل الشركاء المرتبطين بالمعرض',
                           style: TextStyle(
                             fontSize: 13,
                             fontFamily: mainFont,

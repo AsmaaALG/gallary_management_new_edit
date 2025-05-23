@@ -7,6 +7,7 @@ import 'package:gallery_management/screens/ads_screen2.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
+import 'package:gallery_management/screens/dashboard_screen.dart';
 
 class ControlPanel extends StatefulWidget {
   const ControlPanel({super.key});
@@ -139,6 +140,17 @@ class _ControlPanelState extends State<ControlPanel> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => AdsScreen2()),
+                      ),
+                      isEnabled: true,
+                    ),
+                    AdminCard(
+                      title: 'التقارير والإحصائيات',
+                      description:
+                          'عرض تقارير تفصيلية حول المعارض، المستخدمين، الحجوزات والمفضلات.',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DashboardScreen()),
                       ),
                       isEnabled: true,
                     ),
