@@ -14,42 +14,56 @@ class MainCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 35, vertical: 15),
+        margin: const EdgeInsets.all(8),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(60), // شكل بيضاوي
+          borderRadius: BorderRadius.circular(30),
           side: BorderSide(
             color: const Color.fromARGB(255, 218, 142, 146).withOpacity(0.5),
             width: 1.5,
           ),
         ),
         color: const Color.fromARGB(255, 250, 237, 237),
-        elevation: 5,
+        elevation: 4,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 12.0, vertical: 8.0), // قللنا vertical
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontFamily: mainFont,
                   color: primaryColor,
+                  fontSize: 16,
                 ),
               ),
-              SizedBox(height: 20),
+              // const SizedBox(height: 4), // قللنا الفراغ هنا أيضا
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: buttons.map((button) {
-                  return IconButton(
-                    onPressed: button['action'],
-                    icon: Icon(
-                      button['icon'],
-                      color: secondaryColor, // تغيير لون الأيقونة
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 9.0),
+                    child: IconButton(
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                      onPressed: button['action'],
+                      icon: Icon(
+                        button['icon'],
+                        color: secondaryColor,
+                        size: 20,
+                      ),
                     ),
                   );
                 }).toList(),
@@ -115,7 +129,7 @@ Future<void> confirmDelete(
                   ),
                 ),
               ),
-              SizedBox(width: screenWidth * 0.08),
+              SizedBox(width: screenWidth * 0.05),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
                 child: Text(

@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/control_panal.dart';
 import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/widgets/custom_text_field.dart';
-import 'package:gallery_management/widgets/social_button.dart';
 
 class SignInScreen extends StatefulWidget {
   @override
@@ -17,46 +15,39 @@ class _SignInScreenState extends State<SignInScreen> {
   final passwordController = TextEditingController();
   bool showSpinner = false;
 
-  // دالة تسجيل الدخول
   Future<void> _signIn() async {
     final email = emailController.text.trim();
     final pass = passwordController.text.trim();
+
     setState(() {
       showSpinner = true;
     });
 
     if (email.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('يرجى إدخال البريد الإلكتروني وكلمة المرور')),
+        const SnackBar(
+            content: Text('يرجى إدخال البريد الإلكتروني وكلمة المرور')),
       );
-      setState(() {
-        showSpinner = false;
-      });
+      setState(() => showSpinner = false);
       return;
     }
 
     try {
       bool isValid = await Auth().signIn(emailController, passwordController);
 
-      // البحث في مجموعة admin عن مستخدم بهذا البريد الإلكتروني
       final querySnapshot = await FirebaseFirestore.instance
           .collection('admin')
-          .where('email',
-              isEqualTo: email) // نفترض أن هناك حقل 'email' في المستندات
+          .where('email', isEqualTo: email)
           .limit(1)
           .get();
 
       if (querySnapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('البريد الإلكتروني ليس مسجلاً كمسؤول')),
+          const SnackBar(content: Text('البريد الإلكتروني ليس مسجلاً كمسؤول')),
         );
-        setState(() {
-          showSpinner = false;
-        });
+        setState(() => showSpinner = false);
         return;
       }
-
-      // إذا وجدنا المستند، نتابع عملية تسجيل الدخول
 
       if (isValid) {
         Navigator.pushReplacement(
@@ -65,7 +56,8 @@ class _SignInScreenState extends State<SignInScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
+          const SnackBar(
+              content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
         );
       }
     } catch (e) {
@@ -73,9 +65,7 @@ class _SignInScreenState extends State<SignInScreen> {
         SnackBar(content: Text('حدث خطأ أثناء محاولة تسجيل الدخول: $e')),
       );
     } finally {
-      setState(() {
-        showSpinner = false;
-      });
+      setState(() => showSpinner = false);
     }
   }
 
@@ -88,82 +78,91 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-      ),
+      appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: 50),
-              Text(
-                "مرحبا يك في لوحة تحكم المعارض",
-                style: TextStyle(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            width: isWideScreen ? 450 : double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: isWideScreen
+                  ? [
+                      BoxShadow(
+                        color: Colors.grey.shade300,
+                        blurRadius: 15,
+                        offset: Offset(0, 5),
+                      ),
+                    ]
+                  : [],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                Text(
+                  "مرحبا بك في لوحة تحكم المعارض",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     fontFamily: mainFont,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                "ادارة معارضك تبدأ من هنا",
-                style: TextStyle(
-                  fontFamily: mainFont,
-                  fontSize: 15,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(height: 60),
-              Image.asset(
-                'images/logo.png', // استبدل بمسار الشعار الفعلي
-                height: 170,
-              ),
-              SizedBox(height: 40),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 45),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CustomTextField(
-                      hintText: "البريد الإلكتروني",
-                      controller: emailController,
-                    ),
-                    SizedBox(height: 10),
-                    CustomTextField(
-                      hintText: "كلمة المرور",
-                      obscureText: true,
-                      controller: passwordController,
-                    ),
-                    SizedBox(height: 10),
-                    SizedBox(height: 10),
-                    SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: _signIn,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: secondaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                const SizedBox(height: 10),
+                const Text(
+                  "إدارة معارضك تبدأ من هنا",
+                  style: TextStyle(
+                    fontFamily: mainFont,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Image.asset(
+                  'images/logo.png',
+                  height: 140,
+                ),
+                const SizedBox(height: 30),
+                CustomTextField(
+                  hintText: "البريد الإلكتروني",
+                  controller: emailController,
+                ),
+                const SizedBox(height: 12),
+                CustomTextField(
+                  hintText: "كلمة المرور",
+                  obscureText: true,
+                  controller: passwordController,
+                ),
+                const SizedBox(height: 30),
+                showSpinner
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _signIn,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: secondaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 40),
                         ),
-                        padding: EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: Text(
-                        "التسجيل",
-                        style: TextStyle(
+                        child: const Text(
+                          "تسجيل الدخول",
+                          style: TextStyle(
                             fontFamily: mainFont,
-                            color: cardBackground,
-                            fontSize: 18),
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

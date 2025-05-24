@@ -5,11 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/control_panal.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
+import 'package:gallery_management/services/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding
       .ensureInitialized(); // المستخدم في Flutter يتم تهيئتها قبل بدء التطبيق، وهو أمر ضروري قبل استخدام أي خدمات غير متزامنة مثل Firebase.
-  await Firebase.initializeApp(); //تهيئة
+  await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+
+  ); //تهيئة
   runApp(MyApp());
 }
 

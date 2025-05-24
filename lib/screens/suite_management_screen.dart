@@ -1,229 +1,183 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/edit_suite_screen.dart';
-import 'package:gallery_management/services/firestore_service.dart';
+import 'package:gallery_management/screens/main_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
-import 'package:intl/intl.dart';
+import 'package:gallery_management/services/firestore_service.dart';
+import 'package:gallery_management/screens/edit_suite_screen.dart';
 
 class SuiteManagementScreen extends StatefulWidget {
   final String galleryId;
-  final Map<String, dynamic>? initialSuiteData;
-
-  const SuiteManagementScreen({
-    Key? key,
-    required this.galleryId,
-    this.initialSuiteData,
-  }) : super(key: key);
+  const SuiteManagementScreen({super.key, required this.galleryId});
 
   @override
-  _SuiteManagementScreenState createState() => _SuiteManagementScreenState();
+  State<SuiteManagementScreen> createState() => _SuiteManagementScreenState();
 }
 
 class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  final FirestoreService _firestoreService = FirestoreService();
+  final FirestoreService _fs = FirestoreService();
+  final TextEditingController _searchCtl = TextEditingController();
 
-  void _showAddSuiteDialog() {
-    final _nameController =
-        TextEditingController(text: widget.initialSuiteData?['name'] ?? '');
-    final _descController = TextEditingController(
-        text: widget.initialSuiteData?['description'] ?? '');
-    final _imageController =
-        TextEditingController(text: widget.initialSuiteData?['imageUrl'] ?? '');
+  Future<void> _showSuiteDialog() async {
+    final nameCtl = TextEditingController();
+    final descCtl = TextEditingController();
+    final imageCtl = TextEditingController();
 
-    showDialog(
+    bool nameError = false;
+    bool descError = false;
+    bool imageError = false;
+
+    await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 248, 243, 243),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Directionality(
-          textDirection: textDirectionRTL,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text("إضافة جناح جديد",
-                    style: TextStyle(
-                        fontFamily: mainFont, fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
-                buildInput(_nameController, "اسم الجناح"),
-                SizedBox(height: 10),
-                buildInput(_descController, "وصف الجناح"),
-                SizedBox(height: 10),
-                buildInput(_imageController, "رابط صورة الجناح"),
-                SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_nameController.text.isEmpty ||
-                        _descController.text.isEmpty ||
-                        _imageController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('يرجى ملء جميع الحقول',
-                              style: TextStyle(fontFamily: mainFont))));
-                      return;
-                    }
-
-                    await _firestoreService.addSuite(
-                      name: _nameController.text,
-                      description: _descController.text,
-                      imageUrl: _imageController.text,
-                      galleryId: widget.galleryId,
-                    );
-
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: secondaryColor,
-                    padding: EdgeInsets.symmetric(horizontal: 35, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                  ),
-                  child: Text("إضافة",
-                      style:
-                          TextStyle(fontFamily: mainFont, color: Colors.black)),
-                )
-              ],
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 248, 243, 243),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Directionality(
+              textDirection: TextDirection.rtl,
+              child: Text('إضافة جناح', style: TextStyle(fontFamily: mainFont)),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildInput(TextEditingController controller, String hint) {
-    return Container(
-      width: 250,
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hint,
-          filled: true,
-          fillColor: Colors.white,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(35),
-            borderSide: BorderSide(color: Color.fromARGB(255, 209, 167, 181)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(35),
-            borderSide: BorderSide(color: Color.fromARGB(255, 207, 98, 98)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            const Text('تعديل الاجنحة',
-                style: TextStyle(
-                  fontFamily: mainFont,
-                  fontSize: 15,
-                  color: Colors.white,
-                )),
-            SizedBox(width: 8),
-            IconButton(
-              icon: Icon(Icons.arrow_forward, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: primaryColor,
-        onPressed: _showAddSuiteDialog,
-        child: Icon(Icons.add, color: Colors.white, size: 25),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      body: Directionality(
-        textDirection: textDirectionRTL,
-        child: Padding(
-          padding: const EdgeInsets.all(27.0),
-          child: Column(
-            children: [
-              Text(
-                "يمكنك من خلال هذه الواجهة تعديل الأجنحة داخل المعرض المحدد مسبقاً عبر تعبئة الحقول التالية",
-                style: TextStyle(fontFamily: mainFont),
-              ),
-              SizedBox(height: 35),
-              Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'ابحث باسم الجناح',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
+            content: Directionality(
+              textDirection: TextDirection.rtl,
+              child: SizedBox(
+                width: 260,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _field(nameCtl, 'اسم الجناح'),
+                    if (nameError)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text('يرجى ملء هذا الحقل',
+                            style: TextStyle(color: Colors.red, fontSize: 12)),
                       ),
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 228, 226, 226),
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    ),
-                  ),
+                    const SizedBox(height: 10),
+                    _field(descCtl, 'وصف الجناح'),
+                    if (descError)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text('يرجى ملء هذا الحقل',
+                            style: TextStyle(color: Colors.red, fontSize: 12)),
+                      ),
+                    const SizedBox(height: 10),
+                    _field(imageCtl, 'رابط صورة الجناح'),
+                    if (imageError)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text('يرجى ملء هذا الحقل',
+                            style: TextStyle(color: Colors.red, fontSize: 12)),
+                      ),
+                  ],
                 ),
               ),
-              SizedBox(height: 30),
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream:
-                      _firestoreService.getSuitesForGallery(widget.galleryId),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData)
-                      return Center(child: CircularProgressIndicator());
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child:
+                    const Text('إلغاء', style: TextStyle(fontFamily: mainFont)),
+              ),
+              TextButton(
+                onPressed: () async {
+                  setState(() {
+                    nameError = nameCtl.text.trim().isEmpty;
+                    descError = descCtl.text.trim().isEmpty;
+                    imageError = imageCtl.text.trim().isEmpty;
+                  });
 
-                    final suites = snapshot.data!.docs;
-                    final filtered = suites
-                        .where((doc) => doc['name']
-                            .toString()
-                            .toLowerCase()
-                            .contains(_searchController.text.toLowerCase()))
-                        .toList();
+                  if (nameError || descError || imageError) return;
 
-                    return ListView.builder(
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final data = filtered[index];
-                        return MainCard(title: data['name'], buttons: [
-                          {
-                            'icon': Icons.edit,
-                            'action': () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditSuiteScreen(
-                                    suiteId: data.id,
-                                  ),
-                                ),
-                              );
-                            },
-                          },
-                          {
-                            'icon': Icons.delete_rounded,
-                            'action': () {
-                              confirmDelete(context, 'suite', data.id);
-                            },
-                          },
-                        ]);
-                      },
-                    );
-                  },
+                  await _fs.addSuite(
+                    name: nameCtl.text.trim(),
+                    description: descCtl.text.trim(),
+                    imageUrl: imageCtl.text.trim(),
+                    galleryId: widget.galleryId,
+                  );
+
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'إضافة',
+                  style: TextStyle(
+                    fontFamily: mainFont,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
                 ),
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _field(TextEditingController c, String hint) => TextField(
+        controller: c,
+        decoration: InputDecoration(
+          hintText: hint,
+          filled: true,
+          fillColor: const Color.fromARGB(255, 255, 255, 255),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
         ),
-      ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _fs.getSuitesForGallery(widget.galleryId),
+      builder: (context, snap) {
+        if (!snap.hasData) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+
+        final cards = snap.data!.docs.where((d) {
+          final name = d['name'].toString().toLowerCase();
+          return name.contains(_searchCtl.text.toLowerCase());
+        }).map<MainCard>((d) {
+          return MainCard(
+            title: d['name'],
+            buttons: [
+              {
+                'icon': Icons.edit,
+                'action': () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditSuiteScreen(suiteId: d.id),
+                    ),
+                  );
+                },
+              },
+              {
+                'icon': Icons.delete_rounded,
+                'action': () => confirmDelete(context, 'suite', d.id),
+              },
+            ],
+          );
+        }).toList();
+
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              backgroundColor: primaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
+              onPressed: () => _showSuiteDialog(),
+            ),
+            body: MainScreen(
+              title: 'التعديل على الأجنحة',
+              description:
+                  'يمكنك من خلال هذه الواجهة تعديل الأجنحة داخل المعرض المحدد مسبقاً عبر تعبئة الحقول التالية',
+              cards: cards,
+              addScreen: const SizedBox(), // لن يُستعمل لأنه يوجد Dialog
+            ),
+          ),
+        );
+      },
     );
   }
 }

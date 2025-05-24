@@ -17,6 +17,7 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
   final _descController = TextEditingController();
   final _imageController = TextEditingController();
   bool isLoading = true; // حالة تحميل البيانات من قاعدة البيانات
+  bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
   @override
   void initState() {
@@ -154,58 +155,134 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
                       const SizedBox(height: 40),
 
                       // زر تعديل البيانات
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: updateSuite,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: secondaryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: const Text(
-                            'تعديل',
-                            style: TextStyle(
-                              fontFamily: mainFont,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
+                      isWeb(context)
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              // crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                SizedBox(
+                                  // width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: updateSuite,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: secondaryColor,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 50),
+                                      child: const Text(
+                                        'تعديل',
+                                        style: TextStyle(
+                                          fontFamily: mainFont,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                // زر الانتقال لعرض صور الجناح
+                                SizedBox(
+                                  // width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              SuiteImageScreen(
+                                                  suiteId: widget.suiteId),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: secondaryColor,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20),
+                                      child: const Text(
+                                        'عرض صور الجناح',
+                                        style: TextStyle(
+                                          fontFamily: mainFont,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: updateSuite,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: secondaryColor,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'تعديل',
+                                      style: TextStyle(
+                                        fontFamily: mainFont,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
 
-                      const SizedBox(height: 15),
-
-                      // زر الانتقال لعرض صور الجناح
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    SuiteImageScreen(suiteId: widget.suiteId),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: secondaryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                                // زر الانتقال لعرض صور الجناح
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              SuiteImageScreen(
+                                                  suiteId: widget.suiteId),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: secondaryColor,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'عرض صور الجناح',
+                                      style: TextStyle(
+                                        fontFamily: mainFont,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          child: const Text(
-                            'عرض صور الجناح',
-                            style: TextStyle(
-                              fontFamily: mainFont,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

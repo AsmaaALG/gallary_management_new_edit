@@ -420,7 +420,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 10),
                                       Text(
-                                          'الوصف: ${data['description'] ?? '---'}',
+                                          'الوصف: ${data['productType'] ?? '---'}',
                                           style: const TextStyle(
                                               fontSize: 14,
                                               fontFamily: mainFont)),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/edit_gallery_screen.dart';
-import 'package:gallery_management/screens/gallery_management_screen.dart';
 import 'package:gallery_management/screens/suite_management_screen.dart';
 import 'package:gallery_management/screens/partner_management_screen.dart';
 
@@ -10,13 +9,15 @@ class GallerySuiteScreen extends StatelessWidget {
 
   const GallerySuiteScreen({super.key, required this.galleryId});
 
-  void _onContainerTap(BuildContext context) {
-    // هنا يمكنك إضافة الإجراء الذي تود تنفيذه عند النقر على الـ Container
-    print('Container tapped!'); // يمكنك تعديل هذا حسب الحاجة
-  }
+  bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double cardWidth = isWeb(context)
+        ? screenWidth / 2 - 40 // مساحة لبطاقتين في صف واحد مع فراغ
+        : double.infinity;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -27,9 +28,10 @@ class GallerySuiteScreen extends StatelessWidget {
           ),
           backgroundColor: primaryColor,
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 15),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'يمكنك من خلال هذه الواجهة تعديل المعارض عبر تعبئة الحقول التالية',
@@ -40,171 +42,121 @@ class GallerySuiteScreen extends StatelessWidget {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(
-                height: 30,
-              ),
-              InkWell(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          EditGalleryScreen(galleryId: galleryId)),
-                ), // الإجراء عند النقر
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 250, 237, 237),
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 218, 142, 146)
-                          .withOpacity(0.5),
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          textAlign: TextAlign.right,
-                          'تعديل بيانات المعرض',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: mainFont,
-                            color: primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+              const SizedBox(height: 30),
+              Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                children: [
+                  OptionCard(
+                    width: cardWidth,
+                    title: 'تعديل بيانات المعرض',
+                    description:
+                        'من خلال هذه اللوحة يمكنك متابعة أحدث التغيرات وإضافة مقالات وفعاليات جديدة',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EditGalleryScreen(galleryId: galleryId),
                         ),
-                        SizedBox(height: 10),
-                        Text(
-                          'من خلال هذه اللوحة يمكنك متابعة أحدث التغيرات وإضافة مقالات وفعاليات جديدة',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontFamily: mainFont,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
+                      );
+                    },
+                  ),
+                  OptionCard(
+                    width: cardWidth,
+                    title: 'التعديل على الأجنحة',
+                    description:
+                        'من خلال هذه اللوحة يمكنك رؤية جميع الأجنحة التابعة للمعرض والتعديل عليها',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              SuiteManagementScreen(galleryId: galleryId),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              InkWell(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        SuiteManagementScreen(galleryId: galleryId),
-                  ),
-                  //الاجراء عند النقر
-                ), // الإجراء عند النقر
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 250, 237, 237),
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 218, 142, 146)
-                          .withOpacity(0.5),
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          textAlign: TextAlign.right,
-                          'التعديل على الأجنحة',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: mainFont,
-                            color: primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                  OptionCard(
+                    width: cardWidth,
+                    title: 'التعديل على الشركاء',
+                    description:
+                        'من خلال هذه اللوحة يمكنك تعديل الشركاء المرتبطين بالمعرض',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PartnerManagementScreen(galleryId: galleryId),
                         ),
-                        SizedBox(height: 10),
-                        Text(
-                          'من خلال هذه اللوحة يمكنك رؤية جميع الجنحة التابعة للمعرض والتعديل عليها',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontFamily: mainFont,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                ),
-              ),
-              SizedBox(height: 20),
-              InkWell(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        PartnerManagementScreen(galleryId: galleryId),
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 250, 237, 237),
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 218, 142, 146)
-                          .withOpacity(0.5),
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          textAlign: TextAlign.right,
-                          'التعديل على الشركاء',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: mainFont,
-                            color: primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'من خلال هذه اللوحة يمكنك تعديل الشركاء المرتبطين بالمعرض',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontFamily: mainFont,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class OptionCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+  final double width;
+
+  const OptionCard({
+    super.key,
+    required this.title,
+    required this.description,
+    required this.onTap,
+    required this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 250, 237, 237),
+          border: Border.all(
+            color: const Color.fromARGB(255, 218, 142, 146).withOpacity(0.5),
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: mainFont,
+                color: primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              description,
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: mainFont,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
