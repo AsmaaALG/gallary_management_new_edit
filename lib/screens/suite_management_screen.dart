@@ -154,8 +154,9 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
               },
               {
                 'icon': Icons.delete_rounded,
-                'action': () => confirmDelete(context, 'suite', d.id),
-              },
+'action': () => confirmDelete(context, () async {
+                      await _fs.deleteSuiteAndImages(d.id);
+                    })              },
             ],
           );
         }).toList();

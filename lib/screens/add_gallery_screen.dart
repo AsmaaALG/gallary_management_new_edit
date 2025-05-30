@@ -266,6 +266,8 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -285,7 +287,8 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: EdgeInsets.symmetric(
+              vertical: 30.0, horizontal: isWideScreen ? 250 : 30),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -418,26 +421,29 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                       () => _selectDate(context, false)),
                   const SizedBox(height: 20),
                   // زر الإضافة
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _addGallery,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _addGallery,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        minimumSize:
+                            Size(isWideScreen ? 250 : double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'إضافة',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: mainFont,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromARGB(221, 255, 255, 255),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'إضافة',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: mainFont,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(221, 255, 255, 255),
+                              ),
                             ),
-                          ),
+                    ),
                   ),
                 ],
               ),

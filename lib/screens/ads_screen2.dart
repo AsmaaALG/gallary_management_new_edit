@@ -71,7 +71,9 @@ class _AdsScreen2State extends State<AdsScreen2> {
                     {
                       'icon': Icons.delete_rounded,
                       'action': () {
-                        confirmDelete(context, 'ads', documentId);
+                       confirmDelete(context, () async {
+                      await _firestoreService.deleteDocument('ads', documentId);
+                    });
                       },
                     },
                     {

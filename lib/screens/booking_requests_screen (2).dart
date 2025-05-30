@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookingRequestsScreen extends StatefulWidget {
   final String adId;
@@ -91,6 +92,11 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
           ),
           TextButton(
             onPressed: () async {
+              await _firestoreService.updateDocument(
+                'space_form',
+                docId,
+                {'status': 'rejected'},
+              );
               await _firestoreService.deleteBookingRequest(docId);
               Navigator.of(ctx).pop();
               setState(() {
@@ -140,7 +146,14 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
       // 4. Add to suite collection
       await _firestoreService.addDocument('suite', suiteData);
 
-      // 5. Show success message
+      // 5. Update request status to 'accepted'
+      await _firestoreService.updateDocument(
+        'space_form',
+        docId,
+        {'status': 'accepted'},
+      );
+
+      // 6. Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم قبول الطلب وحجز الجناح بنجاح'),
@@ -148,7 +161,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
         ),
       );
 
-      // 6. Refresh the list
+      // 7. Refresh the list
       setState(() {
         _requestsFuture =
             _firestoreService.getBookingRequestsForAd(widget.adId);
@@ -227,8 +240,6 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isWideScreen = MediaQuery.of(context).size.width > 600;
-
     return Directionality(
       textDirection: textDirectionRTL,
       child: Scaffold(
@@ -238,10 +249,16 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           backgroundColor: primaryColor,
+          title: const Text(
+            'طلبات حجز الأجنحة',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: mainFont,
+            ),
+          ),
         ),
         body: Padding(
-          padding: EdgeInsets.symmetric(
-              vertical: 20, horizontal: isWideScreen ? 80 : 20),
+          padding: const EdgeInsets.all(19.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -267,9 +284,9 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
               ),
               const SizedBox(height: 16),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 35, vertical: 3),
                 child: SizedBox(
-                  width: isWideScreen ? 500 : double.infinity,
                   height: 60,
                   child: TextField(
                     controller: _searchController,
@@ -310,7 +327,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Expanded(
                 child: FutureBuilder<List<Map<String, dynamic>>>(
                   future: _requestsFuture,
@@ -351,6 +368,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                           var data = filteredRequests[index];
                           String docId = data['docId'] ?? '';
                           String wingName = data['wingName'] ?? '';
+                          bool isAccepted = data['status'] == 'accepted';
 
                           return FutureBuilder<bool>(
                             future: Future.wait([
@@ -404,7 +422,6 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontSize: 14,
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 10),
-                                      //  خط فاصل
                                       const Divider(
                                         color: Colors.grey,
                                         thickness: 1,
@@ -423,7 +440,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 10),
                                       Text(
-                                          'الوصف: ${data['productType'] ?? '---'}',
+                                          'الوصف: ${data['description'] ?? '---'}',
                                           style: const TextStyle(
                                               fontSize: 14,
                                               fontFamily: mainFont)),
@@ -444,7 +461,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
                                         children: [
-                                          if (isBooked)
+                                          if (isAccepted || isBooked)
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(

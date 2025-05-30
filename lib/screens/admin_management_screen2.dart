@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/add_admin_screen.dart';
@@ -19,6 +18,7 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: StreamBuilder<QuerySnapshot>(
@@ -35,6 +35,10 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
           final cards = snapshot.data!.docs.map((doc) {
             final documentId = doc.id;
 
+            Future<void> delete() {
+              return _firestoreService.deleteAdmin(doc.id);
+            }
+
             return MainCard(
               title: doc['email'],
               buttons: [
@@ -47,8 +51,9 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                 {
                   'icon': Icons.delete_rounded,
                   'action': () {
-                    confirmDelete(context, 'admin', documentId);
-                    
+                    confirmDelete(context, () async {
+                      await _firestoreService.deleteAdmin(doc.id);
+                    });
                   },
                 },
               ],

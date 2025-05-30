@@ -53,14 +53,9 @@ class FirestoreService {
     }
   }
 
+
 //////////////////////////////////////////////////////////////////////////
   ///ادارة الاعلانــــــــــــــات
-
-  // // إضافة إعلان جديد
-  // Future<void> addAd(Map<String, dynamic> adData) async {
-  //   await _firestore.collection('ads').add(adData);
-  // }
-
   // تحديث إعلان موجود
   Future<void> updateAd(String id, Map<String, dynamic> updatedData) async {
     await _firestore.collection('ads').doc(id).update(updatedData);
@@ -78,6 +73,13 @@ class FirestoreService {
       print("Error getting ad: $e");
       return null;
     }
+  }
+    Future<void> updateDocument(
+      String collection, String docId, Map<String, dynamic> data) async {
+    await FirebaseFirestore.instance
+        .collection(collection)
+        .doc(docId)
+        .update(data);
   }
 
   //////////////////////////////////////////////////////////////////
@@ -231,15 +233,7 @@ class FirestoreService {
             }
           });
 
-          // // حذف الصور المرتبطة بالأجنحة المحفوظة
-          // await _firestore.collection('saved_wing_images')
-          //     .where('wingId', isEqualTo: doc.id)
-          //     .get()
-          //     .then((savedImageSnapshot) {
-          //       for (var savedImageDoc in savedImageSnapshot.docs) {
-          //         savedImageDoc.reference.delete(); // حذف الصورة المحفوظة
-          //       }
-          //     });
+     
 
           doc.reference.delete(); // حذف الجناح
         }
@@ -275,6 +269,7 @@ class FirestoreService {
       print('حدث خطأ أثناء حذف المعرض: $e');
     }
   }
+  
 
   Future<void> updateGallery(
       String galleryId, Map<String, dynamic> updatedData) async {
@@ -443,16 +438,4 @@ class FirestoreService {
   Future<void> deletePartner(String partnerId) async {
     await _firestore.collection('partners').doc(partnerId).delete();
   }
-
-///////////
-  ///////////Future<void> addSectionToAd(
-  ///////////  String adId, Map<String, dynamic> sectionData) async {
-  /////////// final sectionRef = FirebaseFirestore.instance
-///////////.collection('ads')
-  ///////////  .doc(adId)
-  ///////////  .collection('sections')
-  ///////////  .doc(); // auto-generated ID
-
-  ///////////await sectionRef.set(sectionData);
-  /////////// }
 }

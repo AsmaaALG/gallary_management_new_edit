@@ -106,6 +106,7 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -129,7 +130,8 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
-                padding: const EdgeInsets.all(35.0),
+                padding: EdgeInsets.symmetric(
+                    vertical: 30, horizontal: isWideScreen ? 250 : 30),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

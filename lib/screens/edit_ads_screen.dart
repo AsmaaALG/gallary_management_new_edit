@@ -200,6 +200,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -221,7 +223,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         body: _isLoading && !_isInitialized
             ? const Center(child: CircularProgressIndicator())
             : Padding(
-                padding: const EdgeInsets.all(30.0),
+                padding: EdgeInsets.symmetric(
+                    vertical: 30, horizontal: isWideScreen ? 250 : 30),
                 child: Form(
                   key: _formKey,
                   child: SingleChildScrollView(
@@ -421,27 +424,30 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         const SizedBox(height: 30),
 
                         // زر التعديل
-                        ElevatedButton(
-                          onPressed: _isLoading ? null : _updateAd,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            minimumSize: const Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _updateAd,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              minimumSize: Size(
+                                  isWideScreen ? 250 : double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
                             ),
-                          ),
-                          child: _isLoading
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white)
-                              : const Text(
-                                  'حفظ التعديلات',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontFamily: mainFont,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color.fromARGB(221, 255, 255, 255),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white)
+                                : const Text(
+                                    'حفظ التعديلات',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: mainFont,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(221, 255, 255, 255),
+                                    ),
                                   ),
-                                ),
+                          ),
                         ),
                         const SizedBox(height: 20),
                       ],

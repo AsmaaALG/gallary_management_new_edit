@@ -22,6 +22,7 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -41,7 +42,8 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: EdgeInsets.symmetric(
+              vertical: 30, horizontal: isWideScreen ? 250 : 30),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,63 +103,67 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                   },
                 ),
                 const SizedBox(height: 30),
-                ElevatedButton(
-                  ////تعديل زر الاضافة بحيت يتم اضافته في auth
-                  onPressed: () async {
-                    if (emailController.text.isNotEmpty &&
-                        passwordController.text.isNotEmpty &&
-                        firstNameController.text.isNotEmpty &&
-                        lastNameController.text.isNotEmpty) {
-                      try {
-                        final success =
-                            await widget.firestoreService.createUser(
-                          firstName: firstNameController.text.trim(),
-                          lastName: lastNameController.text.trim(),
-                          email: emailController.text.trim(),
-                          password: passwordController.text.trim(),
-                        );
-
-                        if (success) {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('تمت إضافة المسؤول بنجاح'),
-                              backgroundColor: Colors.green,
-                            ),
+                Center(
+                  child: ElevatedButton(
+                    ////تعديل زر الاضافة بحيت يتم اضافته في auth
+                    onPressed: () async {
+                      if (emailController.text.isNotEmpty &&
+                          passwordController.text.isNotEmpty &&
+                          firstNameController.text.isNotEmpty &&
+                          lastNameController.text.isNotEmpty) {
+                        try {
+                          final success =
+                              await widget.firestoreService.createUser(
+                            firstName: firstNameController.text.trim(),
+                            lastName: lastNameController.text.trim(),
+                            email: emailController.text.trim(),
+                            password: passwordController.text.trim(),
                           );
-                        } else {
+
+                          if (success) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('تمت إضافة المسؤول بنجاح'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('فشل في إضافة المسؤول'),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
+                          }
+                        } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('فشل في إضافة المسؤول'),
-                              backgroundColor: Colors.redAccent,
-                            ),
+                            SnackBar(
+                                content: Text('حدث خطأ أثناء الإضافة: $e')),
                           );
                         }
-                      } catch (e) {
+                      } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('حدث خطأ أثناء الإضافة: $e')),
+                          const SnackBar(content: Text('يرجى ملء جميع الحقول')),
                         );
                       }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('يرجى ملء جميع الحقول')),
-                      );
-                    }
-                  },
-//////
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                    },
+                    //////
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      minimumSize:
+                          Size(isWideScreen ? 250 : double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'إضافة',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: mainFont,
-                        color: Color.fromARGB(255, 255, 255, 255)),
+                    child: const Text(
+                      'إضافة',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: mainFont,
+                          color: Color.fromARGB(255, 255, 255, 255)),
+                    ),
                   ),
                 ),
               ],

@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/add_ads_screen.dart';
+import 'package:gallery_management/screens/GalleryStatistic_screen.dart';
 import 'package:gallery_management/screens/add_gallery_screen.dart';
-import 'package:gallery_management/screens/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/gallery_suite_screen.dart';
 import 'package:gallery_management/screens/main_screen.dart';
 import 'package:gallery_management/screens/review_management_screen.dart';
@@ -75,7 +73,10 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                     {
                       'icon': Icons.delete_rounded,
                       'action': () {
-                        confirmDelete(context, '2', documentId);
+                        confirmDelete(context, () async {
+                          await _firestoreService
+                              .deleteGalleryAndRelatedData(documentId);
+                        });
                       },
                     },
                     {
@@ -88,6 +89,17 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                               galleryId: documentId,
                             ),
                           ),
+                        );
+                      },
+                    },
+                    {
+                      'icon': Icons.dashboard_rounded,
+                      'action': () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => GalleryStatisticsScreen(
+                                  galleryId: documentId)),
                         );
                       },
                     },

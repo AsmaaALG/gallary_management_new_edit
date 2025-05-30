@@ -77,7 +77,9 @@ class MainCard extends StatelessWidget {
 }
 
 Future<void> confirmDelete(
-    BuildContext context, String collection, String documentId) async {
+  BuildContext context,
+  VoidCallback onConfirm,
+) async {
   final screenWidth = MediaQuery.of(context).size.width;
   final FirestoreService _firestoreService = FirestoreService();
 
@@ -150,8 +152,7 @@ Future<void> confirmDelete(
   );
 
   if (confirmed == true) {
-    _firestoreService.deleteDocument(collection, documentId);
-
+    onConfirm();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(

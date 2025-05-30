@@ -80,6 +80,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
+                      width: 500,
                       height: 60,
                       child: TextField(
                         controller: _searchController,
@@ -120,7 +121,8 @@ class _MainScreenState extends State<MainScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.all(cardPadding),
+                padding:
+                    EdgeInsets.symmetric(horizontal: cardPadding, vertical: 0),
                 child: isWeb(context)
                     ? GridView.builder(
                         shrinkWrap: true,

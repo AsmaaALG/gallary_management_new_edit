@@ -112,7 +112,9 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
               },
               {
                 'icon': Icons.delete_rounded,
-                'action': () => confirmDelete(context, 'partners', d.id),
+                'action': () => confirmDelete(context, () async {
+                      await _fs.deleteDocument('partners', d.id);
+                    })
               },
             ],
           );

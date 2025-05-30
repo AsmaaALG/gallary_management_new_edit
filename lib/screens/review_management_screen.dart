@@ -20,6 +20,8 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -40,7 +42,8 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 25),
+          padding: EdgeInsets.symmetric(
+              vertical: 30, horizontal: isWideScreen ? 250 : 30),
           child: Column(
             children: [
               const Text(
@@ -51,8 +54,8 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
 
               // مربع البحث العادي
               Container(
-                width: MediaQuery.of(context).size.width * 0.75,
-                height: 50,
+                width: isWideScreen ? 300 : double.infinity,
+                height: 40,
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 228, 226, 226),
                   borderRadius: BorderRadius.circular(30),

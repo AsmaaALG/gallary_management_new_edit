@@ -128,6 +128,8 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWeb = MediaQuery.of(context).size.width > 600;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -165,14 +167,13 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              Center(
-                child: Text(
-                  "يمكنك من خلال هذه الواجهة إضافة صور جديدة للأجنحة",
-                  style: TextStyle(
-                    fontFamily: mainFont,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
+
+              Text(
+                "يمكنك من خلال هذه الواجهة إضافة صور جديدة للأجنحة",
+                style: TextStyle(
+                  fontFamily: mainFont,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 10),
@@ -209,22 +210,39 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final data = images[index];
+                        // String driveUrl =
+                        //     'drive.google.com/uc?export=view&id=1SDLxVAeYuF4P7V6pfDOpGjWQSMU-OysZ';
+                        // String proxyUrl =
+                        //     'https://images.weserv.nl/?url=$driveUrl';
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Stack(
                             children: [
                               // عرض الصورة من الرابط
                               Positioned.fill(
-                                child: Image.network(
-                                  'https://drive.google.com/uc?id=${data['image url']}',
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                    color: Colors.grey.shade200,
-                                    child: Icon(Icons.broken_image,
-                                        color: Colors.grey),
-                                  ),
-                                ),
+                                child: isWeb
+                                    ? Image.network(
+                                        data['image url'],
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Container(
+                                          color: Colors.grey.shade200,
+                                          child: Icon(Icons.broken_image,
+                                              color: Colors.grey),
+                                        ),
+                                      )
+                                    : Image.network(
+                                        'https://drive.google.com/uc?id=${data['image url']}',
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Container(
+                                          color: Colors.grey.shade200,
+                                          child: Icon(Icons.broken_image,
+                                              color: Colors.grey),
+                                        ),
+                                      ),
                               ),
 
                               // زر الحذف

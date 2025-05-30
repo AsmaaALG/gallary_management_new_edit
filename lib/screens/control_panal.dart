@@ -55,6 +55,8 @@ class _ControlPanelState extends State<ControlPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -82,7 +84,8 @@ class _ControlPanelState extends State<ControlPanel> {
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: EdgeInsets.symmetric(
+              vertical: 30, horizontal: isWideScreen ? 250 : 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
