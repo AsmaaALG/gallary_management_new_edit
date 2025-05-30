@@ -81,72 +81,76 @@ Future<void> confirmDelete(
   VoidCallback onConfirm,
 ) async {
   final screenWidth = MediaQuery.of(context).size.width;
-  final FirestoreService _firestoreService = FirestoreService();
-
-  final fontSize = screenWidth * 0.04;
+  final isDesktop = screenWidth > 600;
+  final fontSize = isDesktop ? 18.0 : 16.0;
+  final buttonFontSize = isDesktop ? 16.0 : 14.0;
+  final paddingSize = isDesktop ? 24.0 : 16.0;
 
   final confirmed = await showDialog(
     context: context,
-    builder: (ctx) => AlertDialog(
-      contentPadding: EdgeInsets.all(screenWidth * 0.05),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'تأكيد الحذف',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: fontSize.clamp(16, 20),
-              color: primaryColor,
-              fontFamily: mainFont,
-              fontWeight: FontWeight.bold,
+    builder: (ctx) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: AlertDialog(
+        contentPadding: EdgeInsets.all(paddingSize),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'تأكيد الحذف',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: primaryColor,
+                fontFamily: mainFont,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          SizedBox(height: screenWidth * 0.04),
-          Text(
-            'هل أنت متأكد من عملية الحذف؟',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: fontSize.clamp(14, 18),
-              color: Colors.black87,
-              fontFamily: mainFont,
+            SizedBox(height: paddingSize),
+            Text(
+              'هل أنت متأكد من عملية الحذف؟',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: fontSize - 2,
+                color: Colors.black87,
+                fontFamily: mainFont,
+              ),
             ),
-          ),
-          SizedBox(height: screenWidth * 0.06),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(
-                  'إلغاء',
-                  style: TextStyle(
-                    fontSize: fontSize.clamp(12, 16),
-                    color: const Color.fromARGB(255, 72, 71, 71),
-                    fontFamily: mainFont,
-                    fontWeight: FontWeight.bold,
+            SizedBox(height: paddingSize * 1.5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(
+                    'إلغاء',
+                    style: TextStyle(
+                      fontSize: buttonFontSize,
+                      color: const Color.fromARGB(255, 72, 71, 71),
+                      fontFamily: mainFont,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: screenWidth * 0.05),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(
-                  'حذف',
-                  style: TextStyle(
-                    fontSize: fontSize.clamp(12, 16),
-                    color: primaryColor,
-                    fontFamily: mainFont,
-                    fontWeight: FontWeight.bold,
+                SizedBox(width: paddingSize),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(
+                    'حذف',
+                    style: TextStyle(
+                      fontSize: buttonFontSize,
+                      color: primaryColor,
+                      fontFamily: mainFont,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -154,10 +158,13 @@ Future<void> confirmDelete(
   if (confirmed == true) {
     onConfirm();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(
           'تم الحذف بنجاح',
-          style: TextStyle(fontFamily: mainFont),
+          style: TextStyle(
+            fontFamily: mainFont,
+            fontSize: isDesktop ? 16 : 14,
+          ),
         ),
         backgroundColor: Color.fromARGB(255, 146, 149, 146),
       ),

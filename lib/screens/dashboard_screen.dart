@@ -8,41 +8,48 @@ import 'package:intl/intl.dart';
 import 'package:gallery_management/constants.dart';
 import 'dashboard_controller.dart';
 
-// شاشة لوحة التقارير
 class DashboardScreen extends StatefulWidget {
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final DashboardController _controller =
-      DashboardController(); // متحكم البيانات
+  final DashboardController _controller = DashboardController();
 
   @override
   void initState() {
     super.initState();
-    _loadData(); // تحميل البيانات عند بدء تشغيل الشاشة
+    _loadData();
   }
 
-  // دالة لتحميل البيانات من المتحكم
   Future<void> _loadData() async {
-    await _controller.loadData(); // استدعاء دالة تحميل البيانات
-    setState(() {}); // إعادة بناء الواجهة بعد تحميل البيانات
+    await _controller.loadData();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width >
-        600; // تحديد إذا كان العرض على سطح مكتب
-    final cardPadding = isDesktop ? 70.0 : 10.0; // تحديد الحشو حسب نوع الشاشة
-    final chartHeight = isDesktop ? 250.0 : 250.0; // تحديد ارتفاع الرسم البياني
+    final mediaQuery = MediaQuery.of(context);
+    final isDesktop = mediaQuery.size.width > 600;
+    final isLargeScreen = mediaQuery.size.width > 1200;
+
+    // تحديد الهوامش والحشوات حسب حجم الشاشة
+    final horizontalPadding = isLargeScreen
+        ? 120.0
+        : isDesktop
+            ? 80.0
+            : 20.0;
+    final verticalPadding = isDesktop ? 40.0 : 20.0;
+    final cardPadding = isDesktop ? 24.0 : 16.0;
+    final chartHeight = isDesktop ? 300.0 : 250.0;
+    final sectionSpacing = isDesktop ? 80.0 : 60.0;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'لوحة التحكم',
+          'لوحة الاحصائيات',
           style: TextStyle(
-            fontSize: isDesktop ? 16 : 14,
+            fontSize: isDesktop ? 18 : 16,
             fontFamily: mainFont,
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -52,11 +59,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
         actions: [
-          // زر لتحديث البيانات
           IconButton(
             icon: Icon(Icons.refresh, color: Colors.white),
             onPressed: () async {
-              await _loadData(); // تحميل البيانات عند الضغط
+              await _loadData();
               setState(() {});
             },
             tooltip: 'تحديث البيانات',
@@ -64,41 +70,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: _controller.isLoading
-          ? Center(
-              child:
-                  CircularProgressIndicator(color: primaryColor)) // مؤشر تحميل
+          ? Center(child: CircularProgressIndicator(color: primaryColor))
           : _controller.errorMessage.isNotEmpty
-              ? Center(
-                  child:
-                      Text(_controller.errorMessage)) // عرض رسالة خطأ إذا وجدت
+              ? Center(child: Text(_controller.errorMessage))
               : SingleChildScrollView(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding,
+                  ),
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.end, // محاذاة العناصر من اليمين
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      // عرض تاريخ آخر تحديث إذا كان متاحاً
                       if (_controller.lastUpdated != null)
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 25.0),
+                          padding:
+                              EdgeInsets.only(bottom: isDesktop ? 30.0 : 25.0),
                           child: Text(
                             'آخر تحديث: ${DateFormat('yyyy-MM-dd HH:mm').format(_controller.lastUpdated!)}',
                             style: TextStyle(
-                              fontSize: isDesktop ? 14 : 12,
+                              fontSize: isDesktop ? 15 : 13,
                               color: Colors.grey,
                               fontFamily: mainFont,
                             ),
                             textDirection: textDirectionRTL,
                           ),
                         ),
-                      // شبكة لعرض بطاقات الإحصائيات
+                      SizedBox(height: isDesktop ? 40 : 20),
                       GridView.count(
-                        crossAxisCount: isDesktop ? 6 : 2,
+                        crossAxisCount: isDesktop ? 4 : 2,
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(), // منع التمرير
-                        childAspectRatio: isDesktop ? 1.9 : 1.3,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 10,
+                        physics: NeverScrollableScrollPhysics(),
+                        childAspectRatio: isDesktop ? 2.0 : 1.3,
+                        crossAxisSpacing: isDesktop ? 20 : 14,
+                        mainAxisSpacing: isDesktop ? 20 : 10,
                         padding: EdgeInsets.zero,
                         children: [
                           StatCard(
@@ -123,87 +127,83 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               const Color.fromARGB(255, 244, 177, 7)),
                         ],
                       ),
-                      SizedBox(height: 60),
+                      SizedBox(height: sectionSpacing),
                       Text(
                         'أكثر التصنيفات زيارة',
                         style: TextStyle(
-                          fontSize: isDesktop ? 18 : 15,
+                          fontSize: isDesktop ? 20 : 16,
                           fontWeight: FontWeight.bold,
                           fontFamily: mainFont,
                           color: primaryColor,
                         ),
-                        textDirection: textDirectionRTL, // تحديد الاتجاه
+                        textDirection: textDirectionRTL,
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: isDesktop ? 20 : 12),
                       Card(
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16)),
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(cardPadding),
                           child: SizedBox(
                               height: chartHeight,
-                              child: MostVisitedChart(context,
-                                  _controller)), // رسم بياني لأكثر التصنيفات زيارة
+                              child: MostVisitedChart(context, _controller)),
                         ),
                       ),
-                      SizedBox(height: 60),
+                      SizedBox(height: sectionSpacing),
                       Text(
                         'تحليل الطلبات المستلمة (أسبوعي)',
                         style: TextStyle(
-                          fontSize: isDesktop ? 18 : 15,
+                          fontSize: isDesktop ? 20 : 16,
                           fontWeight: FontWeight.bold,
                           fontFamily: mainFont,
                           color: primaryColor,
                         ),
-                        textDirection: textDirectionRTL, // تحديد الاتجاه
+                        textDirection: textDirectionRTL,
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: isDesktop ? 20 : 12),
                       Card(
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16)),
                         child: Padding(
-                          padding: const EdgeInsets.all(12.0),
+                          padding: EdgeInsets.all(cardPadding),
                           child: SizedBox(
                             height: chartHeight,
-                            child: WeeklyChart(_controller
-                                .weeklyData), // رسم بياني للطلبات الأسبوعية
+                            child: WeeklyChart(_controller.weeklyData),
                           ),
                         ),
                       ),
-                      SizedBox(height: 60),
+                      SizedBox(height: sectionSpacing),
                       Text(
                         'نسبة الطلبات لكل تصنيف',
                         style: TextStyle(
-                          fontSize: isDesktop ? 18 : 15,
+                          fontSize: isDesktop ? 20 : 16,
                           fontWeight: FontWeight.bold,
                           fontFamily: mainFont,
                           color: primaryColor,
                         ),
-                        textDirection: textDirectionRTL, // تحديد الاتجاه
+                        textDirection: textDirectionRTL,
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: isDesktop ? 20 : 12),
                       Card(
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16)),
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(cardPadding),
                           child: Column(
                             children: [
                               SizedBox(
                                   height: chartHeight,
-                                  child: PieChartWidget(
-                                      _controller)), // رسم بياني دائري
-                              SizedBox(height: 16),
-                              PieChartLegend(context,
-                                  _controller), // وسيلة إيضاح لرسم المخطط الدائري
+                                  child: PieChartWidget(_controller)),
+                              SizedBox(height: isDesktop ? 20 : 16),
+                              PieChartLegend(context, _controller),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(height: 25),
+                      SizedBox(height: isDesktop ? 40 : 25),
                     ],
                   ),
                 ),
