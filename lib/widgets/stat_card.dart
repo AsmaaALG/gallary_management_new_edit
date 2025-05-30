@@ -25,27 +25,16 @@ class StatCard extends StatelessWidget {
           vertical: isDesktop ? 15.0 : 16.0, // padding رأسي حسب نوع الجهاز
         ),
         child: Column(
-<<<<<<< HEAD
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-=======
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
->>>>>>> 3154b310d3fa08530398d206f695ca211a4d9475
               children: [
                 Flexible(
                   child: Text(
                     title,
                     style: TextStyle(
-<<<<<<< HEAD
                       fontSize: isDesktop ? 18 : 13,
-=======
-                      fontSize: isDesktop ? 18 : 16,
->>>>>>> 3154b310d3fa08530398d206f695ca211a4d9475
                       color: primaryColor,
                       fontFamily: mainFont,
                     ),
