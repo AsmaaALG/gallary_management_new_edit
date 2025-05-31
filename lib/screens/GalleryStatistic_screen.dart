@@ -247,367 +247,372 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
     final isDesktop = MediaQuery.of(context).size.width > 600;
     final chartHeight = isDesktop ? 250.0 : 200.0;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'إحصائيات المعرض',
-          style: TextStyle(
-            fontSize: isDesktop ? 16 : 14,
-            fontFamily: mainFont,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+    return Directionality(
+      textDirection: TextDirection.rtl, // هذا السطر هو الأهم لتطبيق RTL
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'إحصائيات المعرض',
+            style: TextStyle(
+              fontSize: isDesktop ? 16 : 14,
+              fontFamily: mainFont,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: primaryColor,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.white),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.refresh, color: Colors.white),
+              onPressed: _loadGalleryStatistics,
+              tooltip: 'تحديث البيانات',
+            ),
+          ],
         ),
-        backgroundColor: primaryColor,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white),
-            onPressed: _loadGalleryStatistics,
-            tooltip: 'تحديث البيانات',
-          ),
-        ],
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator(color: primaryColor))
-          : errorMessage.isNotEmpty
-              ? Center(child: Text(errorMessage))
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isWide = constraints.maxWidth >= 800;
-                    return SingleChildScrollView(
-                      padding: EdgeInsets.all(20),
-                      child: Wrap(
-                        spacing: 20,
-                        runSpacing: 20,
-                        children: [
-                          Container(
-                            width: isWide
-                                ? constraints.maxWidth / 2 - 30
-                                : double.infinity,
-                            child: GridView.count(
-                              crossAxisCount: 2,
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              childAspectRatio: isWide ? 1.9 : 1.3,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 10,
-                              padding: EdgeInsets.zero,
-                              children: [
-                                StatCard('عدد الأجنحة', totalSuites,
-                                    Icons.room_preferences, Colors.amber),
-                                StatCard('عدد الزيارات', totalVisits,
-                                    Icons.people, Colors.amber),
-                                StatCard('عدد الشركاء', totalFavorites,
-                                    Icons.diversity_3, Colors.amber),
-                                StatCard('عدد المقيمين', totalReviews,
-                                    Icons.star, Colors.amber),
-                              ],
+        body: isLoading
+            ? Center(child: CircularProgressIndicator(color: primaryColor))
+            : errorMessage.isNotEmpty
+                ? Center(child: Text(errorMessage))
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 800;
+                      return SingleChildScrollView(
+                        padding: EdgeInsets.all(20),
+                        child: Wrap(
+                          spacing: 20,
+                          runSpacing: 20,
+                          children: [
+                            Container(
+                              width: isWide
+                                  ? constraints.maxWidth / 2 - 30
+                                  : double.infinity,
+                              child: GridView.count(
+                                crossAxisCount: 2,
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                childAspectRatio: isWide ? 1.9 : 1.3,
+                                crossAxisSpacing: 14,
+                                mainAxisSpacing: 10,
+                                padding: EdgeInsets.zero,
+                                children: [
+                                  StatCard('عدد الأجنحة', totalSuites,
+                                      Icons.room_preferences, Colors.amber),
+                                  StatCard('عدد الزيارات', totalVisits,
+                                      Icons.people, Colors.amber),
+                                  StatCard('عدد الشركاء', totalFavorites,
+                                      Icons.diversity_3, Colors.amber),
+                                  StatCard('عدد المقيمين', totalReviews,
+                                      Icons.star, Colors.amber),
+                                ],
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: isWide
-                                ? constraints.maxWidth / 2 - 30
-                                : double.infinity,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'نسبة نجاح المعرض',
-                                  style: TextStyle(
-                                    fontSize: isDesktop ? 18 : 15,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: mainFont,
-                                    color: primaryColor,
+                            Container(
+                              width: isWide
+                                  ? constraints.maxWidth / 2 - 30
+                                  : double.infinity,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'نسبة نجاح المعرض',
+                                    style: TextStyle(
+                                      fontSize: isDesktop ? 18 : 15,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: mainFont,
+                                      color: primaryColor,
+                                    ),
                                   ),
-                                  textDirection: TextDirection.rtl,
-                                ),
-                                SizedBox(height: 20),
-                                Container(
-                                  height: 250,
-                                  child: SfRadialGauge(
-                                    axes: <RadialAxis>[
-                                      RadialAxis(
-                                        minimum: 0,
-                                        maximum: 100,
-                                        showLabels: false,
-                                        showTicks: false,
-                                        startAngle: 180,
-                                        endAngle: 0,
-                                        radiusFactor: 0.8,
-                                        axisLineStyle: AxisLineStyle(
-                                          thickness: 0.2,
-                                          color: Colors.grey.shade300,
-                                          thicknessUnit: GaugeSizeUnit.factor,
-                                        ),
-                                        pointers: <GaugePointer>[
-                                          RangePointer(
-                                            value: successRate,
-                                            width: 0.2,
-                                            color: const Color.fromARGB(
-                                                255, 171, 15, 4),
-                                            cornerStyle: CornerStyle.bothCurve,
-                                            sizeUnit: GaugeSizeUnit.factor,
+                                  SizedBox(height: 20),
+                                  Container(
+                                    height: 250,
+                                    child: SfRadialGauge(
+                                      axes: <RadialAxis>[
+                                        RadialAxis(
+                                          minimum: 0,
+                                          maximum: 100,
+                                          showLabels: false,
+                                          showTicks: false,
+                                          startAngle: 180,
+                                          endAngle: 0,
+                                          radiusFactor: 0.8,
+                                          axisLineStyle: AxisLineStyle(
+                                            thickness: 0.2,
+                                            color: Colors.grey.shade300,
+                                            thicknessUnit: GaugeSizeUnit.factor,
                                           ),
-                                        ],
-                                        annotations: <GaugeAnnotation>[
-                                          GaugeAnnotation(
-                                            angle: 10,
-                                            positionFactor: 0.0,
-                                            widget: Text(
-                                              '${successRate.toStringAsFixed(0)}%',
-                                              style: TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.bold,
-                                                color: primaryColor,
-                                              ),
+                                          pointers: <GaugePointer>[
+                                            RangePointer(
+                                              value: successRate,
+                                              width: 0.2,
+                                              color: const Color.fromARGB(
+                                                  255, 171, 15, 4),
+                                              cornerStyle:
+                                                  CornerStyle.bothCurve,
+                                              sizeUnit: GaugeSizeUnit.factor,
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: isWide
-                                ? constraints.maxWidth / 2 - 30
-                                : double.infinity,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'إحصائيات طلبات الحجز',
-                                  style: TextStyle(
-                                    fontSize: isDesktop ? 18 : 15,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: mainFont,
-                                    color: primaryColor,
-                                  ),
-                                  textDirection: TextDirection.rtl,
-                                ),
-                                SizedBox(height: 20),
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                        255, 255, 255, 255),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const SizedBox(height: 16),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Column(
-                                            children: [
-                                              Text(
-                                                'غير مقبولة',
+                                          ],
+                                          annotations: <GaugeAnnotation>[
+                                            GaugeAnnotation(
+                                              angle: 10,
+                                              positionFactor: 0.0,
+                                              widget: Text(
+                                                '${successRate.toStringAsFixed(0)}%',
                                                 style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontFamily: mainFont,
-                                                  color: Colors.grey[700],
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                '${rejectedBookingPercentage.toStringAsFixed(0)}%',
-                                                style: const TextStyle(
                                                   fontSize: 24,
-                                                  fontFamily: mainFont,
                                                   fontWeight: FontWeight.bold,
                                                   color: primaryColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              Text(
-                                                'مقبولة',
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontFamily: mainFont,
-                                                  color: Colors.grey[700],
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                '${acceptedBookingPercentage.toStringAsFixed(0)}%',
-                                                style: const TextStyle(
-                                                  fontSize: 24,
-                                                  fontFamily: mainFont,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.green,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 16),
-                                      SizedBox(
-                                        height: 20,
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              flex: rejectedBookingPercentage
-                                                  .round(),
-                                              child: Container(
-                                                decoration: const BoxDecoration(
-                                                  color: Color.fromRGBO(
-                                                      224, 224, 224, 1),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: acceptedBookingPercentage
-                                                  .round(),
-                                              child: Container(
-                                                decoration: const BoxDecoration(
-                                                  color: Colors.green,
                                                 ),
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: isWide
-                                ? constraints.maxWidth / 2 - 30
-                                : double.infinity,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'توزيع التقييمات',
-                                  style: TextStyle(
-                                    fontSize: isDesktop ? 18 : 15,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: mainFont,
-                                    color: primaryColor,
+                            Container(
+                              width: isWide
+                                  ? constraints.maxWidth / 2 - 30
+                                  : double.infinity,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'إحصائيات طلبات الحجز',
+                                    style: TextStyle(
+                                      fontSize: isDesktop ? 18 : 15,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: mainFont,
+                                      color: primaryColor,
+                                    ),
                                   ),
-                                  textDirection: TextDirection.rtl,
-                                ),
-                                SizedBox(height: 20),
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Column(
-                                        children: [
-                                          Text(
-                                            averageRating.toStringAsFixed(1),
-                                            style: TextStyle(
-                                              fontSize: 48,
-                                              fontWeight: FontWeight.bold,
-                                              color: primaryColor,
-                                            ),
-                                          ),
-                                          SizedBox(height: 2),
-                                          Text(
-                                            'متوسط\nالتقييمات',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontFamily: mainFont,
-                                              color: primaryColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(width: 20),
-                                      Expanded(
-                                        child: Column(
-                                          children: List.generate(5, (index) {
-                                            final star = 5 - index;
-                                            final count =
-                                                starRatings[star] ?? 0;
-                                            final total = starRatings.values
-                                                .fold(0, (a, b) => a + b);
-                                            final percent =
-                                                total > 0 ? count / total : 0.0;
-
-                                            return Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 3),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    star.toString(),
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16,
-                                                      fontFamily: mainFont,
-                                                      color: primaryColor,
-                                                    ),
+                                  SizedBox(height: 20),
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(
+                                          255, 255, 255, 255),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const SizedBox(height: 16),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  'غير مقبولة',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontFamily: mainFont,
+                                                    color: Colors.grey[700],
                                                   ),
-                                                  SizedBox(width: 6),
-                                                  Expanded(
-                                                    child: Stack(
-                                                      children: [
-                                                        Container(
-                                                          height: 12,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors
-                                                                .grey.shade300,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8),
-                                                          ),
-                                                        ),
-                                                        FractionallySizedBox(
-                                                          widthFactor: percent,
-                                                          child: Container(
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  '${rejectedBookingPercentage.toStringAsFixed(0)}%',
+                                                  style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontFamily: mainFont,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: primaryColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  'مقبولة',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontFamily: mainFont,
+                                                    color: Colors.grey[700],
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  '${acceptedBookingPercentage.toStringAsFixed(0)}%',
+                                                  style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontFamily: mainFont,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        SizedBox(
+                                          height: 20,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                flex: rejectedBookingPercentage
+                                                    .round(),
+                                                child: Container(
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color: Color.fromRGBO(
+                                                        224, 224, 224, 1),
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: acceptedBookingPercentage
+                                                    .round(),
+                                                child: Container(
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: isWide
+                                  ? constraints.maxWidth / 2 - 30
+                                  : double.infinity,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'توزيع التقييمات',
+                                    style: TextStyle(
+                                      fontSize: isDesktop ? 18 : 15,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: mainFont,
+                                      color: primaryColor,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
+                                          children: [
+                                            Text(
+                                              averageRating.toStringAsFixed(1),
+                                              style: TextStyle(
+                                                fontSize: 48,
+                                                fontWeight: FontWeight.bold,
+                                                color: primaryColor,
+                                              ),
+                                            ),
+                                            SizedBox(height: 2),
+                                            Text(
+                                              'متوسط\nالتقييمات',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: mainFont,
+                                                color: primaryColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(width: 20),
+                                        Expanded(
+                                          child: Column(
+                                            children: List.generate(5, (index) {
+                                              final star = 5 - index;
+                                              final count =
+                                                  starRatings[star] ?? 0;
+                                              final total = starRatings.values
+                                                  .fold(0, (a, b) => a + b);
+                                              final percent = total > 0
+                                                  ? count / total
+                                                  : 0.0;
+
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 3),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      star.toString(),
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                        fontFamily: mainFont,
+                                                        color: primaryColor,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 6),
+                                                    Expanded(
+                                                      child: Stack(
+                                                        children: [
+                                                          Container(
                                                             height: 12,
                                                             decoration:
                                                                 BoxDecoration(
-                                                              color:
-                                                                  Colors.amber,
+                                                              color: Colors.grey
+                                                                  .shade300,
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
                                                                           8),
                                                             ),
                                                           ),
-                                                        ),
-                                                      ],
+                                                          FractionallySizedBox(
+                                                            widthFactor:
+                                                                percent,
+                                                            child: Container(
+                                                              height: 12,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .amber,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }),
+                                                  ],
+                                                ),
+                                              );
+                                            }),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+      ),
     );
   }
 }

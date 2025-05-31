@@ -2,18 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // <-- لإيقاف التدوير
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/control_panal.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding
-      .ensureInitialized(); // المستخدم في Flutter يتم تهيئتها قبل بدء التطبيق، وهو أمر ضروري قبل استخدام أي خدمات غير متزامنة مثل Firebase.
-  await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
+  WidgetsFlutterBinding.ensureInitialized(); // تهيئة قبل تشغيل Firebase
 
-  ); //تهيئة
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // تهيئة Firebase
+
+  // قفل الشاشة على الوضع العمودي فقط
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(MyApp());
 }
 
@@ -26,11 +33,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
-          useMaterial3: true,
-        ),
-        home: _auth.currentUser != null ? ControlPanel() : SignInScreen());
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
+        useMaterial3: true,
+      ),
+      home: _auth.currentUser != null ? ControlPanel() : SignInScreen(),
+    );
   }
 }

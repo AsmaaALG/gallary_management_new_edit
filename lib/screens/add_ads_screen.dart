@@ -63,6 +63,55 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
     }
   }
 
+  Future<void> _deleteClassification(String classificationId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('تأكيد الحذف'),
+            content: const Text('هل أنت متأكد أنك تريد حذف هذا التصنيف؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('إلغاء'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('حذف', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('classification')
+            .doc(classificationId)
+            .delete();
+
+        setState(() {
+          _classifications.removeWhere((c) => c.id == classificationId);
+          if (_selectedClassification?.id == classificationId) {
+            _selectedClassification = null;
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم حذف التصنيف بنجاح')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في حذف التصنيف: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -386,9 +435,9 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        // استخدم Expanded لجعل القائمة تأخذ المساحة المتاحة
                         child: DropdownButtonFormField<Classification>(
                           value: _selectedClassification,
+                          isExpanded: true, // هذه السطر مهم لحل مشكلة العرض
                           decoration: InputDecoration(
                             labelText: 'التصنيف',
                             border: OutlineInputBorder(
@@ -407,10 +456,35 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
                               .map((Classification classification) {
                             return DropdownMenuItem<Classification>(
                               value: classification,
-                              child: Align(
-                                alignment: Alignment
-                                    .centerRight, // محاذاة النص إلى اليمين
-                                child: Text(classification.name),
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // أيقونة الحذف على اليسار
+                                    IconButton(
+                                      icon: const Icon(Icons.close, size: 18),
+                                      onPressed: () => _deleteClassification(
+                                          classification.id),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                    // النص على اليمين
+                                    Expanded(
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: Text(
+                                          classification.name,
+                                          textAlign: TextAlign.end,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           }).toList(),
@@ -421,8 +495,7 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(
-                          width: 10), // إضافة مسافة بين القائمة والزِر
+                      const SizedBox(width: 10),
                       ElevatedButton(
                         onPressed: _addNewClassification,
                         child: const Text('+'),

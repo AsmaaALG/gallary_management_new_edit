@@ -33,7 +33,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchClassifications(); // جلب التصنيفات عند بدء الشاشة
+    _fetchClassifications();
   }
 
   @override
@@ -50,19 +50,71 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
 
   Future<void> _fetchClassifications() async {
     try {
-      List<Map<String, dynamic>> classificationsData =
-          await _firestoreService.getAllData('classification');
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('classification').get();
+
       setState(() {
-        _classifications = classificationsData.map((data) {
+        _classifications = querySnapshot.docs.map((doc) {
           return Classification(
-            id: data['documentId'], // تعيين المعرف
-            name: data['name'], // تعيين الاسم
+            id: doc.id,
+            name: doc['name'],
           );
         }).toList();
-        print('التصنيفات: $_classifications');
       });
     } catch (e) {
       print('حدث خطأ أثناء جلب التصنيفات: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('حدث خطأ أثناء جلب التصنيفات: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _deleteClassification(String classificationId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('تأكيد الحذف'),
+            content: const Text('هل أنت متأكد أنك تريد حذف هذا التصنيف؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('إلغاء'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('حذف', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('classification')
+            .doc(classificationId)
+            .delete();
+
+        setState(() {
+          _classifications.removeWhere((c) => c.id == classificationId);
+          if (_selectedClassification?.id == classificationId) {
+            _selectedClassification = null;
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم حذف التصنيف بنجاح')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل في حذف التصنيف: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -81,7 +133,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
     try {
       final classificationRef = FirebaseFirestore.instance
           .collection('classification')
-          .doc(_selectedClassification!.id); // استخدام المعرف
+          .doc(_selectedClassification!.id);
 
       DocumentSnapshot classificationDoc = await classificationRef.get();
 
@@ -97,9 +149,8 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
         'description': _descriptionController.text,
         'location': _locationController.text,
         'image url': _imageUrlController.text,
-        'phone': _phoneController.text,
         'map': _mapController.text,
-        'classification id': classificationRef, // تخزين المرجع
+        'classification id': classificationRef,
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
         'qr code': _qrCodeController.text,
@@ -155,29 +206,20 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
 
     if (newClassification != null && newClassification.isNotEmpty) {
       try {
-        // إضافة التصنيف الجديد إلى Firestore
-        await FirebaseFirestore.instance
+        DocumentReference docRef = await FirebaseFirestore.instance
             .collection('classification')
             .add({'name': newClassification});
-        setState(() {
-          _classifications.add(Classification(
-              id: 'new_id', name: newClassification)); // استخدم معرفًا جديدًا
-        });
-        // إظهار رسالة نجاح
+
+        await _fetchClassifications();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تمت إضافة التصنيف بنجاح')),
         );
       } catch (e) {
-        // إظهار رسالة فشل
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('فشل في إضافة التصنيف: ${e.toString()}')),
         );
       }
-    } else {
-      // إظهار رسالة إذا كان التصنيف فارغًا
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال اسم التصنيف')),
-      );
     }
   }
 
@@ -308,16 +350,12 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-
-                  // حقل اسم المعرض
                   _buildTextField(
                     controller: _titleController,
                     label: 'اسم المعرض',
                     hint: 'أدخل اسم المعرض هنا',
                   ),
                   const SizedBox(height: 16),
-
-                  // حقل الوصف
                   _buildTextField(
                     controller: _descriptionController,
                     label: 'الوصف',
@@ -325,24 +363,12 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                     maxLines: 3,
                   ),
                   const SizedBox(height: 16),
-
-                  // حقل الموقع
                   _buildTextField(
                     controller: _locationController,
                     label: 'الموقع',
                     hint: 'أدخل موقع المعرض هنا',
                   ),
                   const SizedBox(height: 16),
-
-                  // حقل الهاتف
-                  _buildTextField(
-                    controller: _phoneController,
-                    label: 'رقم الهاتف',
-                    hint: 'أدخل رقم الهاتف هنا',
-                  ),
-                  const SizedBox(height: 16),
-
-                  // حقل رابط الصورة
                   _buildTextField(
                     controller: _imageUrlController,
                     label: 'رابط صورة الغلاف',
@@ -355,22 +381,19 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                     hint: 'أدخل رابط الصورة هنا',
                   ),
                   const SizedBox(height: 16),
-
-                  // حقل رمز QR
                   _buildTextField(
                     controller: _qrCodeController,
                     label: 'رمز QR',
                     hint: 'أدخل رمز QR هنا',
                   ),
                   const SizedBox(height: 16),
-                  // قائمة التصنيفات
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        // استخدم Expanded لجعل القائمة تأخذ المساحة المتاحة
                         child: DropdownButtonFormField<Classification>(
                           value: _selectedClassification,
+                          isExpanded: true, // هذه السطر مهم لحل مشكلة العرض
                           decoration: InputDecoration(
                             labelText: 'التصنيف',
                             border: OutlineInputBorder(
@@ -389,10 +412,35 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                               .map((Classification classification) {
                             return DropdownMenuItem<Classification>(
                               value: classification,
-                              child: Align(
-                                alignment: Alignment
-                                    .centerRight, // محاذاة النص إلى اليمين
-                                child: Text(classification.name),
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                ),
+                                child: Row(
+                                  children: [
+                                    // أيقونة الحذف على اليسار
+                                    IconButton(
+                                      icon: const Icon(Icons.close, size: 18),
+                                      onPressed: () => _deleteClassification(
+                                          classification.id),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                    // النص على اليمين
+                                    Expanded(
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: Text(
+                                          classification.name,
+                                          textAlign: TextAlign.end,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           }).toList(),
@@ -403,8 +451,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(
-                          width: 10), // إضافة مسافة بين القائمة والزِر
+                      const SizedBox(width: 10),
                       ElevatedButton(
                         onPressed: _addNewClassification,
                         child: const Text('+'),
@@ -412,15 +459,12 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // حقول التواريخ
                   _buildDateField('تاريخ البدء', _startDate,
                       () => _selectDate(context, true)),
                   const SizedBox(height: 20),
                   _buildDateField('تاريخ الانتهاء', _endDate,
                       () => _selectDate(context, false)),
                   const SizedBox(height: 20),
-                  // زر الإضافة
                   Center(
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _addGallery,
