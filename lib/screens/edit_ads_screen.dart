@@ -5,6 +5,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:url_launcher/url_launcher.dart';
 
 class EditAdsScreen extends StatefulWidget {
   final String adId;
@@ -23,6 +24,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
   final TextEditingController _qrCodeController = TextEditingController();
+  final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
 
   String? _selectedClassification; // للتصنيف المختار
   List<Classification> _classifications = []; // قائمة التصنيفات
@@ -321,30 +323,62 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         const SizedBox(height: 16),
 
                         // حقل رابط الصورة
-                        TextFormField(
-                          controller: _imageUrlController,
-                          decoration: InputDecoration(
-                            labelText: 'رابط صورة الإعلان',
-                            hintText: 'أدخل رابط الصورة هنا',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: isWideScreen ? 3 : 2,
+                              child: TextFormField(
+                                controller: _imageUrlController,
+                                decoration: InputDecoration(
+                                  labelText: 'رابط صورة الإعلان',
+                                  hintText:
+                                      'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                    borderSide:
+                                        const BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                    borderSide: BorderSide(color: primaryColor),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'يرجى إدخال رابط الصورة';
+                                  }
+                                  return null;
+                                },
+                              ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(color: Colors.grey),
+                            Expanded(
+                              child: ElevatedButton(
+                                  onPressed: () async {
+                                    if (await canLaunchUrl(imgurUrl)) {
+                                      await launchUrl(imgurUrl,
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 15),
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      'افتح Imgur لرفع صورة',
+                                      style: TextStyle(
+                                          fontFamily: mainFont, fontSize: 10),
+                                    ),
+                                  ),
+                                  style: ButtonStyle()),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يرجى إدخال رابط الصورة';
-                            }
-                            return null;
-                          },
+                          ],
                         ),
+
                         const SizedBox(height: 16),
                         DropdownButtonFormField<Classification>(
                           value: _classifications.isNotEmpty
