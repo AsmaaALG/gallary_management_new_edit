@@ -31,7 +31,7 @@ class MainCard extends StatelessWidget {
         elevation: 4,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: 12.0, vertical: 8.0), // قللنا vertical
+              horizontal: 0.0, vertical: 8.0), // قللنا vertical
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             mainAxisSize: MainAxisSize.min,

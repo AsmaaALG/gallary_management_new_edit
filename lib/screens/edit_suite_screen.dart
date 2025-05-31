@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/suite_images_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EditSuiteScreen extends StatefulWidget {
   final String suiteId; // معرف الجناح المُراد تعديله
@@ -154,6 +155,29 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
                           maxLines: 5),
                       const SizedBox(height: 15),
                       buildLabeledField('رابط صورة الجناح', _imageController),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                          onPressed: () async {
+                            if (await canLaunchUrl(imgurUrl)) {
+                              await launchUrl(imgurUrl,
+                                  mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                'افتح Imgur لرفع صورة',
+                                style: TextStyle(
+                                    fontFamily: mainFont, fontSize: 10),
+                              ),
+                            ),
+                          )),
+
                       const SizedBox(height: 40),
 
                       // زر تعديل البيانات

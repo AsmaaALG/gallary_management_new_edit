@@ -4,6 +4,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/main_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PartnerManagementScreen extends StatefulWidget {
   final String galleryId;
@@ -42,6 +43,29 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                 _field(nameCtl, 'اسم الشريك'),
                 const SizedBox(height: 10),
                 _field(imageCtl, 'رابط الصورة'),
+                SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                    onPressed: () async {
+                      if (await canLaunchUrl(imgurUrl)) {
+                        await launchUrl(imgurUrl,
+                            mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          'افتح Imgur لرفع صورة',
+                          style: TextStyle(fontFamily: mainFont, fontSize: 10),
+                        ),
+                      ),
+                    )),
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SuiteImageScreen extends StatefulWidget {
   final String suiteId;
@@ -19,6 +20,7 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
+        elevation: 90,
         backgroundColor: const Color.fromARGB(255, 250, 230, 230),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Directionality(
@@ -28,23 +30,51 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
         ),
         content: Directionality(
           textDirection: TextDirection.rtl,
-          child: TextField(
-            controller: _newImageController,
-            decoration: InputDecoration(
-              hintText: 'رابط الصورة',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25),
-                borderSide: BorderSide(
-                    color: Color.fromARGB(255, 228, 182, 199), width: 1.5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _newImageController,
+                decoration: InputDecoration(
+                  hintText: 'رابط الصورة',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide(
+                        color: Color.fromARGB(255, 228, 182, 199), width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide(
+                        color: Color.fromARGB(255, 244, 210, 221), width: 2),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25),
-                borderSide: BorderSide(
-                    color: Color.fromARGB(255, 244, 210, 221), width: 2),
+              SizedBox(
+                height: 10,
               ),
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            ),
+              ElevatedButton(
+                  onPressed: () async {
+                    if (await canLaunchUrl(imgurUrl)) {
+                      await launchUrl(imgurUrl,
+                          mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        'افتح Imgur لرفع صورة',
+                        style: TextStyle(fontFamily: mainFont, fontSize: 10),
+                      ),
+                    ),
+                  )),
+            ],
           ),
         ),
         actions: [
@@ -210,10 +240,7 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final data = images[index];
-                        // String driveUrl =
-                        //     'drive.google.com/uc?export=view&id=1SDLxVAeYuF4P7V6pfDOpGjWQSMU-OysZ';
-                        // String proxyUrl =
-                        //     'https://images.weserv.nl/?url=$driveUrl';
+
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Stack(

@@ -4,6 +4,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:url_launcher/url_launcher.dart';
 
 class EditGalleryScreen extends StatefulWidget {
   final String galleryId;
@@ -219,6 +220,75 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         const SizedBox(height: 16),
                         _buildTextField(_imageUrlController,
                             'رابط صورة غلاف المعرض', 'يرجى إدخال رابط الصورة'),
+                        const SizedBox(height: 16),
+                        isWideScreen
+                            ? Row(
+                                children: [
+                                  Expanded(
+                                    flex: isWideScreen ? 3 : 2,
+                                    child: _buildTextField(
+                                        _imageUrlController,
+                                        'رابط صورة غلاف المعرض',
+                                        'يرجى إدخال رابط الصورة'),
+                                  ),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                        onPressed: () async {
+                                          if (await canLaunchUrl(imgurUrl)) {
+                                            await launchUrl(imgurUrl,
+                                                mode: LaunchMode
+                                                    .externalApplication);
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 15),
+                                          child: Text(
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            'افتح Imgur لرفع صورة',
+                                            style: TextStyle(
+                                                fontFamily: mainFont,
+                                                fontSize: 10),
+                                          ),
+                                        )),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  _buildTextField(
+                                      _imageUrlController,
+                                      'رابط صورة غلاف المعرض',
+                                      'يرجى إدخال رابط الصورة'),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                      onPressed: () async {
+                                        if (await canLaunchUrl(imgurUrl)) {
+                                          await launchUrl(imgurUrl,
+                                              mode: LaunchMode
+                                                  .externalApplication);
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 15),
+                                        child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            'افتح Imgur لرفع صورة',
+                                            style: TextStyle(
+                                                fontFamily: mainFont,
+                                                fontSize: 10),
+                                          ),
+                                        ),
+                                      )),
+                                ],
+                              ),
                         const SizedBox(height: 16),
                         _buildTextField(_mapController,
                             'رابط صورة خارطة المعرض', 'يرجى إدخال رابط الصورة'),

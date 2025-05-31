@@ -4,6 +4,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:url_launcher/url_launcher.dart';
 
 class AddGalleryScreen extends StatefulWidget {
   const AddGalleryScreen({super.key});
@@ -369,11 +370,73 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                     hint: 'أدخل موقع المعرض هنا',
                   ),
                   const SizedBox(height: 16),
-                  _buildTextField(
+                  isWideScreen
+                      ? Row(
+                          children: [
+                            Expanded(
+                              flex: isWideScreen ? 3 : 2,
+                              child: _buildTextField(
+                                controller: _imageUrlController,
+                                label: 'رابط صورة الغلاف',
+                                hint: 'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
+                              ),
+                            ),
+                            Expanded(
+                              child: ElevatedButton(
+                                  onPressed: () async {
+                                    if (await canLaunchUrl(imgurUrl)) {
+                                      await launchUrl(imgurUrl,
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 15),
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      'افتح Imgur لرفع صورة',
+                                      style: TextStyle(
+                                          fontFamily: mainFont, fontSize: 10),
+                                    ),
+                                  )),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            _buildTextField(
                     controller: _imageUrlController,
                     label: 'رابط صورة الغلاف',
-                    hint: 'أدخل رابط الصورة هنا',
+                    hint: 'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
                   ),
+                            
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  if (await canLaunchUrl(imgurUrl)) {
+                                    await launchUrl(imgurUrl,
+                                        mode: LaunchMode.externalApplication);
+                                  }
+                                },
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 15),
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      'افتح Imgur لرفع صورة',
+                                      style: TextStyle(
+                                          fontFamily: mainFont, fontSize: 10),
+                                    ),
+                                  ),
+                                )),
+                          ],
+                        ),
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _mapController,

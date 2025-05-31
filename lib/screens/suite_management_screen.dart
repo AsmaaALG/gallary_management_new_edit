@@ -5,6 +5,7 @@ import 'package:gallery_management/screens/main_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/screens/edit_suite_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SuiteManagementScreen extends StatefulWidget {
   final String galleryId;
@@ -69,6 +70,28 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                         child: Text('يرجى ملء هذا الحقل',
                             style: TextStyle(color: Colors.red, fontSize: 12)),
                       ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                        onPressed: () async {
+                          if (await canLaunchUrl(imgurUrl)) {
+                            await launchUrl(imgurUrl,
+                                mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              'افتح Imgur لرفع صورة',
+                              style:
+                                  TextStyle(fontFamily: mainFont, fontSize: 10),
+                            ),
+                          ),
+                        )),
                   ],
                 ),
               ),
@@ -154,9 +177,10 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
               },
               {
                 'icon': Icons.delete_rounded,
-'action': () => confirmDelete(context, () async {
+                'action': () => confirmDelete(context, () async {
                       await _fs.deleteSuiteAndImages(d.id);
-                    })              },
+                    })
+              },
             ],
           );
         }).toList();
