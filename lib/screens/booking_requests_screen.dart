@@ -423,7 +423,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 10),
                                       Text(
-                                          'الوصف: ${data['productType'] ?? '---'}',
+                                          'الوصف: ${data['description'] ?? '---'}',
                                           style: const TextStyle(
                                               fontSize: 14,
                                               fontFamily: mainFont)),
@@ -456,7 +456,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                                     BorderRadius.circular(20),
                                               ),
                                               child: const Text(
-                                                'تم قبول الطلب',
+                                                ' قبول الطلب',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontFamily: mainFont,

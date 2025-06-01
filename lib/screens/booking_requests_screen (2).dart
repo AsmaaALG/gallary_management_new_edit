@@ -473,7 +473,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                                     BorderRadius.circular(20),
                                               ),
                                               child: const Text(
-                                                'تم قبول الطلب',
+                                                ' قبول الطلب',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontFamily: mainFont,

@@ -64,14 +64,31 @@ class DashboardController {
       final now = DateTime.now();
       weeklyData.clear();
 
-      for (int i = 0; i < 4; i++) {
-        final weekStart = now.subtract(Duration(days: i * 7));
-        final weekCount = await _fetchCountForWeek(weekStart);
-        weeklyData.add(FlSpot(i.toDouble(), weekCount.toDouble()));
+      // نحدد بداية الأسبوع (السبت) – إذا كان اليوم الأحد (weekday == 7) نرجع يوم
+      final int daysFromSaturday = now.weekday % 7;
+      final weekStart = now.subtract(Duration(days: daysFromSaturday));
+
+      for (int i = 0; i < 7; i++) {
+        final day = weekStart.add(Duration(days: i));
+        final count = await _fetchCountForDay(day);
+        weeklyData.add(FlSpot(i.toDouble(), count.toDouble()));
       }
     } catch (e) {
-      debugPrint('خطأ في جلب البيانات الأسبوعية: $e');
+      debugPrint('خطأ في جلب البيانات اليومية: $e');
     }
+  }
+
+  Future<int> _fetchCountForDay(DateTime day) async {
+    final start = DateTime(day.year, day.month, day.day);
+    final end = start.add(Duration(days: 1));
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('space_form') // أو اسم المجموعة الخاصة بك
+        .where('timestamp', isGreaterThanOrEqualTo: start)
+        .where('timestamp', isLessThan: end)
+        .get();
+
+    return snapshot.docs.length;
   }
 
   Future<int> _fetchCountForWeek(DateTime weekStart) async {
@@ -195,10 +212,10 @@ class DashboardController {
           PieChartSectionData(
             color: categoryColors[colorIndex % categoryColors.length],
             value: percentage,
-            title: '${percentage.toStringAsFixed(1)}%',
+            title: '$category\n${percentage.toStringAsFixed(1)}%',
             radius: 60,
             titleStyle: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
