@@ -154,7 +154,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
         'classification id': classificationRef,
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
-        'qr code': _qrCodeController.text,
+        'QR code': _qrCodeController.text,
       };
 
       await _firestoreService.addData('2', galleryData);
@@ -378,7 +378,8 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                               child: _buildTextField(
                                 controller: _imageUrlController,
                                 label: 'رابط صورة الغلاف',
-                                hint: 'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
+                                hint:
+                                    'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
                               ),
                             ),
                             Expanded(
@@ -407,11 +408,11 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                       : Column(
                           children: [
                             _buildTextField(
-                    controller: _imageUrlController,
-                    label: 'رابط صورة الغلاف',
-                    hint: 'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
-                  ),
-                            
+                              controller: _imageUrlController,
+                              label: 'رابط صورة الغلاف',
+                              hint:
+                                  'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
+                            ),
                             const SizedBox(height: 16),
                             ElevatedButton(
                                 onPressed: () async {

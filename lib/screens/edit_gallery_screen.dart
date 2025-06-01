@@ -218,8 +218,8 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         _buildTextField(
                             _locationController, 'الموقع', 'يرجى إدخال الموقع'),
                         const SizedBox(height: 16),
-                        _buildTextField(_imageUrlController,
-                            'رابط صورة غلاف المعرض', 'يرجى إدخال رابط الصورة'),
+                        _buildTextField(
+                            _qrCodeController, 'رمز الQR', 'يرجى إدخال رمز QR'),
                         const SizedBox(height: 16),
                         isWideScreen
                             ? Row(

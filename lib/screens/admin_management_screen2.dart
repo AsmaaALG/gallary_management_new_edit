@@ -114,6 +114,8 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                       textAlign: TextAlign.right,
                       decoration:
                           const InputDecoration(labelText: 'البريد الإلكتروني'),
+                      readOnly: true,
+                      enabled: false,
                     ),
                     TextField(
                       controller: firstNameController,
@@ -192,7 +194,6 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                   onPressed: () {
                     _firestoreService.updateAdmin(
                       admin.id,
-                      emailController.text.trim(),
                       firstNameController.text.trim(),
                       lastNameController.text.trim(),
                       passwordController.text.trim(),

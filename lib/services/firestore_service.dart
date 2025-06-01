@@ -126,14 +126,12 @@ class FirestoreService {
 // تحديث مسؤول
   Future<void> updateAdmin(
     String adminId,
-    String email,
     String firstName,
     String lastName,
     String password,
     int state,
   ) async {
     await _db.collection('admin').doc(adminId).update({
-      'email': email,
       'first_name': firstName,
       'last_name': lastName,
       'password': password,
