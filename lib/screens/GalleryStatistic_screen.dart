@@ -32,6 +32,20 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
   double acceptedBookingPercentage = 0.0;
   double rejectedBookingPercentage = 0.0;
 
+  Future<bool> _isWingAlreadyBooked(String wingName, String galleryId) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('suite')
+          .where('name', isEqualTo: wingName)
+          .where('gallery id', isEqualTo: galleryId)
+          .get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking wing status: $e');
+      return false;
+    }
+  }
+
   Future<void> _loadBookingStatistics() async {
     try {
       final requests = await FirebaseFirestore.instance
@@ -39,12 +53,22 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
           .where('adId', isEqualTo: widget.galleryId)
           .get();
 
-      setState(() {
+      setState(() async {
         totalBookingRequests = requests.docs.length;
-        acceptedBookingRequests =
-            requests.docs.where((doc) => doc['status'] == 'accepted').length;
-        rejectedBookingRequests =
-            requests.docs.where((doc) => doc['status'] != 'accepted').length;
+        acceptedBookingRequests = 0;
+        rejectedBookingRequests = 0;
+
+        for (var doc in requests.docs) {
+          final wingName = doc['wingName'];
+          final isAlreadyBooked =
+              await _isWingAlreadyBooked(wingName, widget.galleryId);
+
+          if (isAlreadyBooked) {
+            rejectedBookingRequests++;
+          } else {
+            acceptedBookingRequests++;
+          }
+        }
 
         acceptedBookingPercentage = totalBookingRequests > 0
             ? (acceptedBookingRequests / totalBookingRequests * 100)
@@ -408,7 +432,7 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
                                             Column(
                                               children: [
                                                 Text(
-                                                  'غير مقبولة',
+                                                  ' مقبولة',
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                     fontFamily: mainFont,
@@ -422,7 +446,7 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
                                                     fontSize: 24,
                                                     fontFamily: mainFont,
                                                     fontWeight: FontWeight.bold,
-                                                    color: primaryColor,
+                                                    color: Colors.green,
                                                   ),
                                                 ),
                                               ],
@@ -430,7 +454,7 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
                                             Column(
                                               children: [
                                                 Text(
-                                                  'مقبولة',
+                                                  'غير مقبولة',
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                     fontFamily: mainFont,
@@ -444,7 +468,8 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
                                                     fontSize: 24,
                                                     fontFamily: mainFont,
                                                     fontWeight: FontWeight.bold,
-                                                    color: Colors.green,
+                                                    color: Color.fromARGB(
+                                                        255, 112, 112, 112),
                                                   ),
                                                 ),
                                               ],
@@ -462,9 +487,7 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
                                                 child: Container(
                                                   decoration:
                                                       const BoxDecoration(
-                                                    color: Color.fromRGBO(
-                                                        224, 224, 224, 1),
-                                                  ),
+                                                          color: Colors.green),
                                                 ),
                                               ),
                                               Expanded(
@@ -473,7 +496,8 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
                                                 child: Container(
                                                   decoration:
                                                       const BoxDecoration(
-                                                    color: Colors.green,
+                                                    color: Color.fromARGB(
+                                                        255, 212, 210, 210),
                                                   ),
                                                 ),
                                               ),

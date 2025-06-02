@@ -109,17 +109,39 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final DateTime now = DateTime.now();
+    final DateTime initial = isStartDate ? now : (_startDate ?? now);
+
+    final DateTime first =
+        isStartDate ? DateTime(2000) : (_startDate ?? DateTime(2000));
+    final DateTime last = DateTime(2100);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialDate: initial,
+      firstDate: first,
+      lastDate: last,
     );
 
     if (picked != null) {
+      if (!isStartDate && _startDate != null && picked.isBefore(_startDate!)) {
+        // عرض رسالة خطأ إذا كان تاريخ الانتهاء قبل تاريخ البداية
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       setState(() {
         if (isStartDate) {
           _startDate = picked;
+          // مسح تاريخ الانتهاء إذا أصبح غير صالح
+          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate = null;
+          }
         } else {
           _endDate = picked;
         }
@@ -128,14 +150,30 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   }
 
   Future<void> _selectStopDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime initial = _endDate ?? now;
+
+    final DateTime first = _endDate ?? DateTime(2000);
+    final DateTime last = DateTime(2100);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialDate: initial,
+      firstDate: first,
+      lastDate: last,
     );
 
     if (picked != null) {
+      if (_endDate != null && picked.isBefore(_endDate!)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تاريخ التوقف يجب أن يكون بعد تاريخ الانتهاء'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       setState(() {
         _stopDate = picked;
       });
@@ -156,6 +194,15 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       );
       return;
     }
+
+    // تحقق من رابط الصورة
+    if (!_isValidImageUrl(_imageUrlController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -198,6 +245,15 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+// دالة للتحقق من رابط الصورة
+  bool _isValidImageUrl(String url) {
+    final RegExp regex = RegExp(
+      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$', // تحقق من امتدادات الصور
+      caseSensitive: false,
+    );
+    return regex.hasMatch(url);
   }
 
   @override

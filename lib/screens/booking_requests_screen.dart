@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BookingRequestsScreen extends StatefulWidget {
   final String adId;
@@ -225,6 +226,62 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
     _requestsFuture = _firestoreService.getBookingRequestsForAd(widget.adId);
   }
 
+  Widget _buildImageWidget(String imageUrl) {
+    if (imageUrl.isEmpty || imageUrl == '---') {
+      return Container();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        const Text(
+          'صورة الجناح:',
+          style: TextStyle(
+            fontSize: 14,
+            fontFamily: mainFont,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 5),
+        GestureDetector(
+          onTap: () {
+            if (imageUrl.isNotEmpty && imageUrl != '---') {
+              launchUrl(Uri.parse(imageUrl),
+                  mode: LaunchMode.externalApplication);
+            }
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              image: DecorationImage(
+                image: NetworkImage(imageUrl),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 5),
+        TextButton(
+          onPressed: () {
+            if (imageUrl.isNotEmpty && imageUrl != '---') {
+              launchUrl(Uri.parse(imageUrl),
+                  mode: LaunchMode.externalApplication);
+            }
+          },
+          child: const Text(
+            'عرض الصورة في المتصفح',
+            style: TextStyle(
+              fontSize: 12,
+              fontFamily: mainFont,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
@@ -351,6 +408,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                           var data = filteredRequests[index];
                           String docId = data['docId'] ?? '';
                           String wingName = data['wingName'] ?? '';
+                          String wingImage = data['wingImage'] ?? '';
 
                           return FutureBuilder<bool>(
                             future: Future.wait([
@@ -404,7 +462,6 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontSize: 14,
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 10),
-                                      //  خط فاصل
                                       const Divider(
                                         color: Colors.grey,
                                         thickness: 1,
@@ -428,11 +485,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontSize: 14,
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 10),
-                                      Text(
-                                          'صورة الجناح: ${data['wingImage'] ?? '---'}',
-                                          style: const TextStyle(
-                                              fontSize: 14,
-                                              fontFamily: mainFont)),
+                                      _buildImageWidget(wingImage),
                                       const SizedBox(height: 10),
                                       Text(
                                           'العنوان: ${data['address'] ?? '---'}',

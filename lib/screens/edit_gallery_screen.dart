@@ -105,6 +105,14 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
       return;
     }
 
+    // تحقق من رابط الصورة
+    if (!_isValidImageUrl(_imageUrlController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       final classificationRef = FirebaseFirestore.instance
@@ -145,6 +153,15 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+// دالة للتحقق من رابط الصورة
+  bool _isValidImageUrl(String url) {
+    final RegExp regex = RegExp(
+      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$', // تحقق من امتدادات الصور
+      caseSensitive: false,
+    );
+    return regex.hasMatch(url);
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {

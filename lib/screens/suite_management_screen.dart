@@ -174,6 +174,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                     ),
                   );
                 },
+                'heroTag': 'edit_suite_${d.id}', // تاج فريد
               },
               {
                 'icon': Icons.delete_rounded,
