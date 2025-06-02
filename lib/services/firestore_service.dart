@@ -24,6 +24,7 @@ class FirestoreService {
     required String lastName,
     required String email,
     required String password,
+    required int state,
   }) async {
     try {
       // إنشاء المستخدم في Firebase Auth
@@ -40,11 +41,12 @@ class FirestoreService {
       final docRef =
           _firestore.collection('admin').doc(uid); // استخدام الـ UID كـ ID
       await docRef.set({
-        'id': uid, // حفظ الـ ID داخل بيانات المستخدم
+        'id': uid,
         'first_name': firstName,
         'last_name': lastName,
         'email': email,
-        'password': password
+        'password': password,
+        'state': state,
       });
       return true;
     } catch (e) {
@@ -52,7 +54,6 @@ class FirestoreService {
       return false;
     }
   }
-
 
 //////////////////////////////////////////////////////////////////////////
   ///ادارة الاعلانــــــــــــــات
@@ -74,7 +75,8 @@ class FirestoreService {
       return null;
     }
   }
-    Future<void> updateDocument(
+
+  Future<void> updateDocument(
       String collection, String docId, Map<String, dynamic> data) async {
     await FirebaseFirestore.instance
         .collection(collection)
@@ -87,41 +89,41 @@ class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
 // جلب المسؤولين
-  Stream<QuerySnapshot> getAdmins() {
-    return _db.collection('admin').snapshots();
-  }
+  // Stream<QuerySnapshot> getAdmins() {
+  //   return _db.collection('admin').snapshots();
+  // }
 
 // إضافة مسؤول
-  Future<void> addAdmin(
-      String email, String firstName, String lastName, String id) async {
-    await _db.collection('admin').add({
-      'email': email,
-      'first_name': firstName,
-      'last_name': lastName,
-    });
-  }
+  // Future<void> addAdmin(
+  //     String email, String firstName, String lastName, String id) async {
+  //   await _db.collection('admin').add({
+  //     'email': email,
+  //     'first_name': firstName,
+  //     'last_name': lastName,
+  //   });
+  // }
 
   // إضافة مسؤول جديد بمعرف يتم إنشاؤه تلقائيًا
-  Future<void> addAdminWithPasswordAndState(
-    String email,
-    String password,
-    String firstName,
-    String lastName,
-    int state,
-  ) async {
-    try {
-      await _firestore.collection('admin').add({
-        'email': email,
-        'password': password,
-        'first_name': firstName,
-        'last_name': lastName,
-        'state': state,
-      });
-    } catch (e) {
-      print('خطأ أثناء إضافة المسؤول: $e');
-      rethrow;
-    }
-  }
+  // Future<void> addAdminWithPasswordAndState(
+  //   String email,
+  //   String password,
+  //   String firstName,
+  //   String lastName,
+  //   int state,
+  // ) async {
+  //   try {
+  //     await _firestore.collection('admin').add({
+  //       'email': email,
+  //       'password': password,
+  //       'first_name': firstName,
+  //       'last_name': lastName,
+  //       'state': state,
+  //     });
+  //   } catch (e) {
+  //     print('خطأ أثناء إضافة المسؤول: $e');
+  //     rethrow;
+  //   }
+  // }
 
 // تحديث مسؤول
   Future<void> updateAdmin(
@@ -140,8 +142,18 @@ class FirestoreService {
   }
 
 // حذف مسؤول
+
   Future<void> deleteAdmin(String adminId) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    final adminDoc = await _db.collection('admin').doc(adminId).get();
+    final deletedEmail = adminDoc.data()?['email'];
+
     await _db.collection('admin').doc(adminId).delete();
+
+    if (currentUser != null && currentUser.email == deletedEmail) {
+      await FirebaseAuth.instance.signOut();
+    }
   }
 
 //////////////////////////////////////////
@@ -231,8 +243,6 @@ class FirestoreService {
             }
           });
 
-     
-
           doc.reference.delete(); // حذف الجناح
         }
       });
@@ -267,7 +277,6 @@ class FirestoreService {
       print('حدث خطأ أثناء حذف المعرض: $e');
     }
   }
-  
 
   Future<void> updateGallery(
       String galleryId, Map<String, dynamic> updatedData) async {

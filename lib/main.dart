@@ -24,9 +24,26 @@ void main() async {
   runApp(MyApp());
 }
 
+// class MyApp extends StatelessWidget {
+//   var db = FirebaseFirestore.instance;
+//   final _auth = FirebaseAuth.instance;
+
+//   MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
+//         useMaterial3: true,
+//       ),
+//       home: _auth.currentUser != null ? ControlPanel() : SignInScreen(),
+//     );
+//   }
+// }
 class MyApp extends StatelessWidget {
-  var db = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   MyApp({super.key});
 
@@ -38,7 +55,25 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
         useMaterial3: true,
       ),
-      home: _auth.currentUser != null ? ControlPanel() : SignInScreen(),
+      home: StreamBuilder<User?>(
+        stream: _auth.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // أثناء التحميل
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (snapshot.hasData) {
+            // المستخدم مسجّل دخول
+            return const ControlPanel();
+          } else {
+            // المستخدم مسجّل خروج
+            return SignInScreen();
+          }
+        },
+      ),
     );
   }
 }

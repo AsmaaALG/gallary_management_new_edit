@@ -89,6 +89,8 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
 
     bool obscurePassword = true;
 
+    final _formKey = GlobalKey<FormState>();
+
     await showDialog(
       context: context,
       builder: (ctx) => Directionality(
@@ -105,76 +107,100 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: emailController,
-                      textAlign: TextAlign.right,
-                      decoration:
-                          const InputDecoration(labelText: 'البريد الإلكتروني'),
-                      readOnly: true,
-                      enabled: false,
-                    ),
-                    TextField(
-                      controller: firstNameController,
-                      textAlign: TextAlign.right,
-                      decoration:
-                          const InputDecoration(labelText: 'الاسم الأول'),
-                    ),
-                    TextField(
-                      controller: lastNameController,
-                      textAlign: TextAlign.right,
-                      decoration:
-                          const InputDecoration(labelText: 'الاسم الأخير'),
-                    ),
-                    TextField(
-                      controller: passwordController,
-                      obscureText: obscurePassword,
-                      textAlign: TextAlign.right,
-                      decoration: InputDecoration(
-                        labelText: 'كلمة المرور',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              obscurePassword = !obscurePassword;
-                            });
-                          },
-                        ),
+              content: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: emailController,
+                        textAlign: TextAlign.right,
+                        decoration: const InputDecoration(
+                            labelText: 'البريد الإلكتروني'),
+                        readOnly: true,
+                        enabled: false,
                       ),
-                    ),
-                    DropdownButtonFormField<int>(
-                      value: stateValue,
-                      decoration: const InputDecoration(labelText: 'الصلاحيات'),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 1,
-                          child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text('صلاحيات كاملة')),
+                      TextFormField(
+                        controller: firstNameController,
+                        textAlign: TextAlign.right,
+                        decoration:
+                            const InputDecoration(labelText: 'الاسم الأول'),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'الرجاء إدخال الاسم الأول';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: lastNameController,
+                        textAlign: TextAlign.right,
+                        decoration:
+                            const InputDecoration(labelText: 'الاسم الأخير'),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'الرجاء إدخال الاسم الأخير';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: obscurePassword,
+                        textAlign: TextAlign.right,
+                        decoration: InputDecoration(
+                          labelText: 'كلمة المرور',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                obscurePassword = !obscurePassword;
+                              });
+                            },
+                          ),
                         ),
-                        DropdownMenuItem(
-                          value: 0,
-                          child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text('صلاحيات محدودة')),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            stateValue = value;
-                          });
-                        }
-                      },
-                    ),
-                  ],
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'الرجاء إدخال كلمة المرور';
+                          } else if (value.trim().length < 6) {
+                            return 'كلمة المرور يجب ألا تقل عن 6 خانات';
+                          }
+                          return null;
+                        },
+                      ),
+                      DropdownButtonFormField<int>(
+                        value: stateValue,
+                        decoration:
+                            const InputDecoration(labelText: 'الصلاحيات'),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 1,
+                            child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Text('صلاحيات كاملة')),
+                          ),
+                          DropdownMenuItem(
+                            value: 0,
+                            child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Text('صلاحيات محدودة')),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              stateValue = value;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -192,14 +218,22 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                 ),
                 TextButton(
                   onPressed: () {
-                    _firestoreService.updateAdmin(
-                      admin.id,
-                      firstNameController.text.trim(),
-                      lastNameController.text.trim(),
-                      passwordController.text.trim(),
-                      stateValue,
-                    );
-                    Navigator.pop(ctx);
+                    if (_formKey.currentState!.validate()) {
+                      _firestoreService.updateAdmin(
+                        admin.id,
+                        firstNameController.text.trim(),
+                        lastNameController.text.trim(),
+                        passwordController.text.trim(),
+                        stateValue,
+                      );
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('تم تحديث بيانات المسؤول بنجاح'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
                   },
                   child: const Text(
                     'تحديث',

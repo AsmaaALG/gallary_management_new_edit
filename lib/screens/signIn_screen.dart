@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/models/user_session.dart';
 import 'package:gallery_management/screens/control_panal.dart';
 import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/widgets/custom_text_field.dart';
@@ -50,6 +51,8 @@ class _SignInScreenState extends State<SignInScreen> {
       }
 
       if (isValid) {
+        UserSession.email = email;
+        UserSession.password = pass;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ControlPanel()),

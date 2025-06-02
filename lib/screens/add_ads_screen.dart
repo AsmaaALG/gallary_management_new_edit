@@ -90,6 +90,26 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
 
     if (confirmed == true) {
       try {
+        // التحقق مما إذا كان التصنيف مرتبطًا بأي معارض
+        final adsQuery = await FirebaseFirestore.instance
+            .collection('2')
+            .where('classification id',
+                isEqualTo: FirebaseFirestore.instance
+                    .collection('classification')
+                    .doc(classificationId))
+            .limit(1)
+            .get();
+
+        if (adsQuery.docs.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('لا يمكن حذف التصنيف لأنه مرتبط بمعارض'),
+              backgroundColor: Colors.grey,
+            ),
+          );
+          return;
+        }
+
         await FirebaseFirestore.instance
             .collection('classification')
             .doc(classificationId)
