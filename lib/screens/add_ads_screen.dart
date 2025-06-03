@@ -46,6 +46,8 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
     _fetchClassifications(); // جلب التصنيفات عند بدء الشاشة
   }
 
+///////////////////////////////////////////تصنيـــــــات
+  ///
   Future<void> _fetchClassifications() async {
     try {
       List<Map<String, dynamic>> classificationsData =
@@ -178,7 +180,7 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
     final DateTime now = DateTime.now();
     final DateTime initial = _endDate ?? now;
 
-    final DateTime first = _endDate ?? DateTime(2000);
+    final DateTime first = DateTime(2000);
     final DateTime last = DateTime(2100);
 
     final DateTime? picked = await showDatePicker(
@@ -189,16 +191,6 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
     );
 
     if (picked != null) {
-      if (_endDate != null && picked.isBefore(_endDate!)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تاريخ التوقف يجب أن يكون بعد تاريخ الانتهاء'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
       setState(() {
         _stopDate = picked;
       });

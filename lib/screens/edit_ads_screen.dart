@@ -153,7 +153,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     final DateTime now = DateTime.now();
     final DateTime initial = _endDate ?? now;
 
-    final DateTime first = _endDate ?? DateTime(2000);
+    final DateTime first = DateTime(2000);
     final DateTime last = DateTime(2100);
 
     final DateTime? picked = await showDatePicker(
@@ -164,16 +164,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     );
 
     if (picked != null) {
-      if (_endDate != null && picked.isBefore(_endDate!)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تاريخ التوقف يجب أن يكون بعد تاريخ الانتهاء'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
       setState(() {
         _stopDate = picked;
       });

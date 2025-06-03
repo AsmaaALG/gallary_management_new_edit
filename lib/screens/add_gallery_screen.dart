@@ -251,17 +251,39 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final DateTime now = DateTime.now();
+    final DateTime initial = isStartDate ? now : (_startDate ?? now);
+
+    final DateTime first =
+        isStartDate ? DateTime(2000) : (_startDate ?? DateTime(2000));
+    final DateTime last = DateTime(2100);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialDate: initial,
+      firstDate: first,
+      lastDate: last,
     );
 
     if (picked != null) {
+      if (!isStartDate && _startDate != null && picked.isBefore(_startDate!)) {
+        // عرض رسالة خطأ إذا كان تاريخ الانتهاء قبل تاريخ البداية
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       setState(() {
         if (isStartDate) {
           _startDate = picked;
+          // مسح تاريخ الانتهاء إذا أصبح غير صالح
+          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate = null;
+          }
         } else {
           _endDate = picked;
         }
