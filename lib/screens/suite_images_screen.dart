@@ -15,6 +15,14 @@ class SuiteImageScreen extends StatefulWidget {
 class _SuiteImageScreenState extends State<SuiteImageScreen> {
   final TextEditingController _newImageController = TextEditingController();
 
+  bool _isValidImageUrl(String url) {
+    final RegExp regex = RegExp(
+      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$', // تحقق من امتدادات الصور
+      caseSensitive: false,
+    );
+    return regex.hasMatch(url);
+  }
+
   // حوار إضافة صورة جديدة
   void _showAddImageDialog() {
     showDialog(
@@ -86,6 +94,12 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
           TextButton(
             onPressed: () async {
               final imageUrl = _newImageController.text.trim();
+              if (!_isValidImageUrl(imageUrl)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+                );
+                return;
+              }
               if (imageUrl.isEmpty) return;
 
               await FirebaseFirestore.instance.collection('suite image').add({
