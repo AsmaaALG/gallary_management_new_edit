@@ -252,13 +252,13 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         ),
                         const SizedBox(height: 30),
                         _buildTextField(_titleController, 'اسم المعرض',
-                            'يرجى إدخال اسم المعرض'),
+                            'يرجى إدخال اسم المعرض', true),
                         const SizedBox(height: 16),
-                        _buildTextField(
-                            _locationController, 'الموقع', 'يرجى إدخال الموقع'),
+                        _buildTextField(_locationController, 'الموقع',
+                            'يرجى إدخال الموقع', true),
                         const SizedBox(height: 16),
-                        _buildTextField(
-                            _qrCodeController, 'رمز الQR', 'يرجى إدخال رمز QR'),
+                        _buildTextField(_qrCodeController, 'رمز الQR',
+                            'يرجى إدخال رمز QR', false),
                         const SizedBox(height: 16),
                         isWideScreen
                             ? Row(
@@ -268,7 +268,8 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                                     child: _buildTextField(
                                         _imageUrlController,
                                         'رابط صورة غلاف المعرض',
-                                        'يرجى إدخال رابط الصورة'),
+                                        'يرجى إدخال رابط الصورة',
+                                        true),
                                   ),
                                   Expanded(
                                     child: ElevatedButton(
@@ -300,7 +301,8 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                                   _buildTextField(
                                       _imageUrlController,
                                       'رابط صورة غلاف المعرض',
-                                      'يرجى إدخال رابط الصورة'),
+                                      'يرجى إدخال رابط الصورة',
+                                      true),
                                   const SizedBox(height: 16),
                                   ElevatedButton(
                                       onPressed: () async {
@@ -329,8 +331,11 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                                 ],
                               ),
                         const SizedBox(height: 16),
-                        _buildTextField(_mapController,
-                            'رابط صورة خارطة المعرض', 'يرجى إدخال رابط الصورة'),
+                        _buildTextField(
+                            _mapController,
+                            'رابط صورة خارطة المعرض',
+                            'يرجى إدخال رابط الصورة',
+                            false),
 
                         const SizedBox(height: 16),
                         _buildDateField('تاريخ البدء', _startDate,
@@ -380,7 +385,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         const SizedBox(height: 16),
 
                         _buildTextField(_descriptionController, 'الوصف',
-                            'يرجى إدخال وصف المعرض',
+                            'يرجى إدخال وصف المعرض', true,
                             maxLines: 3),
                         const SizedBox(height: 30),
                         Center(
@@ -418,8 +423,8 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
     );
   }
 
-  Widget _buildTextField(
-      TextEditingController controller, String label, String errorMessage,
+  Widget _buildTextField(TextEditingController controller, String label,
+      String errorMessage, bool required,
       {int maxLines = 1}) {
     return TextFormField(
       controller: controller,
@@ -439,7 +444,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
       ),
       maxLines: maxLines,
       validator: (value) {
-        if (value == null || value.isEmpty) {
+        if ((value == null || value.isEmpty) && required) {
           return errorMessage;
         }
         return null;

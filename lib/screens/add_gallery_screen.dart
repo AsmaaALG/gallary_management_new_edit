@@ -295,6 +295,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
     required TextEditingController controller,
     required String label,
     required String hint,
+    required bool required,
     int maxLines = 1,
   }) {
     return TextFormField(
@@ -314,7 +315,7 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
       ),
       maxLines: maxLines,
       validator: (value) {
-        if (value == null || value.isEmpty) {
+        if ((value == null || value.isEmpty) && required) {
           return 'يرجى إدخال $label';
         }
         return null;
@@ -403,20 +404,21 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                     controller: _titleController,
                     label: 'اسم المعرض',
                     hint: 'أدخل اسم المعرض هنا',
+                    required: true,
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
-                    controller: _descriptionController,
-                    label: 'الوصف',
-                    hint: 'أدخل وصف المعرض هنا',
-                    maxLines: 3,
-                  ),
+                      controller: _descriptionController,
+                      label: 'الوصف',
+                      hint: 'أدخل وصف المعرض هنا',
+                      maxLines: 3,
+                      required: true),
                   const SizedBox(height: 16),
                   _buildTextField(
-                    controller: _locationController,
-                    label: 'الموقع',
-                    hint: 'أدخل موقع المعرض هنا',
-                  ),
+                      controller: _locationController,
+                      label: 'الموقع',
+                      hint: 'أدخل موقع المعرض هنا',
+                      required: true),
                   const SizedBox(height: 16),
                   isWideScreen
                       ? Row(
@@ -424,11 +426,11 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                             Expanded(
                               flex: isWideScreen ? 3 : 2,
                               child: _buildTextField(
-                                controller: _imageUrlController,
-                                label: 'رابط صورة الغلاف',
-                                hint:
-                                    'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
-                              ),
+                                  controller: _imageUrlController,
+                                  label: 'رابط صورة الغلاف',
+                                  hint:
+                                      'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
+                                  required: true),
                             ),
                             Expanded(
                               child: ElevatedButton(
@@ -456,11 +458,11 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                       : Column(
                           children: [
                             _buildTextField(
-                              controller: _imageUrlController,
-                              label: 'رابط صورة الغلاف',
-                              hint:
-                                  'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
-                            ),
+                                controller: _imageUrlController,
+                                label: 'رابط صورة الغلاف',
+                                hint:
+                                    'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
+                                required: true),
                             const SizedBox(height: 16),
                             ElevatedButton(
                                 onPressed: () async {
@@ -488,16 +490,16 @@ class _AddGalleryScreenState extends State<AddGalleryScreen> {
                         ),
                   const SizedBox(height: 16),
                   _buildTextField(
-                    controller: _mapController,
-                    label: 'رابط صورة خارطة المعرض',
-                    hint: 'أدخل رابط الصورة هنا',
-                  ),
+                      controller: _mapController,
+                      label: 'رابط صورة خارطة المعرض',
+                      hint: 'أدخل رابط الصورة هنا',
+                      required: false),
                   const SizedBox(height: 16),
                   _buildTextField(
-                    controller: _qrCodeController,
-                    label: 'رمز QR',
-                    hint: 'أدخل رمز QR هنا',
-                  ),
+                      controller: _qrCodeController,
+                      label: 'رمز QR',
+                      hint: 'أدخل رمز QR هنا',
+                      required: false),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
