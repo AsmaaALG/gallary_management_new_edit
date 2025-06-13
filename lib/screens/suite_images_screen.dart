@@ -274,7 +274,7 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
                                         ),
                                       )
                                     : Image.network(
-                                        'https://drive.google.com/uc?id=${data['image url']}',
+                                        data['image url'],
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>

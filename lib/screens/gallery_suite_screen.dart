@@ -3,6 +3,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/suite_management_screen.dart';
 import 'package:gallery_management/screens/partner_management_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GallerySuiteScreen extends StatelessWidget {
   final String galleryId;
@@ -27,6 +28,30 @@ class GallerySuiteScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
           ),
           backgroundColor: primaryColor,
+          title: FutureBuilder<DocumentSnapshot>(
+            future:
+                FirebaseFirestore.instance.collection('2').doc(galleryId).get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('...تحميل');
+              }
+              if (snapshot.hasError ||
+                  !snapshot.hasData ||
+                  !snapshot.data!.exists) {
+                return const Text('خطأ في تحميل الاسم');
+              }
+              final data = snapshot.data!.data() as Map<String, dynamic>;
+              final name = data['title'] ?? 'المعرض';
+              return Text(name,
+                  style: const TextStyle(
+                    fontFamily: mainFont,
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 250, 237, 237),
+
+//fontWeight: FontWeight.bold,
+                  ));
+            },
+          ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),

@@ -19,6 +19,27 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
   final FirestoreService _fs = FirestoreService();
   final TextEditingController _searchCtl = TextEditingController();
 
+  String galleryName = 'المعرض';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadGalleryName();
+  }
+
+  Future<void> loadGalleryName() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('2')
+        .doc(widget.galleryId)
+        .get();
+    final data = doc.data();
+    setState(() {
+      galleryName = data?['title'] ?? 'المعرض';
+      isLoading = false;
+    });
+  }
+
   /* ---------- Dialog الإضافة / التعديل ---------- */
   Future<void> _showPartnerDialog({DocumentSnapshot? doc}) async {
     final nameCtl = TextEditingController(text: doc?['name'] ?? '');
@@ -43,59 +64,69 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                 _field(nameCtl, 'اسم الشريك'),
                 const SizedBox(height: 10),
                 _field(imageCtl, 'رابط الصورة'),
-                SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 ElevatedButton(
-                    onPressed: () async {
-                      if (await canLaunchUrl(imgurUrl)) {
-                        await launchUrl(imgurUrl,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          'افتح Imgur لرفع صورة',
-                          style: TextStyle(fontFamily: mainFont, fontSize: 10),
+                  onPressed: () async {
+                    if (await canLaunchUrl(imgurUrl)) {
+                      await launchUrl(imgurUrl,
+                          mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'افتح Imgur لرفع صورة',
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: mainFont,
+                          fontSize: 10,
                         ),
                       ),
-                    )),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child:
-                  const Text('إلغاء', style: TextStyle(fontFamily: mainFont))),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء', style: TextStyle(fontFamily: mainFont)),
+          ),
           TextButton(
-              onPressed: () async {
-                if (nameCtl.text.trim().isEmpty || imageCtl.text.trim().isEmpty)
-                  return;
-                if (doc == null) {
-                  await _fs.addPartner(
-                      name: nameCtl.text.trim(),
-                      imageUrl: imageCtl.text.trim(),
-                      galleryId: widget.galleryId);
-                } else {
-                  await _fs.updatePartner(doc.id,
-                      name: nameCtl.text.trim(),
-                      imageUrl: imageCtl.text.trim());
-                }
-                Navigator.pop(context);
-              },
-              child: Text(doc == null ? 'إضافة' : 'حفظ',
-                  style: const TextStyle(
-                      fontFamily: mainFont,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor))),
+            onPressed: () async {
+              if (nameCtl.text.trim().isEmpty || imageCtl.text.trim().isEmpty)
+                return;
+
+              if (doc == null) {
+                await _fs.addPartner(
+                  name: nameCtl.text.trim(),
+                  imageUrl: imageCtl.text.trim(),
+                  galleryId: widget.galleryId,
+                );
+              } else {
+                await _fs.updatePartner(
+                  doc.id,
+                  name: nameCtl.text.trim(),
+                  imageUrl: imageCtl.text.trim(),
+                );
+              }
+              Navigator.pop(context);
+            },
+            child: Text(
+              doc == null ? 'إضافة' : 'حفظ',
+              style: const TextStyle(
+                fontFamily: mainFont,
+                fontWeight: FontWeight.bold,
+                color: primaryColor,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -114,57 +145,85 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
   /* ---------- واجهة ---------- */
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _fs.getPartnersForGallery(widget.galleryId),
-      builder: (context, snap) {
-        if (!snap.hasData) {
-          return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
-        }
-
-        // بناء قائمة MainCard
-        final cards = snap.data!.docs.where((d) {
-          final nm = d['name'].toString().toLowerCase();
-          return nm.contains(_searchCtl.text.toLowerCase());
-        }).map<MainCard>((d) {
-          return MainCard(
-            title: d['name'],
-            buttons: [
-              {
-                'icon': Icons.edit,
-                'action': () => _showPartnerDialog(doc: d),
-              },
-              {
-                'icon': Icons.delete_rounded,
-                'action': () => confirmDelete(context, () async {
-                      await _fs.deleteDocument('partners', d.id);
-                    })
-              },
-            ],
-          );
-        }).toList();
-
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: Scaffold(
-            floatingActionButton: FloatingActionButton(
-                backgroundColor: primaryColor,
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ),
-                onPressed: () => _showPartnerDialog()),
-            body: MainScreen(
-              title: 'التعديل على الشركاء',
-              description:
-                  'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
-              cards: cards,
-              addScreen:
-                  const SizedBox(), // لن يُستعمل لأننا نظهر حوار بدلاً من صفحة
-            ),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: primaryColor,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
-        );
-      },
+          title: Text(
+            isLoading ? 'تحميل...' : galleryName,
+            style: const TextStyle(
+              fontFamily: mainFont,
+              fontSize: 18,
+              color: Colors.white,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: primaryColor,
+          child: const Icon(Icons.add, color: Colors.white),
+          onPressed: () => _showPartnerDialog(),
+        ),
+        body: StreamBuilder<QuerySnapshot>(
+          stream: _fs.getPartnersForGallery(widget.galleryId),
+          builder: (context, snap) {
+            if (!snap.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final cards = snap.data!.docs.where((d) {
+              final name = d['name'].toString().toLowerCase();
+              return name.contains(_searchCtl.text.toLowerCase());
+            }).map<MainCard>((d) {
+              return MainCard(
+                title: d['name'],
+                buttons: [
+                  {
+                    'icon': Icons.edit,
+                    'action': () => _showPartnerDialog(doc: d),
+                  },
+                  {
+                    'icon': Icons.delete_rounded,
+                    'action': () => confirmDelete(context, () async {
+                          await _fs.deleteDocument('partners', d.id);
+                        }),
+                  },
+                ],
+              );
+            }).toList();
+
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //const Text(
+                  //'التعديل على الشركاء',
+                  //style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: mainFont),
+                  //),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
+                    style: TextStyle(fontFamily: mainFont),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView(
+                      children: cards,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

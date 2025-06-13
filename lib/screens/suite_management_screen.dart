@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/main_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/screens/edit_suite_screen.dart';
@@ -18,6 +17,8 @@ class SuiteManagementScreen extends StatefulWidget {
 class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
   final FirestoreService _fs = FirestoreService();
   final TextEditingController _searchCtl = TextEditingController();
+
+  bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
   Future<void> _showSuiteDialog() async {
     final nameCtl = TextEditingController();
@@ -174,7 +175,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                     ),
                   );
                 },
-                'heroTag': 'edit_suite_${d.id}', // تاج فريد
+                'heroTag': 'edit_suite_${d.id}',
               },
               {
                 'icon': Icons.delete_rounded,
@@ -189,17 +190,64 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: primaryColor,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('2')
+                    .doc(widget.galleryId)
+                    .get(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Text('تحميل...');
+                  }
+                  final data = snapshot.data!.data() as Map<String, dynamic>?;
+                  final name = data?['title'] ?? 'المعرض';
+
+                  return Text(
+                    name,
+                    style: TextStyle(
+                      fontFamily: mainFont,
+                      fontSize:
+                          MediaQuery.of(context).size.width < 600 ? 16 : 18,
+                      color: Colors.white,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
+              ),
+            ),
             floatingActionButton: FloatingActionButton(
               backgroundColor: primaryColor,
               child: const Icon(Icons.add, color: Colors.white),
               onPressed: () => _showSuiteDialog(),
             ),
-            body: MainScreen(
-              title: 'التعديل على الأجنحة',
-              description:
-                  'يمكنك من خلال هذه الواجهة تعديل الأجنحة داخل المعرض المحدد مسبقاً عبر تعبئة الحقول التالية',
-              cards: cards,
-              addScreen: const SizedBox(), // لن يُستعمل لأنه يوجد Dialog
+            body: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'يمكنك من خلال هذه الواجهة تعديل الأجنحة داخل المعرض المحدد مسبقاً عبر تعبئة الحقول التالية',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: mainFont,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: ListView(
+                      children: cards,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
