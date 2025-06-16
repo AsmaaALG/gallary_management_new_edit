@@ -33,23 +33,25 @@ class GallerySuiteScreen extends StatelessWidget {
                 FirebaseFirestore.instance.collection('2').doc(galleryId).get(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('...تحميل');
+                return const Text('تحميل...');
               }
               if (snapshot.hasError ||
                   !snapshot.hasData ||
                   !snapshot.data!.exists) {
-                return const Text('خطأ في تحميل الاسم');
+                return const Text('حدث خطأ');
               }
+
               final data = snapshot.data!.data() as Map<String, dynamic>;
               final name = data['title'] ?? 'المعرض';
-              return Text(name,
-                  style: const TextStyle(
-                    fontFamily: mainFont,
-                    fontSize: 18,
-                    color: const Color.fromARGB(255, 250, 237, 237),
-
-//fontWeight: FontWeight.bold,
-                  ));
+              return Text(
+                name,
+                style: const TextStyle(
+                  //  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  fontFamily: mainFont,
+                  color: Colors.white,
+                ),
+              );
             },
           ),
         ),
