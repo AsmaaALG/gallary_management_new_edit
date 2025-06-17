@@ -9,12 +9,14 @@ class MainScreen extends StatefulWidget {
     required this.description,
     required this.cards,
     required this.addScreen,
+    this.galleryName, // نضيف اسم المعرض هنا اختياري
   });
 
   final String title;
   final String description;
   final List<MainCard> cards;
   final Widget addScreen;
+  final String? galleryName;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -48,6 +50,25 @@ class _MainScreenState extends State<MainScreen> {
                   onPressed: () => Navigator.pop(context),
                 )
               : null,
+          title: widget.galleryName != null
+              ? LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWide = MediaQuery.of(context).size.width > 600;
+                    return Text(
+                      widget.galleryName!,
+                      maxLines: 2,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: mainFont,
+                        fontWeight: FontWeight.normal,
+                        fontSize: isWide ? 16 : 14, // حجم أكبر في الويب
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  },
+                )
+              : null,
+          centerTitle: false,
         ),
         body: CustomScrollView(
           slivers: [
@@ -156,7 +177,7 @@ class _MainScreenState extends State<MainScreen> {
             );
           },
           backgroundColor: primaryColor,
-          child: Icon(Icons.add, color: Colors.white),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
     );

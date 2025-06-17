@@ -4,11 +4,18 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/screens/edit_suite_screen.dart';
+import 'package:gallery_management/screens/main_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SuiteManagementScreen extends StatefulWidget {
   final String galleryId;
-  const SuiteManagementScreen({super.key, required this.galleryId});
+  final String? galleryName; // اختيارية
+
+  const SuiteManagementScreen({
+    super.key,
+    required this.galleryId,
+    this.galleryName,
+  });
 
   @override
   State<SuiteManagementScreen> createState() => _SuiteManagementScreenState();
@@ -18,7 +25,39 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
   final FirestoreService _fs = FirestoreService();
   final TextEditingController _searchCtl = TextEditingController();
 
-  bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
+  String? _galleryName;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.galleryName != null) {
+      _galleryName = widget.galleryName;
+      _isLoading = false;
+    } else {
+      fetchGalleryName();
+    }
+  }
+
+  Future<void> fetchGalleryName() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('2')
+        .doc(widget.galleryId)
+        .get();
+
+    if (snapshot.exists) {
+      setState(() {
+        _galleryName = snapshot.data()?['title'];
+
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _galleryName = 'اسم غير متوفر';
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<void> _showSuiteDialog() async {
     final nameCtl = TextEditingController();
@@ -77,26 +116,27 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                         ),
                       const SizedBox(height: 10),
                       ElevatedButton(
-                          onPressed: () async {
-                            if (await canLaunchUrl(imgurUrl)) {
-                              await launchUrl(imgurUrl,
-                                  mode: LaunchMode.externalApplication);
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                'افتح Imgur لرفع صورة',
-                                style: TextStyle(
-                                    fontFamily: mainFont, fontSize: 10),
-                              ),
+                        onPressed: () async {
+                          if (await canLaunchUrl(imgurUrl)) {
+                            await launchUrl(imgurUrl,
+                                mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'افتح Imgur لرفع صورة',
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontFamily: mainFont, fontSize: 10),
                             ),
-                          )),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -155,12 +195,19 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return StreamBuilder<QuerySnapshot>(
       stream: _fs.getSuitesForGallery(widget.galleryId),
       builder: (context, snap) {
         if (!snap.hasData) {
           return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         final cards = snap.data!.docs.where((d) {
@@ -186,7 +233,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                 'icon': Icons.delete_rounded,
                 'action': () => confirmDelete(context, () async {
                       await _fs.deleteSuiteAndImages(d.id);
-                    })
+                    }),
               },
             ],
           );
@@ -195,64 +242,18 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: primaryColor,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-              title: FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance
-                    .collection('2')
-                    .doc(widget.galleryId)
-                    .get(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Text('تحميل...');
-                  }
-                  final data = snapshot.data!.data() as Map<String, dynamic>?;
-                  final name = data?['title'] ?? 'المعرض';
-
-                  return Text(
-                    name,
-                    style: TextStyle(
-                      fontFamily: mainFont,
-                      fontSize:
-                          MediaQuery.of(context).size.width < 600 ? 14 : 18,
-                      color: Colors.white,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  );
-                },
-              ),
-            ),
             floatingActionButton: FloatingActionButton(
               backgroundColor: primaryColor,
               child: const Icon(Icons.add, color: Colors.white),
               onPressed: () => _showSuiteDialog(),
             ),
-            body: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'يمكنك من خلال هذه الواجهة تعديل الأجنحة داخل المعرض المحدد مسبقاً عبر تعبئة الحقول التالية',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: mainFont,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: ListView(
-                      children: cards,
-                    ),
-                  ),
-                ],
-              ),
+            body: MainScreen(
+              title: 'التعديل على الأجنحة',
+              description:
+                  'يمكنك من خلال هذه الواجهة تعديل الأجنحة داخل المعرض المحدد مسبقاً عبر تعبئة الحقول التالية',
+              cards: cards,
+              addScreen: const SizedBox(),
+              galleryName: _galleryName ?? '',
             ),
           ),
         );

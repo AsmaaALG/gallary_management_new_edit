@@ -19,28 +19,34 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
   final FirestoreService _fs = FirestoreService();
   final TextEditingController _searchCtl = TextEditingController();
 
-  String galleryName = 'المعرض';
-  bool isLoading = true;
+  String? _galleryName;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    loadGalleryName();
+    _fetchGalleryName();
   }
 
-  Future<void> loadGalleryName() async {
-    final doc = await FirebaseFirestore.instance
+  Future<void> _fetchGalleryName() async {
+    final snapshot = await FirebaseFirestore.instance
         .collection('2')
         .doc(widget.galleryId)
         .get();
-    final data = doc.data();
-    setState(() {
-      galleryName = data?['title'] ?? 'المعرض';
-      isLoading = false;
-    });
+
+    if (snapshot.exists) {
+      setState(() {
+        _galleryName = snapshot.data()?['title'];
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _galleryName = 'اسم غير متوفر';
+        _isLoading = false;
+      });
+    }
   }
 
-  /* ---------- Dialog الإضافة / التعديل ---------- */
   Future<void> _showPartnerDialog({DocumentSnapshot? doc}) async {
     final nameCtl = TextEditingController(text: doc?['name'] ?? '');
     final imageCtl = TextEditingController(text: doc?['image'] ?? '');
@@ -51,9 +57,10 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         backgroundColor: const Color.fromARGB(255, 250, 230, 230),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Text(doc == null ? 'إضافة شريك' : 'تعديل الشريك',
-                style: const TextStyle(fontFamily: mainFont))),
+          textDirection: TextDirection.rtl,
+          child: Text(doc == null ? 'إضافة شريك' : 'تعديل الشريك',
+              style: const TextStyle(fontFamily: mainFont)),
+        ),
         content: Directionality(
           textDirection: TextDirection.rtl,
           child: SizedBox(
@@ -73,8 +80,8 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                             mode: LaunchMode.externalApplication);
                       }
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 15),
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
@@ -82,10 +89,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: mainFont,
-                            fontSize: 10,
-                          ),
+                          style: TextStyle(fontFamily: mainFont, fontSize: 10),
                         ),
                       ),
                     ),
@@ -97,38 +101,37 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: mainFont)),
-          ),
+              onPressed: () => Navigator.pop(context),
+              child:
+                  const Text('إلغاء', style: TextStyle(fontFamily: mainFont))),
           TextButton(
-            onPressed: () async {
-              if (nameCtl.text.trim().isEmpty || imageCtl.text.trim().isEmpty)
-                return;
+              onPressed: () async {
+                if (nameCtl.text.trim().isEmpty || imageCtl.text.trim().isEmpty)
+                  return;
 
-              if (doc == null) {
-                await _fs.addPartner(
-                  name: nameCtl.text.trim(),
-                  imageUrl: imageCtl.text.trim(),
-                  galleryId: widget.galleryId,
-                );
-              } else {
-                await _fs.updatePartner(
-                  doc.id,
-                  name: nameCtl.text.trim(),
-                  imageUrl: imageCtl.text.trim(),
-                );
-              }
-              Navigator.pop(context);
-            },
-            child: Text(
-              doc == null ? 'إضافة' : 'حفظ',
-              style: const TextStyle(
-                fontFamily: mainFont,
-                fontWeight: FontWeight.bold,
-                color: primaryColor,
-              ),
-            ),
-          ),
+                if (doc == null) {
+                  await _fs.addPartner(
+                    name: nameCtl.text.trim(),
+                    imageUrl: imageCtl.text.trim(),
+                    galleryId: widget.galleryId,
+                  );
+                } else {
+                  await _fs.updatePartner(
+                    doc.id,
+                    name: nameCtl.text.trim(),
+                    imageUrl: imageCtl.text.trim(),
+                  );
+                }
+                Navigator.pop(context);
+              },
+              child: Text(
+                doc == null ? 'إضافة' : 'حفظ',
+                style: const TextStyle(
+                  fontFamily: mainFont,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+              )),
         ],
       ),
     );
@@ -144,84 +147,62 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         ),
       );
 
-  /* ---------- واجهة ---------- */
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: primaryColor,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            isLoading ? 'تحميل...' : galleryName,
-            style: const TextStyle(
-              fontFamily: mainFont,
-              fontSize: 18,
-              color: Colors.white,
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: _fs.getPartnersForGallery(widget.galleryId),
+      builder: (context, snap) {
+        if (!snap.hasData) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+
+        final cards = snap.data!.docs.where((d) {
+          final nm = d['name'].toString().toLowerCase();
+          return nm.contains(_searchCtl.text.toLowerCase());
+        }).map<MainCard>((d) {
+          return MainCard(
+            title: d['name'],
+            buttons: [
+              {
+                'icon': Icons.edit,
+                'action': () => _showPartnerDialog(doc: d),
+              },
+              {
+                'icon': Icons.delete_rounded,
+                'action': () => confirmDelete(context, () async {
+                      await _fs.deleteDocument('partners', d.id);
+                    }),
+              },
+            ],
+          );
+        }).toList();
+
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              backgroundColor: primaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
+              onPressed: () => _showPartnerDialog(),
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            body: MainScreen(
+              title: 'التعديل على الشركاء',
+              description:
+                  'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
+              cards: cards,
+              addScreen: const SizedBox(),
+              galleryName: _galleryName ?? '', // <== هنا اسم المعرض بدون bold
+            ),
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: primaryColor,
-          child: const Icon(Icons.add, color: Colors.white),
-          onPressed: () => _showPartnerDialog(),
-        ),
-        body: StreamBuilder<QuerySnapshot>(
-          stream: _fs.getPartnersForGallery(widget.galleryId),
-          builder: (context, snap) {
-            if (!snap.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final cards = snap.data!.docs.where((d) {
-              final name = d['name'].toString().toLowerCase();
-              return name.contains(_searchCtl.text.toLowerCase());
-            }).map<MainCard>((d) {
-              return MainCard(
-                title: d['name'],
-                buttons: [
-                  {
-                    'icon': Icons.edit,
-                    'action': () => _showPartnerDialog(doc: d),
-                  },
-                  {
-                    'icon': Icons.delete_rounded,
-                    'action': () => confirmDelete(context, () async {
-                          await _fs.deleteDocument('partners', d.id);
-                        }),
-                  },
-                ],
-              );
-            }).toList();
-
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  const Text(
-                    'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
-                    style: TextStyle(fontFamily: mainFont),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView(
-                      children: cards,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
+        );
+      },
     );
   }
 }
