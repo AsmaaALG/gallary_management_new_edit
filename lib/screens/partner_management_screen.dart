@@ -58,38 +58,40 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
           textDirection: TextDirection.rtl,
           child: SizedBox(
             width: 260,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _field(nameCtl, 'اسم الشريك'),
-                const SizedBox(height: 10),
-                _field(imageCtl, 'رابط الصورة'),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (await canLaunchUrl(imgurUrl)) {
-                      await launchUrl(imgurUrl,
-                          mode: LaunchMode.externalApplication);
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'افتح Imgur لرفع صورة',
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: mainFont,
-                          fontSize: 10,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _field(nameCtl, 'اسم الشريك'),
+                  const SizedBox(height: 10),
+                  _field(imageCtl, 'رابط الصورة'),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (await canLaunchUrl(imgurUrl)) {
+                        await launchUrl(imgurUrl,
+                            mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          'افتح Imgur لرفع صورة',
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: mainFont,
+                            fontSize: 10,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -203,10 +205,6 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //const Text(
-                  //'التعديل على الشركاء',
-                  //style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: mainFont),
-                  //),
                   const SizedBox(height: 8),
                   const Text(
                     'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',

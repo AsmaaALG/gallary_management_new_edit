@@ -45,55 +45,60 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
               textDirection: TextDirection.rtl,
               child: SizedBox(
                 width: 260,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _field(nameCtl, 'اسم الجناح'),
-                    if (nameError)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 4),
-                        child: Text('يرجى ملء هذا الحقل',
-                            style: TextStyle(color: Colors.red, fontSize: 12)),
-                      ),
-                    const SizedBox(height: 10),
-                    _field(descCtl, 'وصف الجناح'),
-                    if (descError)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 4),
-                        child: Text('يرجى ملء هذا الحقل',
-                            style: TextStyle(color: Colors.red, fontSize: 12)),
-                      ),
-                    const SizedBox(height: 10),
-                    _field(imageCtl, 'رابط صورة الجناح'),
-                    if (imageError)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 4),
-                        child: Text('يرجى ملء هذا الحقل',
-                            style: TextStyle(color: Colors.red, fontSize: 12)),
-                      ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                        onPressed: () async {
-                          if (await canLaunchUrl(imgurUrl)) {
-                            await launchUrl(imgurUrl,
-                                mode: LaunchMode.externalApplication);
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              'افتح Imgur لرفع صورة',
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _field(nameCtl, 'اسم الجناح'),
+                      if (nameError)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4),
+                          child: Text('يرجى ملء هذا الحقل',
                               style:
-                                  TextStyle(fontFamily: mainFont, fontSize: 10),
+                                  TextStyle(color: Colors.red, fontSize: 12)),
+                        ),
+                      const SizedBox(height: 10),
+                      _field(descCtl, 'وصف الجناح'),
+                      if (descError)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4),
+                          child: Text('يرجى ملء هذا الحقل',
+                              style:
+                                  TextStyle(color: Colors.red, fontSize: 12)),
+                        ),
+                      const SizedBox(height: 10),
+                      _field(imageCtl, 'رابط صورة الجناح'),
+                      if (imageError)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4),
+                          child: Text('يرجى ملء هذا الحقل',
+                              style:
+                                  TextStyle(color: Colors.red, fontSize: 12)),
+                        ),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                          onPressed: () async {
+                            if (await canLaunchUrl(imgurUrl)) {
+                              await launchUrl(imgurUrl,
+                                  mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                'افتح Imgur لرفع صورة',
+                                style: TextStyle(
+                                    fontFamily: mainFont, fontSize: 10),
+                              ),
                             ),
-                          ),
-                        )),
-                  ],
+                          )),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -214,7 +219,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                     style: TextStyle(
                       fontFamily: mainFont,
                       fontSize:
-                          MediaQuery.of(context).size.width < 600 ? 16 : 18,
+                          MediaQuery.of(context).size.width < 600 ? 14 : 18,
                       color: Colors.white,
                     ),
                     maxLines: 2,

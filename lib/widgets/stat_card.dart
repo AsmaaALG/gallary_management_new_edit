@@ -34,7 +34,7 @@ class StatCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: isDesktop ? 18 : 13,
+                      fontSize: isDesktop ? 18 : 10,
                       color: primaryColor,
                       fontFamily: mainFont,
                     ),
@@ -46,7 +46,7 @@ class StatCard extends StatelessWidget {
                 Icon(
                   icon,
                   color: color,
-                  size: isDesktop ? 40 : 28,
+                  size: isDesktop ? 40 : 23,
                 ),
               ],
             ),
@@ -56,7 +56,7 @@ class StatCard extends StatelessWidget {
             Text(
               value.toString(), // عرض القيمة كنص
               style: TextStyle(
-                fontSize: isDesktop ? 34 : 28,
+                fontSize: isDesktop ? 34 : 23,
                 fontWeight: FontWeight.bold,
                 color: color,
                 fontFamily: mainFont,

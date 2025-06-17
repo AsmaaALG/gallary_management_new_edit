@@ -42,14 +42,16 @@ class GallerySuiteScreen extends StatelessWidget {
               }
               final data = snapshot.data!.data() as Map<String, dynamic>;
               final name = data['title'] ?? 'المعرض';
-              return Text(name,
-                  style: const TextStyle(
-                    fontFamily: mainFont,
-                    fontSize: 18,
-                    color: const Color.fromARGB(255, 250, 237, 237),
-
-//fontWeight: FontWeight.bold,
-                  ));
+              return Text(
+                name,
+                style: TextStyle(
+                  fontFamily: mainFont,
+                  fontSize: MediaQuery.of(context).size.width < 600 ? 14 : 18,
+                  color: Colors.white,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              );
             },
           ),
         ),
