@@ -59,13 +59,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             backgroundColor: primaryColor,
             centerTitle: true,
             iconTheme: IconThemeData(color: Colors.white),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.refresh, color: Colors.white),
-                onPressed: _loadData,
-                tooltip: 'تحديث البيانات',
-              ),
-            ],
           ),
           body: _controller.isLoading
               ? Center(child: CircularProgressIndicator(color: primaryColor))
