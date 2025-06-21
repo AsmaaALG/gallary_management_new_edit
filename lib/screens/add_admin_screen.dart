@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/user_session.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:gallery_management/widgets/build_text_field.dart';
 
 class AddAdminScreen extends StatefulWidget {
   final FirestoreService firestoreService;
@@ -23,6 +24,12 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
   final TextEditingController lastNameController = TextEditingController();
 
   int selectedState = 0;
+
+  bool isValidEmail(String email) {
+    final RegExp regex =
+        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$', caseSensitive: false);
+    return regex.hasMatch(email);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,45 +72,17 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  _buildTextField(firstNameController, 'الاسم الأول',
-                      'أدخل الاسم الأول هنا', validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'الرجاء إدخال الاسم الأول';
-                    }
-                    return null;
-                  }),
+                  buildTextField(firstNameController, 'الاسم الأول',
+                      'أدخل الإسم الأول هنا', true),
                   const SizedBox(height: 16),
-                  _buildTextField(lastNameController, 'الاسم الأخير',
-                      'أدخل الاسم الأخير هنا', validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'الرجاء إدخال الاسم الأخير';
-                    }
-                    return null;
-                  }),
+                  buildTextField(lastNameController, 'الاسم الأخير',
+                      'أدخل الاسم الأخير هنا', true),
                   const SizedBox(height: 16),
-                  _buildTextField(emailController, 'البريد الإلكتروني',
-                      'أدخل البريد الإلكتروني هنا', validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'الرجاء إدخال البريد الإلكتروني';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$')
-                        .hasMatch(value.trim())) {
-                      return 'صيغة البريد الإلكتروني غير صحيحة';
-                    }
-                    return null;
-                  }),
+                  buildTextField(emailController, 'البريد الإلكتروني',
+                      'أدخل البريد الإلكتروني هنا', true),
                   const SizedBox(height: 16),
-                  _buildTextField(
-                      passwordController, 'كلمة المرور', 'أدخل كلمة المرور هنا',
-                      validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'الرجاء إدخال كلمة المرور';
-                    }
-                    if (value.trim().length < 6) {
-                      return 'كلمة المرور يجب ألا تقل عن 6 خانات';
-                    }
-                    return null;
-                  }),
+                  buildTextField(passwordController, 'كلمة المرور',
+                      'أدخل كلمة المرور هنا', true),
                   const SizedBox(height: 16),
                   const Text(
                     'الصلاحيات',
@@ -142,47 +121,60 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          try {
-                            final success =
-                                await widget.firestoreService.createUser(
-                              firstName: firstNameController.text.trim(),
-                              lastName: lastNameController.text.trim(),
-                              email: emailController.text.trim(),
-                              password: passwordController.text.trim(),
-                              state: selectedState,
-                            );
-
-                            if (success) {
-                              Navigator.pop(context);
-                              if (UserSession.email != null &&
-                                  UserSession.password != null) {
-                                await FirebaseAuth.instance
-                                    .signInWithEmailAndPassword(
-                                  email: UserSession.email!,
-                                  password: UserSession.password!,
+                          if (isValidEmail(emailController.text.trim())) {
+                            if (passwordController.text.trim().length >= 6) {
+                              try {
+                                final success =
+                                    await widget.firestoreService.createUser(
+                                  firstName: firstNameController.text.trim(),
+                                  lastName: lastNameController.text.trim(),
+                                  email: emailController.text.trim(),
+                                  password: passwordController.text.trim(),
+                                  state: selectedState,
+                                );
+                                if (success) {
+                                  Navigator.pop(context);
+                                  if (UserSession.email != null &&
+                                      UserSession.password != null) {
+                                    await FirebaseAuth.instance
+                                        .signInWithEmailAndPassword(
+                                      email: UserSession.email!,
+                                      password: UserSession.password!,
+                                    );
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('تمت إضافة المسؤول بنجاح'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'البريد الإلكتروني مستخدم مسبقًا'),
+                                      backgroundColor: Colors.grey,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('حدث خطأ أثناء الإضافة: $e'),
+                                  ),
                                 );
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('تمت إضافة المسؤول بنجاح'),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text('البريد الإلكتروني مستخدم مسبقًا'),
-                                  backgroundColor: Colors.grey,
-                                ),
-                              );
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text(
+                                    'كلمة المرور يجب أن لا تقل عن 6 ارقام اوحروف'),
+                              ));
                             }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('حدث خطأ أثناء الإضافة: $e'),
-                              ),
-                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('البريد الإلكتروني غير صالح'),
+                            ));
                           }
                         }
                       },
@@ -208,33 +200,6 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label,
-    String hint, {
-    bool obscureText = false,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(40)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
-          borderSide: const BorderSide(color: primaryColor),
         ),
       ),
     );

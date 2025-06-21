@@ -88,42 +88,6 @@ class FirestoreService {
   ///المسؤوليـــــــــــن
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-// جلب المسؤولين
-  // Stream<QuerySnapshot> getAdmins() {
-  //   return _db.collection('admin').snapshots();
-  // }
-
-// إضافة مسؤول
-  // Future<void> addAdmin(
-  //     String email, String firstName, String lastName, String id) async {
-  //   await _db.collection('admin').add({
-  //     'email': email,
-  //     'first_name': firstName,
-  //     'last_name': lastName,
-  //   });
-  // }
-
-  // إضافة مسؤول جديد بمعرف يتم إنشاؤه تلقائيًا
-  // Future<void> addAdminWithPasswordAndState(
-  //   String email,
-  //   String password,
-  //   String firstName,
-  //   String lastName,
-  //   int state,
-  // ) async {
-  //   try {
-  //     await _firestore.collection('admin').add({
-  //       'email': email,
-  //       'password': password,
-  //       'first_name': firstName,
-  //       'last_name': lastName,
-  //       'state': state,
-  //     });
-  //   } catch (e) {
-  //     print('خطأ أثناء إضافة المسؤول: $e');
-  //     rethrow;
-  //   }
-  // }
 
 // تحديث مسؤول
   Future<void> updateAdmin(

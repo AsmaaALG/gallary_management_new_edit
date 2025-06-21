@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:gallery_management/widgets/build_text_field.dart';
+import 'package:gallery_management/widgets/classification_dropdown.dart';
+import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,31 +34,10 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
   bool _isLoading = false;
   bool _isInitialized = false;
 
-  List<Classification> _classifications = []; // قائمة التصنيفات
-
   @override
   void initState() {
     super.initState();
-    _fetchClassifications(); // جلب التصنيفات عند بدء الشاشة
     _fetchGalleryData(); // جلب بيانات المعرض
-  }
-
-  Future<void> _fetchClassifications() async {
-    try {
-      List<Map<String, dynamic>> classificationsData =
-          await _firestoreService.getAllData('classification');
-      setState(() {
-        _classifications = classificationsData.map((data) {
-          return Classification(
-            id: data['documentId'], // تعيين المعرف
-            name: data['name'], // تعيين الاسم
-          );
-        }).toList();
-        print('التصنيفات: $_classifications');
-      });
-    } catch (e) {
-      print('حدث خطأ أثناء جلب التصنيفات: $e');
-    }
   }
 
   Future<void> _fetchGalleryData() async {
@@ -80,6 +62,9 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
         _endDate = data['end date'] != null
             ? dateFormat.parse(data['end date'])
             : null;
+        _isInitialized = true;
+
+        _isLoading = false;
       });
     } else {
       // معالجة الحالة عندما لا توجد بيانات
@@ -164,47 +149,6 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
     return regex.hasMatch(url);
   }
 
-  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final DateTime now = DateTime.now();
-    final DateTime initial = isStartDate ? now : (_startDate ?? now);
-
-    final DateTime first =
-        isStartDate ? DateTime(2000) : (_startDate ?? DateTime(2000));
-    final DateTime last = DateTime(2100);
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: first,
-      lastDate: last,
-    );
-
-    if (picked != null) {
-      if (!isStartDate && _startDate != null && picked.isBefore(_startDate!)) {
-        // عرض رسالة خطأ إذا كان تاريخ الانتهاء قبل تاريخ البداية
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      setState(() {
-        if (isStartDate) {
-          _startDate = picked;
-          // مسح تاريخ الانتهاء إذا أصبح غير صالح
-          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate = null;
-          }
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
@@ -227,7 +171,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: _isLoading && !_isInitialized
+        body: !_isInitialized
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: EdgeInsets.symmetric(
@@ -251,13 +195,13 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                           ),
                         ),
                         const SizedBox(height: 30),
-                        _buildTextField(_titleController, 'اسم المعرض',
+                        buildTextField(_titleController, 'اسم المعرض',
                             'يرجى إدخال اسم المعرض', true),
                         const SizedBox(height: 16),
-                        _buildTextField(_locationController, 'الموقع',
+                        buildTextField(_locationController, 'الموقع',
                             'يرجى إدخال الموقع', true),
                         const SizedBox(height: 16),
-                        _buildTextField(_qrCodeController, 'رمز الQR',
+                        buildTextField(_qrCodeController, 'رمز الQR',
                             'يرجى إدخال رمز QR', false),
                         const SizedBox(height: 16),
                         isWideScreen
@@ -265,7 +209,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                                 children: [
                                   Expanded(
                                     flex: isWideScreen ? 3 : 2,
-                                    child: _buildTextField(
+                                    child: buildTextField(
                                         _imageUrlController,
                                         'رابط صورة غلاف المعرض',
                                         'يرجى إدخال رابط الصورة',
@@ -298,7 +242,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                               )
                             : Column(
                                 children: [
-                                  _buildTextField(
+                                  buildTextField(
                                       _imageUrlController,
                                       'رابط صورة غلاف المعرض',
                                       'يرجى إدخال رابط الصورة',
@@ -331,60 +275,64 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                                 ],
                               ),
                         const SizedBox(height: 16),
-                        _buildTextField(
+                        buildTextField(
                             _mapController,
                             'رابط صورة خارطة المعرض',
                             'يرجى إدخال رابط الصورة',
                             false),
 
                         const SizedBox(height: 16),
-                        _buildDateField('تاريخ البدء', _startDate,
-                            () => _selectDate(context, true)),
-                        const SizedBox(height: 16),
-                        _buildDateField('تاريخ الانتهاء', _endDate,
-                            () => _selectDate(context, false)),
-                        const SizedBox(height: 16),
-
-                        // حقل اختيار التصنيف
-                        DropdownButtonFormField<Classification>(
-                          value: _classifications.isNotEmpty
-                              ? _classifications.firstWhere(
-                                  (c) => c.id == _selectedClassification,
-                                  orElse: () => _classifications[
-                                      0], // إرجاع أول تصنيف إذا لم يتم العثور على تصنيف مطابق
-                                )
-                              : null,
-                          decoration: InputDecoration(
-                            labelText: 'التصنيف',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                          ),
-                          items: _classifications.map((classification) {
-                            return DropdownMenuItem<Classification>(
-                              value: classification,
-                              child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(classification.name)),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
+                        DatePickerField(
+                          label: 'تاريخ البدء',
+                          initialDate: _startDate,
+                          endDateLimit: _endDate,
+                          onDateChanged: (picked) {
                             setState(() {
-                              _selectedClassification =
-                                  value?.id; // استخدم المعرف
+                              _startDate = picked;
+                              if (_endDate != null &&
+                                  _endDate!.isBefore(picked)) {
+                                _endDate = null;
+                              }
                             });
                           },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'يرجى اختيار التصنيف';
+                        ),
+                        const SizedBox(height: 16),
+                        DatePickerField(
+                          label: 'تاريخ الانتهاء',
+                          initialDate: _endDate,
+                          startDateLimit: _startDate,
+                          onDateChanged: (picked) {
+                            if (_startDate != null &&
+                                picked.isBefore(_startDate!)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
                             }
-                            return null;
+                            setState(() {
+                              _endDate = picked;
+                            });
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+                        // حقل اختيار التصنيف
+
+                        ClassificationDropdown(
+                          selectedClassification: _selectedClassification,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedClassification = value?.id;
+                            });
                           },
                         ),
                         const SizedBox(height: 16),
 
-                        _buildTextField(_descriptionController, 'الوصف',
+                        buildTextField(_descriptionController, 'الوصف',
                             'يرجى إدخال وصف المعرض', true,
                             maxLines: 3),
                         const SizedBox(height: 30),
@@ -421,68 +369,5 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
               ),
       ),
     );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String label,
-      String errorMessage, bool required,
-      {int maxLines = 1}) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
-          borderSide: BorderSide(color: primaryColor),
-        ),
-      ),
-      maxLines: maxLines,
-      validator: (value) {
-        if ((value == null || value.isEmpty) && required) {
-          return errorMessage;
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildDateField(String label, DateTime? date, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: Color.fromARGB(255, 152, 150, 150)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: primaryColor),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              date != null
-                  ? intl.DateFormat('dd-MM-yyyy').format(date)
-                  : 'اختر التاريخ',
-            ),
-            const Icon(Icons.calendar_today),
-          ],
-        ),
-      ),
-    );
-  }
+  } 
 }

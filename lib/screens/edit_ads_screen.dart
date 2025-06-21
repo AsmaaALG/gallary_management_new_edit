@@ -1,11 +1,12 @@
-// screens/ads_management/edit_ads_screen.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/models/classification.dart';
-import 'package:gallery_management/services/firestore_service.dart';
+import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/widgets/date_picker_widget.dart';
+import 'package:gallery_management/widgets/classification_dropdown.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gallery_management/services/firestore_service.dart';
+
 
 class EditAdsScreen extends StatefulWidget {
   final String adId;
@@ -24,40 +25,17 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
   final TextEditingController _qrCodeController = TextEditingController();
-  final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
 
-  String? _selectedClassification; // للتصنيف المختار
-  List<Classification> _classifications = []; // قائمة التصنيفات
+  String? _selectedClassification;
   DateTime? _startDate;
   DateTime? _endDate;
   DateTime? _stopDate;
   bool _isLoading = false;
-  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchClassifications();
-
     _loadAdData();
-  }
-
-  Future<void> _fetchClassifications() async {
-    try {
-      List<Map<String, dynamic>> classificationsData =
-          await _firestoreService.getAllData('classification');
-      setState(() {
-        _classifications = classificationsData.map((data) {
-          return Classification(
-            id: data['documentId'], // تعيين المعرف
-            name: data['name'], // تعيين الاسم
-          );
-        }).toList();
-        print('التصنيفات: $_classifications');
-      });
-    } catch (e) {
-      print('حدث خطأ أثناء جلب التصنيفات: $e');
-    }
   }
 
   Future<void> _loadAdData() async {
@@ -70,11 +48,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         _locationController.text = adData['location'] ?? '';
         _imageUrlController.text = adData['image url'] ?? '';
         _qrCodeController.text = adData['QR code'] ?? '';
-
-        var classificationRef =
-            adData['classification id'] as DocumentReference?;
-        _selectedClassification = classificationRef?.id; // تعيين المعرف مباشرة
-
+        _selectedClassification =
+            (adData['classification id'] as DocumentReference?)?.id;
         final dateFormat = intl.DateFormat('dd-MM-yyyy');
         _startDate = adData['start date'] != null
             ? dateFormat.parse(adData['start date'])
@@ -88,85 +63,10 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('حدث خطأ في تحميل بيانات الإعلان: ${e.toString()}')),
+        SnackBar(content: Text('فشل في تحميل البيانات: $e')),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-        _isInitialized = true;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _locationController.dispose();
-    _imageUrlController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final DateTime now = DateTime.now();
-    final DateTime initial = isStartDate ? now : (_startDate ?? now);
-
-    final DateTime first =
-        isStartDate ? DateTime(2000) : (_startDate ?? DateTime(2000));
-    final DateTime last = DateTime(2100);
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: first,
-      lastDate: last,
-    );
-
-    if (picked != null) {
-      if (!isStartDate && _startDate != null && picked.isBefore(_startDate!)) {
-        // عرض رسالة خطأ إذا كان تاريخ الانتهاء قبل تاريخ البداية
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      setState(() {
-        if (isStartDate) {
-          _startDate = picked;
-          // مسح تاريخ الانتهاء إذا أصبح غير صالح
-          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate = null;
-          }
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
-  }
-
-  Future<void> _selectStopDate(BuildContext context) async {
-    final DateTime now = DateTime.now();
-    final DateTime initial = _endDate ?? now;
-
-    final DateTime first = DateTime(2000);
-    final DateTime last = DateTime(2100);
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: first,
-      lastDate: last,
-    );
-
-    if (picked != null) {
-      setState(() {
-        _stopDate = picked;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -184,8 +84,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       );
       return;
     }
-
-    // تحقق من رابط الصورة
     if (!_isValidImageUrl(_imageUrlController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
@@ -198,16 +96,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     try {
       final classificationRef = FirebaseFirestore.instance
           .collection('classification')
-          .doc(_selectedClassification); // استخدام المعرف مباشرة
-
-      DocumentSnapshot classificationDoc = await classificationRef.get();
-
-      if (!classificationDoc.exists) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('التصنيف غير صالح')),
-        );
-        return;
-      }
+          .doc(_selectedClassification);
 
       final updatedData = {
         'title': _titleController.text,
@@ -237,10 +126,9 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     }
   }
 
-// دالة للتحقق من رابط الصورة
   bool _isValidImageUrl(String url) {
     final RegExp regex = RegExp(
-      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$', // تحقق من امتدادات الصور
+      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$',
       caseSensitive: false,
     );
     return regex.hasMatch(url);
@@ -254,21 +142,16 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'تعديل الإعلان',
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: mainFont,
-              color: Color.fromARGB(221, 255, 255, 255),
-            ),
-          ),
+          title: const Text('تعديل الإعلان',
+              style: TextStyle(
+                  fontSize: 16, fontFamily: mainFont, color: Colors.white)),
           backgroundColor: primaryColor,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: _isLoading && !_isInitialized
+        body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: EdgeInsets.symmetric(
@@ -279,301 +162,95 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          child: const Text(
-                            'يمكنك من خلال هذه الواجهة يمكنك تعديل بيانات الإعلان',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontFamily: mainFont,
-                              fontWeight: FontWeight.bold,
-                              color: primaryColor,
-                            ),
+                        const Text(
+                          'يمكنك من خلال هذه الواجهة تعديل بيانات الإعلان',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: mainFont,
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
                           ),
                         ),
                         const SizedBox(height: 30),
-
-                        // حقل اسم الإعلان
-                        TextFormField(
-                          controller: _titleController,
-                          decoration: InputDecoration(
-                            labelText: 'اسم الإعلان',
-                            hintText: 'أدخل اسم الإعلان هنا',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يرجى إدخال اسم الإعلان';
-                            }
-                            return null;
-                          },
-                        ),
+                        buildTextField(_titleController, 'اسم الإعلان',
+                            'يرجى إدخال اسم الإعلان', true),
                         const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _qrCodeController,
-                          decoration: InputDecoration(
-                            labelText: 'رمز QR',
-                            hintText: 'أدخل رمز QR من هنا',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                          ),
-                        ),
+                        buildTextField(_qrCodeController, 'رمز QR',
+                            'يرجى إدخال رمز QR', false),
                         const SizedBox(height: 16),
-
-                        // حقل الموقع
-                        TextFormField(
-                          controller: _locationController,
-                          decoration: InputDecoration(
-                            labelText: 'الموقع',
-                            hintText: 'أدخل موقع الإعلان هنا',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يرجى إدخال موقع الإعلان';
-                            }
-                            return null;
-                          },
-                        ),
+                        buildTextField(_locationController, 'الموقع',
+                            'يرجى إدخال الموقع', true),
                         const SizedBox(height: 16),
-
-                        // حقل رابط الصورة
-                        isWideScreen
-                            ? Row(
-                                children: [
-                                  Expanded(
-                                    flex: isWideScreen ? 3 : 2,
-                                    child: TextFormField(
-                                      controller: _imageUrlController,
-                                      decoration: InputDecoration(
-                                        labelText: 'رابط صورة الإعلان',
-                                        hintText:
-                                            'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(40),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(40),
-                                          borderSide: const BorderSide(
-                                              color: Colors.grey),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(40),
-                                          borderSide:
-                                              BorderSide(color: primaryColor),
-                                        ),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'يرجى إدخال رابط الصورة';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                        onPressed: () async {
-                                          if (await canLaunchUrl(imgurUrl)) {
-                                            await launchUrl(imgurUrl,
-                                                mode: LaunchMode
-                                                    .externalApplication);
-                                          }
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 15),
-                                          child: Text(
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            'افتح Imgur لرفع صورة',
-                                            style: TextStyle(
-                                                fontFamily: mainFont,
-                                                fontSize: 10),
-                                          ),
-                                        )),
-                                  ),
-                                ],
-                              )
-                            : Column(
-                                children: [
-                                  TextFormField(
-                                    controller: _imageUrlController,
-                                    style: TextStyle(fontSize: 10),
-                                    decoration: InputDecoration(
-                                      labelText: 'رابط صورة الإعلان',
-                                      hintText:
-                                          'قم برفع الصورة على imgur ثم نسخ رابط الصورة ووضعه هنا',
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(40),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(40),
-                                        borderSide: const BorderSide(
-                                            color: Colors.grey),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(40),
-                                        borderSide:
-                                            BorderSide(color: primaryColor),
-                                      ),
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'يرجى إدخال رابط الصورة';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                      onPressed: () async {
-                                        if (await canLaunchUrl(imgurUrl)) {
-                                          await launchUrl(imgurUrl,
-                                              mode: LaunchMode
-                                                  .externalApplication);
-                                        }
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 15),
-                                        child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Text(
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            'افتح Imgur لرفع صورة',
-                                            style: TextStyle(
-                                                fontFamily: mainFont,
-                                                fontSize: 10),
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-
+                        buildTextField(_imageUrlController, 'رابط الصورة',
+                            'يرجى إدخال رابط الصورة', true),
                         const SizedBox(height: 16),
-                        DropdownButtonFormField<Classification>(
-                          value: _classifications.isNotEmpty
-                              ? _classifications.firstWhere(
-                                  (c) => c.id == _selectedClassification,
-                                  orElse: () => _classifications[
-                                      0], // إرجاع أول تصنيف إذا لم يتم العثور على تصنيف مطابق
-                                )
-                              : null,
-                          decoration: InputDecoration(
-                            labelText: 'التصنيف',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                          ),
-                          items: _classifications.map((classification) {
-                            return DropdownMenuItem<Classification>(
-                              value: classification,
-                              child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(classification.name)),
-                            );
-                          }).toList(),
+                        ClassificationDropdown(
+                          selectedClassification: _selectedClassification,
                           onChanged: (value) {
                             setState(() {
-                              _selectedClassification =
-                                  value?.id; // استخدم المعرف
+                              _selectedClassification = value?.id;
                             });
                           },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'يرجى اختيار التصنيف';
-                            }
-                            return null;
+                        ),
+                        const SizedBox(height: 16),
+                        DatePickerField(
+                          label: 'تاريخ البدء',
+                          initialDate: _startDate,
+                          endDateLimit: _endDate,
+                          onDateChanged: (picked) {
+                            setState(() {
+                              _startDate = picked;
+                              if (_endDate != null &&
+                                  _endDate!.isBefore(picked)) {
+                                _endDate = null;
+                              }
+                            });
                           },
                         ),
                         const SizedBox(height: 16),
-
-                        // حقول التواريخ
-                        _buildDateField('تاريخ البدء', _startDate,
-                            () => _selectDate(context, true)),
-                        const SizedBox(height: 16),
-                        _buildDateField('تاريخ الانتهاء', _endDate,
-                            () => _selectDate(context, false)),
-                        const SizedBox(height: 16),
-                        _buildDateField('تاريخ إيقاف الإعلان', _stopDate,
-                            () => _selectStopDate(context)),
-                        const SizedBox(height: 16),
-
-                        // حقل الوصف
-                        TextFormField(
-                          controller: _descriptionController,
-                          decoration: InputDecoration(
-                            labelText: 'الوصف',
-                            hintText: 'أدخل وصف الإعلان هنا',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                          ),
-                          maxLines: 3,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يرجى إدخال وصف الإعلان';
+                        DatePickerField(
+                          label: 'تاريخ الانتهاء',
+                          initialDate: _endDate,
+                          startDateLimit: _startDate,
+                          onDateChanged: (picked) {
+                            if (_startDate != null &&
+                                picked.isBefore(_startDate!)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
                             }
-                            return null;
+                            setState(() {
+                              _endDate = picked;
+                            });
                           },
                         ),
+                        const SizedBox(height: 16),
+                        DatePickerField(
+                          label: 'تاريخ إيقاف الإعلان',
+                          initialDate: _stopDate,
+                          onDateChanged: (picked) {
+                            setState(() {
+                              _stopDate = picked;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        buildTextField(_descriptionController, 'الوصف',
+                            'يرجى إدخال وصف الإعلان', true,
+                            maxLines: 3),
                         const SizedBox(height: 30),
-
-                        // زر التعديل
                         Center(
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _updateAd,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
-                              minimumSize: Size(
-                                  isWideScreen ? 250 : double.infinity, 50),
+                              minimumSize:
+                                  Size(isWideScreen ? 250 : double.infinity, 50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -587,7 +264,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                                       fontSize: 16,
                                       fontFamily: mainFont,
                                       fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(221, 255, 255, 255),
+                                      color: Colors.white,
                                     ),
                                   ),
                           ),
@@ -598,40 +275,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                   ),
                 ),
               ),
-      ),
-    );
-  }
-
-  Widget _buildDateField(String label, DateTime? date, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: Color.fromARGB(255, 152, 150, 150)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: primaryColor),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              date != null
-                  ? intl.DateFormat('dd-MM-yyyy').format(date)
-                  : 'اختر التاريخ',
-            ),
-            const Icon(Icons.calendar_today),
-          ],
-        ),
       ),
     );
   }
