@@ -113,7 +113,8 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
         totalReviews = reviewsCount!;
         starRatings = ratings;
         averageRating = totalCounts > 0 ? totalStars / totalCounts : 0.0;
-        successRate = _calculateSuccessRate();
+        successRate = _calculateSuccessRate(
+            totalVisits: totalVisits, averageRating: averageRating);
       });
     } catch (e) {
       setState(() {
@@ -127,51 +128,31 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
     }
   }
 
-  double _calculateSuccessRate() {
-    // تحديد الأوزان النسبية لكل معيار
-    const double visitsWeight = 0.5; // وزن الزيارات 50%
-    const double ratingWeight = 0.5; // وزن التقييمات 50%
+  double _calculateSuccessRate({
+    required int totalVisits,
+    required double averageRating, // من 0 إلى 5
+  }) {
+    // الأوزان النسبية
+    const double visitsWeight = 0.5; // 50%
+    const double ratingWeight = 0.5; // 50%
 
-    // حساب درجة الزيارات (0-100)
-    double visitsScore;
-    if (totalVisits >= 200) {
-      visitsScore = 100; // ممتاز
-    } else if (totalVisits >= 150) {
-      visitsScore = 85; // جيد جداً
-    } else if (totalVisits >= 100) {
-      visitsScore = 70; // جيد
-    } else if (totalVisits >= 50) {
-      visitsScore = 50; // متوسط
-    } else {
-      visitsScore = 0; // ضعيف
-    }
+    // تحديد الحد الأعلى المنطقي للزيارات لتحديد النجاح
+    const int maxVisits =
+        200; // المعرض الأكثر نجاحاً يُفترض له 200 زيارة أو أكثر
 
-    // حساب درجة التقييمات (20-60)
-    double ratingScore;
-    if (averageRating >= 4.5) {
-      ratingScore = 60; // ممتاز
-    } else if (averageRating >= 4.0) {
-      ratingScore = 50; // جيد جداً
-    } else if (averageRating >= 3.5) {
-      ratingScore = 40; // جيد
-    } else if (averageRating >= 3.0) {
-      ratingScore = 30; // متوسط
-    } else if (averageRating >= 2.0) {
-      ratingScore = 20; // ضعيف
-    } else {
-      ratingScore = 0; // سيء
-    }
+    // حساب نسبة الزيارات من 0 إلى 100
+    double visitsScore = (totalVisits / maxVisits) * 100;
+    visitsScore = visitsScore.clamp(0, 100); // لمنع التجاوز
 
-    // حساب درجة النجاح الكلية مع تطبيق الأوزان
+    // حساب نسبة التقييم من 0 إلى 100
+    double ratingScore = (averageRating / 5.0) * 100;
+    ratingScore = ratingScore.clamp(0, 100);
+
+    // حساب النسبة الكلية للنجاح
     double successRate =
         (visitsScore * visitsWeight) + (ratingScore * ratingWeight);
 
-    // إضافة تأثير إيجابي إذا كان عدد الشركاء مرتفعاً
-    if (totalFavorites > 20) {
-      successRate = (successRate * 0.9) + 10; // زيادة بنسبة 10%
-    }
-
-    // التأكد من أن النتيجة بين 0 و 100
+    // النتيجة النهائية محصورة بين 0 و 100
     return successRate.clamp(0, 100);
   }
 

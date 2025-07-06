@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // <-- لإيقاف التدوير
+import 'package:flutter/services.dart'; 
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/control_panal.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
@@ -13,7 +12,7 @@ void main() async {
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  ); // تهيئة Firebase
+  ); 
 
   // قفل الشاشة على الوضع العمودي فقط
   await SystemChrome.setPreferredOrientations([
@@ -24,24 +23,6 @@ void main() async {
   runApp(MyApp());
 }
 
-// class MyApp extends StatelessWidget {
-//   var db = FirebaseFirestore.instance;
-//   final _auth = FirebaseAuth.instance;
-
-//   MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
-//         useMaterial3: true,
-//       ),
-//       home: _auth.currentUser != null ? ControlPanel() : SignInScreen(),
-//     );
-//   }
-// }
 class MyApp extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
