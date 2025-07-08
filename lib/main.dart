@@ -6,6 +6,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/Admin/control_panal.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/firebase_options.dart';
+import 'package:gallery_management/screens/Organizer/organizer_dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // تهيئة قبل تشغيل Firebase
