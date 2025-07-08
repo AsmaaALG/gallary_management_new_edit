@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gallery_management/models/user_session.dart';
 
 class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
@@ -55,6 +56,52 @@ class FirestoreService {
     }
   }
 
+////////////////////////////
+  Future<bool> createOrganizer({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+    required String companyId,
+  }) async {
+    try {
+      // حفظ الجلسة الحالية قبل التسجيل
+      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentEmail = UserSession.email;
+      final currentPassword = UserSession.password;
+
+      // تسجيل المستخدم الجديد (سيتم تسجيل دخول تلقائي بالحساب الجديد)
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      String uid = userCredential.user!.uid;
+
+      // تخزين البيانات في Firestore
+      await FirebaseFirestore.instance.collection('Organizer').doc(uid).set({
+        'id': uid,
+        'first name': firstName,
+        'last name': lastName,
+        'email': email,
+        'password': password,
+        'company_id': companyId,
+      });
+
+      // إعادة تسجيل الدخول بالحساب السابق (الأدمن)
+      if (currentEmail != null && currentPassword != null) {
+        await FirebaseAuth.instance.signOut(); // <- مهم جدًا
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: currentEmail,
+          password: currentPassword,
+        );
+      }
+
+      return true;
+    } catch (e) {
+      print("خطأ أثناء إنشاء المنظم: $e");
+      return false;
+    }
+  }
+
 //////////////////////////////////////////////////////////////////////////
   ///ادارة الاعلانــــــــــــــات
   // تحديث إعلان موجود
@@ -87,7 +134,6 @@ class FirestoreService {
   //////////////////////////////////////////////////////////////////
   ///المسؤوليـــــــــــن
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-
 
 // تحديث مسؤول
   Future<void> updateAdmin(

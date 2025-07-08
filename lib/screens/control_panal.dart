@@ -5,6 +5,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/admin_management_screen2.dart';
 import 'package:gallery_management/screens/ads_screen2.dart';
 import 'package:gallery_management/screens/gallery_management_screen.dart';
+import 'package:gallery_management/screens/organizing%20_company_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/screens/dashboard_screen.dart';
@@ -120,6 +121,21 @@ class _ControlPanelState extends State<ControlPanel> {
                                 MaterialPageRoute(
                                   builder: (context) =>
                                       const AdminManagementScreen2(),
+                                ),
+                              )
+                          : _showPermissionDeniedMessage,
+                      isEnabled: _userState == 1,
+                    ),
+                    AdminCard(
+                      title: 'إدارة الشركات المنظمة',
+                      description:
+                          'يمكنك إدارة المشركات المنظمة والمنظمين التابعين لها',
+                      onTap: _userState == 1
+                          ? () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const OrganizingCompanyScreen(),
                                 ),
                               )
                           : _showPermissionDeniedMessage,
