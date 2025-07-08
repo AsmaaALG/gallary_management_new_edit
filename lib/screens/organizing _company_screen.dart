@@ -52,7 +52,7 @@ class OrganizingCompanyScreen extends StatelessWidget {
                 children: [
                   OptionCard(
                     width: cardWidth,
-                    title: 'إدارة الشركات العارضة',
+                    title: 'إدارة الشركات المنظمة',
                     description:
                         'من خلال هذه اللوحة يمكنك ادارة الشركات المنظمة',
                     onTap: () {

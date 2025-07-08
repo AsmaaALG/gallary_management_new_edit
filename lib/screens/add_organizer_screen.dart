@@ -118,7 +118,8 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
         appBar: AppBar(
           title: const Text(
             'إضافة منظم جديد',
-            style: TextStyle(fontSize: 16, fontFamily: mainFont),
+            style: TextStyle(
+                fontSize: 16, fontFamily: mainFont, color: Colors.white),
           ),
           backgroundColor: primaryColor,
           leading: IconButton(

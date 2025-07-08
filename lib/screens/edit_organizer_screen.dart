@@ -7,7 +7,8 @@ import 'package:gallery_management/widgets/company_dropdown.dart';
 class EditOrganizerScreen extends StatefulWidget {
   final String organizerId;
 
-  const EditOrganizerScreen({Key? key, required this.organizerId}) : super(key: key);
+  const EditOrganizerScreen({Key? key, required this.organizerId})
+      : super(key: key);
 
   @override
   State<EditOrganizerScreen> createState() => _EditOrganizerScreenState();
@@ -88,7 +89,9 @@ class _EditOrganizerScreenState extends State<EditOrganizerScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('تعديل بيانات المنظم', style: TextStyle(fontFamily: mainFont)),
+          title: const Text('تعديل بيانات المنظم',
+              style: TextStyle(
+                  fontFamily: mainFont, color: Colors.white, fontSize: 16)),
           backgroundColor: primaryColor,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -115,11 +118,14 @@ class _EditOrganizerScreenState extends State<EditOrganizerScreen> {
                           ),
                         ),
                         const SizedBox(height: 30),
-                        buildTextField(firstNameController, 'الاسم الأول', 'أدخل الاسم الأول', true),
+                        buildTextField(firstNameController, 'الاسم الأول',
+                            'أدخل الاسم الأول', true),
                         const SizedBox(height: 16),
-                        buildTextField(lastNameController, 'الاسم الأخير', 'أدخل الاسم الأخير', true),
+                        buildTextField(lastNameController, 'الاسم الأخير',
+                            'أدخل الاسم الأخير', true),
                         const SizedBox(height: 16),
-                        buildTextField(emailController, 'البريد الإلكتروني', 'أدخل البريد الإلكتروني', true),
+                        buildTextField(emailController, 'البريد الإلكتروني',
+                            'أدخل البريد الإلكتروني', true),
                         const SizedBox(height: 16),
                         CompanyDropdown(
                           selectedCompanyId: selectedCompanyId,
@@ -133,8 +139,8 @@ class _EditOrganizerScreenState extends State<EditOrganizerScreen> {
                             onPressed: _updateOrganizer,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
-                              minimumSize:
-                                  Size(isWideScreen ? 250 : double.infinity, 50),
+                              minimumSize: Size(
+                                  isWideScreen ? 250 : double.infinity, 50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
