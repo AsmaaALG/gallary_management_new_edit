@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/dashboard_controller.dart';
+import 'package:gallery_management/screens/Admin/dashboard_controller.dart';
 
 Widget PieChartLegend(BuildContext context, DashboardController controller) {
   final isDesktop = MediaQuery.of(context).size.width > 600;

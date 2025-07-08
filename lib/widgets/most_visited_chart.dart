@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/dashboard_controller.dart';
+import 'package:gallery_management/screens/Admin/dashboard_controller.dart';
 
 Widget MostVisitedChart(BuildContext context, DashboardController controller) {
   final visitPercentages = controller.getCategoryVisitPercentages();

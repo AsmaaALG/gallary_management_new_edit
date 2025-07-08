@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // استيراد مكتبة Firebase Auth
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/user_session.dart';
-import 'package:gallery_management/screens/control_panal.dart';
-import 'package:gallery_management/services/auth.dart';
+import 'package:gallery_management/screens/Admin/control_panal.dart';
+import 'package:gallery_management/screens/Organizer/organizer_dashboard_screen.dart';
 import 'package:gallery_management/widgets/custom_text_field.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  String userType = 'admin'; // Default to admin
   bool showSpinner = false;
 
   Future<void> _signIn() async {
@@ -26,31 +28,35 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (email.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('يرجى إدخال البريد الإلكتروني وكلمة المرور')),
+        const SnackBar(content: Text('يرجى إدخال جميع الحقول المطلوبة')),
       );
       setState(() => showSpinner = false);
       return;
     }
 
     try {
-      bool isValid = await Auth().signIn(emailController, passwordController);
-
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('admin')
-          .where('email', isEqualTo: email)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('البريد الإلكتروني ليس مسجلاً كمسؤول')),
+      if (userType == 'admin') {
+        // تحقق من تسجيل الدخول كمسؤول
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: pass,
         );
-        setState(() => showSpinner = false);
-        return;
-      }
 
-      if (isValid) {
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('admin')
+            .where('email', isEqualTo: email)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('البريد الإلكتروني ليس مسجلاً كمسؤول')),
+          );
+          return;
+        }
+
         UserSession.email = email;
         UserSession.password = pass;
         Navigator.pushReplacement(
@@ -58,9 +64,32 @@ class _SignInScreenState extends State<SignInScreen> {
           MaterialPageRoute(builder: (context) => ControlPanel()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
+        // تحقق من تسجيل الدخول كمنظم
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: pass,
+        );
+
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('Organizer')
+            .where('email', isEqualTo: email)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('البريد الإلكتروني أو كلمة المرور غير صحيحة')),
+          );
+          return;
+        }
+
+        UserSession.email = email;
+        UserSession.password = pass;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => OrganizerDashboardScreen()),
         );
       }
     } catch (e) {
@@ -126,7 +155,50 @@ class _SignInScreenState extends State<SignInScreen> {
                     fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+
+                // Radio buttons for user type selection
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Radio(
+                      value: 'admin',
+                      groupValue: userType,
+                      onChanged: (value) {
+                        setState(() {
+                          userType = value!;
+                        });
+                      },
+                    ),
+                    const Text(
+                      'مسؤول',
+                      style: TextStyle(
+                        fontFamily: mainFont,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Radio(
+                      value: 'organizer',
+                      groupValue: userType,
+                      onChanged: (value) {
+                        setState(() {
+                          userType = value!;
+                        });
+                      },
+                    ),
+                    const Text(
+                      'منظم',
+                      style: TextStyle(
+                        fontFamily: mainFont,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
                 Image.asset(
                   'images/logo.png',
                   height: 140,

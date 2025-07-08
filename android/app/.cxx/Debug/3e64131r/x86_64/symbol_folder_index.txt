@@ -1,0 +1,1 @@
+C:\development\flutter-projects\gallary_management_new_edit\build\app\intermediates\cxx\Debug\3e64131r\obj\x86_64

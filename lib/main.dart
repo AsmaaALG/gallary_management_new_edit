@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/control_panal.dart';
+import 'package:gallery_management/screens/Admin/control_panal.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/firebase_options.dart';
 
@@ -12,7 +12,7 @@ void main() async {
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  ); 
+  );
 
   // قفل الشاشة على الوضع العمودي فقط
   await SystemChrome.setPreferredOrientations([
