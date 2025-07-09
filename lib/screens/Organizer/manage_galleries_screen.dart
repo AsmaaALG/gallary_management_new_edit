@@ -35,17 +35,18 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
           }
 
           if (snapshot.hasError) {
-            return const Center(child: Text('حدث خطأ أثناء جلب البيانات'));
+            return MainScreen(
+              title: 'إدارة المعارض',
+              description: 'لا يمكن تحميل البيانات. تحقق من اتصالك بالإنترنت.',
+              cards: const [],
+              addScreen: RequestAddGalleryScreen(),
+            );
           }
 
           final filteredDocs = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
             return data['company_id'] == widget.organizerCompanyId;
           }).toList();
-
-          if (filteredDocs.isEmpty) {
-            return const Center(child: Text('لا توجد معارض تابعة لك.'));
-          }
 
           final cards = filteredDocs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
@@ -106,7 +107,9 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
 
           return MainScreen(
             title: 'إدارة المعارض',
-            description: 'قم بإدارة المعارض الخاصة بشركتك من هنا.',
+            description: filteredDocs.isEmpty
+                ? 'لا توجد معارض تابعة لك حالياً. يمكنك البدء بإضافة معرض جديد.'
+                : 'قم بإدارة المعارض الخاصة بشركتك من هنا.',
             cards: cards,
             addScreen: RequestAddGalleryScreen(),
           );

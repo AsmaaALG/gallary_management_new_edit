@@ -28,21 +28,24 @@ class _ManageGalleriesScreenState extends State<ManageAdsScreen> {
         stream: FirebaseFirestore.instance.collection('ads').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
 
           if (snapshot.hasError) {
-            return const Center(child: Text('حدث خطأ أثناء جلب البيانات'));
+            return Scaffold(
+              body: Center(
+                child: Text(
+                    'لا يمكن تحميل البيانات. يرجى التحقق من الاتصال بالإنترنت.'),
+              ),
+            );
           }
 
           final filteredDocs = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
             return data['company_id'] == widget.organizerCompanyId;
           }).toList();
-
-          if (filteredDocs.isEmpty) {
-            return const Center(child: Text('لا توجد معارض تابعة لك.'));
-          }
 
           final cards = filteredDocs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
@@ -88,22 +91,27 @@ class _ManageGalleriesScreenState extends State<ManageAdsScreen> {
 
           return MainScreen(
             title: 'إدارة الإعلانات',
-            description: 'يمكنك من خلال هذه الواجهة إدارة جميع الإعلانات.',
+            description: filteredDocs.isEmpty
+                ? 'لا توجد إعلانات حالياً. يمكنك البدء بإضافة إعلان جديد.'
+                : 'يمكنك من خلال هذه الواجهة إدارة جميع الإعلانات.',
             cards: cards,
             addScreen: AddAdsScreen2(
               companyId: widget.organizerCompanyId,
             ),
             requests: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AdsRequestScreen()));
-                },
-                icon: Icon(
-                  Icons.list_alt_rounded,
-                  color: Colors.white,
-                )),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdsRequestScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.list_alt_rounded,
+                color: Colors.white,
+              ),
+            ),
           );
         },
       ),

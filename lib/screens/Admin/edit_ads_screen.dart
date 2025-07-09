@@ -25,12 +25,15 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
   final TextEditingController _qrCodeController = TextEditingController();
+  final TextEditingController _mapImageController = TextEditingController();
 
   String? _selectedClassification;
   String? _selectedCity;
   DateTime? _startDate;
   DateTime? _endDate;
   DateTime? _stopDate;
+  List<Map<String, dynamic>> _suites = [];
+
   bool _isLoading = false;
 
   @override
@@ -48,10 +51,12 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         _descriptionController.text = adData['description'] ?? '';
         _locationController.text = adData['location'] ?? '';
         _imageUrlController.text = adData['image url'] ?? '';
+        _mapImageController.text = adData['map'] ?? '';
         _qrCodeController.text = adData['QR code'] ?? '';
         _selectedClassification =
             (adData['classification id'] as DocumentReference?)?.id;
-        _selectedCity = adData['city_id'];
+        _selectedCity = adData['city'];
+        _suites = List<Map<String, dynamic>>.from(adData['suites'] ?? []);
         final dateFormat = intl.DateFormat('dd-MM-yyyy');
         _startDate = adData['start date'] != null
             ? dateFormat.parse(adData['start date'])
@@ -92,6 +97,12 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       );
       return;
     }
+    if (!_isValidMapUrl(_locationController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال رابط موقع Google Maps صالح')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -105,8 +116,11 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         'description': _descriptionController.text,
         'location': _locationController.text,
         'image url': _imageUrlController.text,
+        'map': _mapImageController.text,
         'QR code': _qrCodeController.text,
         'classification id': classificationRef,
+        'city': _selectedCity,
+        'suites': _suites,
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
         'stopAd': intl.DateFormat('dd-MM-yyyy').format(_stopDate!),
@@ -128,12 +142,71 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     }
   }
 
+  Future<void> _showAddSuiteDialog() async {
+    final nameCtl = TextEditingController();
+    final areaCtl = TextEditingController();
+    final priceCtl = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('إضافة جناح'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameCtl,
+              decoration: const InputDecoration(hintText: 'اسم الجناح'),
+            ),
+            TextField(
+              controller: areaCtl,
+              decoration: const InputDecoration(hintText: 'المساحة'),
+            ),
+            TextField(
+              controller: priceCtl,
+              decoration: const InputDecoration(hintText: 'السعر'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (nameCtl.text.trim().isEmpty ||
+                  areaCtl.text.trim().isEmpty ||
+                  priceCtl.text.trim().isEmpty) return;
+              setState(() {
+                _suites.add({
+                  'name': nameCtl.text.trim(),
+                  'area': areaCtl.text.trim(),
+                  'price': priceCtl.text.trim(),
+                });
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('إضافة'),
+          ),
+        ],
+      ),
+    );
+  }
+
   bool _isValidImageUrl(String url) {
+    final RegExp regex = RegExp(r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))\$',
+        caseSensitive: false);
+    return regex.hasMatch(url);
+  }
+
+  bool _isValidMapUrl(String url) {
+    final cleanedUrl = url.trim();
     final RegExp regex = RegExp(
-      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$',
+      r'^(https?:\/\/)?(www\.google\.com\/maps|goo\.gl\/maps|maps\.app\.goo\.gl)\/.+',
       caseSensitive: false,
     );
-    return regex.hasMatch(url);
+    return regex.hasMatch(cleanedUrl);
   }
 
   @override
@@ -164,16 +237,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'يمكنك من خلال هذه الواجهة تعديل بيانات الإعلان',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: mainFont,
-                            fontWeight: FontWeight.bold,
-                            color: primaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 30),
                         buildTextField(_titleController, 'اسم الإعلان',
                             'يرجى إدخال اسم الإعلان', true),
                         const SizedBox(height: 16),
@@ -185,6 +248,9 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         const SizedBox(height: 16),
                         buildTextField(_imageUrlController, 'رابط الصورة',
                             'يرجى إدخال رابط الصورة', true),
+                        const SizedBox(height: 16),
+                        buildTextField(_mapImageController, 'رابط خارطة المعرض',
+                            'يرجى إدخال رابط الخارطة', true),
                         const SizedBox(height: 16),
                         ClassificationDropdown(
                           selectedClassification: _selectedClassification,
@@ -251,6 +317,25 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         buildTextField(_descriptionController, 'الوصف',
                             'يرجى إدخال وصف الإعلان', true,
                             maxLines: 3),
+                        const SizedBox(height: 16),
+                        const Text('الأجنحة المضافة:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        ..._suites.map((suite) => ListTile(
+                              title: Text(suite['name']),
+                              subtitle: Text(
+                                  'المساحة: ${suite['area']} - السعر: ${suite['price']}'),
+                              trailing: IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () =>
+                                    setState(() => _suites.remove(suite)),
+                              ),
+                            )),
+                        TextButton.icon(
+                          onPressed: _showAddSuiteDialog,
+                          icon: const Icon(Icons.add),
+                          label: const Text('إضافة جناح'),
+                        ),
                         const SizedBox(height: 30),
                         Center(
                           child: ElevatedButton(
@@ -287,3 +372,4 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     );
   }
 }
+  
