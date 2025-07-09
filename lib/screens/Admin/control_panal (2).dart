@@ -9,6 +9,7 @@ import 'package:gallery_management/screens/Admin/organizing%20_company_screen.da
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/screens/Admin/dashboard_screen.dart';
+import 'package:gallery_management/screens/Admin/request_management_screen.dart';
 
 class ControlPanel extends StatefulWidget {
   const ControlPanel({super.key});
@@ -141,7 +142,7 @@ class _ControlPanelState extends State<ControlPanel> {
                     AdminCard(
                       title: 'إدارة المعارض',
                       description:
-                          'يمكنك إدارة المعارض لاضافة وتعجيل وحذف اي من المعارض .',
+                          'يمكنك إدارة المعارض لاضافة وتعديل وحذف اي من المعارض .',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -167,6 +168,18 @@ class _ControlPanelState extends State<ControlPanel> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => DashboardScreen()),
+                      ),
+                      isEnabled: true,
+                    ),
+                    AdminCard(
+                      title: 'إدارة طلبات  ',
+                      description:
+                          '  يمكنك إدارة طلبات لإنشاء معرض أو إعلانات  ',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RequestManagementScreen(),
+                        ),
                       ),
                       isEnabled: true,
                     ),

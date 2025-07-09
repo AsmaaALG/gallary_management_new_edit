@@ -1,26 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/Admin/GalleryStatistic_screen.dart';
-import 'package:gallery_management/screens/Admin/add_gallery_screen.dart';
-import 'package:gallery_management/screens/Admin/gallery_suite_screen.dart';
+import 'package:gallery_management/screens/Admin/ads_request_screen.dart';
+import 'package:gallery_management/screens/Admin/booking_requests_screen.dart';
+import 'package:gallery_management/screens/Admin/edit_ads_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
-import 'package:gallery_management/screens/Admin/review_management_screen.dart';
-import 'package:gallery_management/screens/Organizer/MyGalleryRequestsScreen.dart';
-import 'package:gallery_management/screens/Organizer/RequestAddGalleryScreen.dart';
+import 'package:gallery_management/screens/Organizer/add_ads_screen2.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 
-class ManageGalleriesScreen extends StatefulWidget {
+class ManageAdsScreen extends StatefulWidget {
   final String organizerCompanyId;
 
-  const ManageGalleriesScreen({super.key, required this.organizerCompanyId});
+  const ManageAdsScreen({super.key, required this.organizerCompanyId});
 
   @override
-  State<ManageGalleriesScreen> createState() => _ManageGalleriesScreenState();
+  State<ManageAdsScreen> createState() => _ManageGalleriesScreenState();
 }
 
-class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
+class _ManageGalleriesScreenState extends State<ManageAdsScreen> {
   final FirestoreService _firestoreService = FirestoreService();
 
   @override
@@ -28,7 +25,7 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('2').snapshots(),
+        stream: FirebaseFirestore.instance.collection('ads').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -60,8 +57,7 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            GallerySuiteScreen(galleryId: documentId),
+                        builder: (context) => EditAdsScreen(adId: documentId),
                       ),
                     );
                   },
@@ -70,32 +66,18 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
                   'icon': Icons.delete_rounded,
                   'action': () {
                     confirmDelete(context, () async {
-                      await _firestoreService
-                          .deleteGalleryAndRelatedData(documentId);
+                      await _firestoreService.deleteDocument('ads', documentId);
                     });
                   },
                 },
                 {
-                  'icon': Icons.messenger_rounded,
+                  'icon': Icons.list_alt,
                   'action': () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ReviewManagementScreen(
-                          galleryId: documentId,
-                        ),
-                      ),
-                    );
-                  },
-                },
-                {
-                  'icon': Icons.dashboard_rounded,
-                  'action': () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            GalleryStatisticsScreen(galleryId: documentId),
+                        builder: (context) =>
+                            BookingRequestsScreen(adId: documentId),
                       ),
                     );
                   },
@@ -105,10 +87,23 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
           }).toList();
 
           return MainScreen(
-            title: 'إدارة المعارض',
-            description: 'قم بإدارة المعارض الخاصة بشركتك من هنا.',
+            title: 'إدارة الإعلانات',
+            description: 'يمكنك من خلال هذه الواجهة إدارة جميع الإعلانات.',
             cards: cards,
-            addScreen: RequestAddGalleryScreen(),
+            addScreen: AddAdsScreen2(
+              companyId: widget.organizerCompanyId,
+            ),
+            requests: IconButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AdsRequestScreen()));
+                },
+                icon: Icon(
+                  Icons.list_alt_rounded,
+                  color: Colors.white,
+                )),
           );
         },
       ),

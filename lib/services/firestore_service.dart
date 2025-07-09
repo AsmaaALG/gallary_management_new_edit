@@ -101,6 +101,29 @@ class FirestoreService {
       return false;
     }
   }
+//////////////////////////////////////////////
+  Future<String?> checkEmailLocation(String email) async {
+  final adminSnapshot = await FirebaseFirestore.instance
+      .collection('admin')
+      .where('email', isEqualTo: email)
+      .get();
+
+  if (adminSnapshot.docs.isNotEmpty) {
+    return 'admin';
+  }
+
+  final organizerSnapshot = await FirebaseFirestore.instance
+      .collection('Organizer')
+      .where('email', isEqualTo: email)
+      .get();
+
+  if (organizerSnapshot.docs.isNotEmpty) {
+    return 'organizer';
+  }
+
+  return null; // إذا لم يوجد في أي جدول
+}
+
 
 //////////////////////////////////////////////////////////////////////////
   ///ادارة الاعلانــــــــــــــات

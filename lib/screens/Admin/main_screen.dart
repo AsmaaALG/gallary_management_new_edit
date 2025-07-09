@@ -9,13 +9,14 @@ class MainScreen extends StatefulWidget {
     required this.description,
     required this.cards,
     required this.addScreen,
-    this.galleryName, // نضيف اسم المعرض هنا اختياري
+    this.galleryName,  this.requests, // نضيف اسم المعرض هنا اختياري
   });
 
   final String title;
   final String description;
   final List<MainCard> cards;
   final Widget addScreen;
+  final Widget? requests;
   final String? galleryName;
 
   @override
@@ -68,6 +69,11 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 )
               : null,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: widget.requests,)
+          ],
           centerTitle: false,
         ),
         body: CustomScrollView(

@@ -2,17 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/screens/Organizer/manage_ads_screen.dart';
 import 'manage_galleries_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 
 class OrganizerDashboardScreen extends StatelessWidget {
-  const OrganizerDashboardScreen({super.key});
+   final String userId;
+
+  const OrganizerDashboardScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
-    final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+final String currentUserId = userId;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -93,7 +96,12 @@ class OrganizerDashboardScreen extends StatelessWidget {
                               'يمكنك إدارة الإعلانات والترويج للمعارض بالإضافة إلى إدارة طلبات الحجز لكل معرض.',
                           isEnabled: true,
                           onTap: () {
-                            // ضيف التنقل هنا لو تحب
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ManageAdsScreen(
+                                      organizerCompanyId: companyId)),
+                            );
                           },
                         ),
                         SizedBox(height: 20),

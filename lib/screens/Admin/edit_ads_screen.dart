@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
+import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gallery_management/services/firestore_service.dart';
-
 
 class EditAdsScreen extends StatefulWidget {
   final String adId;
@@ -27,6 +27,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   final TextEditingController _qrCodeController = TextEditingController();
 
   String? _selectedClassification;
+  String? _selectedCity;
   DateTime? _startDate;
   DateTime? _endDate;
   DateTime? _stopDate;
@@ -50,6 +51,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
         _qrCodeController.text = adData['QR code'] ?? '';
         _selectedClassification =
             (adData['classification id'] as DocumentReference?)?.id;
+        _selectedCity = adData['city_id'];
         final dateFormat = intl.DateFormat('dd-MM-yyyy');
         _startDate = adData['start date'] != null
             ? dateFormat.parse(adData['start date'])
@@ -193,6 +195,12 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
+                        CityDropdown(
+                          selectedCity: _selectedCity,
+                          onChanged: (value) =>
+                              setState(() => _selectedCity = value?.id),
+                        ),
+                        const SizedBox(height: 16),
                         DatePickerField(
                           label: 'تاريخ البدء',
                           initialDate: _startDate,
@@ -249,8 +257,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                             onPressed: _isLoading ? null : _updateAd,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
-                              minimumSize:
-                                  Size(isWideScreen ? 250 : double.infinity, 50),
+                              minimumSize: Size(
+                                  isWideScreen ? 250 : double.infinity, 50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),

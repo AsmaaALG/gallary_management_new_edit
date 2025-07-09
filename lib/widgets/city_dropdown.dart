@@ -1,42 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_management/models/city.dart';
 import 'package:gallery_management/models/classification.dart';
+import 'package:gallery_management/services/citys_service.dart';
 import 'package:gallery_management/services/classification_service.dart';
 import 'package:gallery_management/constants.dart';
 
-class ClassificationDropdown extends StatefulWidget {
-  final String? selectedClassification;
-  final void Function(Classification?) onChanged;
+class CityDropdown extends StatefulWidget {
+  final String? selectedCity;
+  final void Function(City?) onChanged;
 
-  const ClassificationDropdown({
+  const CityDropdown({
     super.key,
-    required this.selectedClassification,
+    required this.selectedCity,
     required this.onChanged,
   });
 
   @override
-  State<ClassificationDropdown> createState() => _ClassificationDropdownState();
+  State<CityDropdown> createState() => _CityDropdownState();
 }
 
-class _ClassificationDropdownState extends State<ClassificationDropdown> {
-  final ClassificationService _classificationService = ClassificationService();
-  Map<String, String> _classificationMap = {};
+class _CityDropdownState extends State<CityDropdown> {
+  final CitysService _citysService = CitysService();
+  Map<String, String> _cityMap = {};
   String? _selectedId;
 
   @override
   void initState() {
     super.initState();
-    _selectedId = widget.selectedClassification;
-    _fetchClassifications();
+    _selectedId = widget.selectedCity;
+    _fetchCities();
   }
 
-  Future<void> _fetchClassifications() async {
+  Future<void> _fetchCities() async {
     try {
-      final list = await _classificationService.fetchClassifications();
+      final list = await _citysService.fetchCitys();
       final map = {
-        for (var item in list) item.id: item.name,
+        for (var city in list) city.id: city.name,
       };
+
       setState(() {
-        _classificationMap = map;
+        _cityMap = map;
       });
     } catch (e) {
       _showSnackBar(e.toString());
@@ -49,7 +52,7 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
     );
   }
 
-  Future<void> _addNewClassification() async {
+  Future<void> _addNewCity() async {
     final controller = TextEditingController();
 
     final result = await showDialog<String>(
@@ -58,10 +61,10 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            title: const Text('إضافة تصنيف جديد'),
+            title: const Text('إضافة مدينة جديدة'),
             content: TextField(
               controller: controller,
-              decoration: const InputDecoration(hintText: 'اسم التصنيف'),
+              decoration: const InputDecoration(hintText: 'اسم المدينة'),
             ),
             actions: [
               TextButton(
@@ -80,16 +83,16 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
 
     if (result != null && result.trim().isNotEmpty) {
       try {
-        await _classificationService.addClassification(result.trim());
-        await _fetchClassifications();
-        _showSnackBar('تمت إضافة التصنيف بنجاح');
+        await _citysService.addCity(result.trim());
+        await _fetchCities();
+        _showSnackBar('تمت إضافة المدينة بنجاح');
       } catch (e) {
         _showSnackBar(e.toString());
       }
     }
   }
 
-  Future<void> _deleteClassification(String id) async {
+  Future<void> _deleteCity(String id) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -97,7 +100,7 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             title: const Text('تأكيد الحذف'),
-            content: const Text('هل تريد حذف هذا التصنيف؟'),
+            content: const Text('هل تريد حذف هذه المدينة؟'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -115,13 +118,13 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
 
     if (confirmed == true) {
       try {
-        await _classificationService.deleteClassification(id);
-        await _fetchClassifications();
+        await _citysService.deleteCity(id);
+        await _fetchCities();
         if (_selectedId == id) {
           setState(() => _selectedId = null);
           widget.onChanged(null);
         }
-        _showSnackBar('تم حذف التصنيف');
+        _showSnackBar('تم حذف المدينة');
       } catch (e) {
         _showSnackBar(e.toString());
       }
@@ -137,9 +140,10 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
             value: _selectedId,
             isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'التصنيف',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(40)),
+              labelText: 'المدينة',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(40),
                 borderSide: const BorderSide(color: Colors.grey),
@@ -149,14 +153,14 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
                 borderSide: BorderSide(color: primaryColor),
               ),
             ),
-            items: _classificationMap.entries.map((entry) {
+            items: _cityMap.entries.map((entry) {
               return DropdownMenuItem<String>(
                 value: entry.key,
                 child: Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.close, size: 18),
-                      onPressed: () => _deleteClassification(entry.key),
+                      onPressed: () => _deleteCity(entry.key),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -180,15 +184,15 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
               if (value == null) {
                 widget.onChanged(null);
               } else {
-                final name = _classificationMap[value]!;
-                widget.onChanged(Classification(id: value, name: name));
+                final cityName = _cityMap[value]!;
+                widget.onChanged(City(id: value, name: cityName));
               }
             },
           ),
         ),
         const SizedBox(width: 10),
         ElevatedButton(
-          onPressed: _addNewClassification,
+          onPressed: _addNewCity,
           child: const Text('+'),
         ),
       ],

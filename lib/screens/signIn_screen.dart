@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart'; // استيراد مكتبة 
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/user_session.dart';
-import 'package:gallery_management/screens/Admin/control_panal.dart';
+import 'package:gallery_management/screens/Admin/control_panal%20(2).dart';
 import 'package:gallery_management/screens/Organizer/organizer_dashboard_screen.dart';
 import 'package:gallery_management/widgets/custom_text_field.dart';
 
@@ -89,7 +89,10 @@ class _SignInScreenState extends State<SignInScreen> {
         UserSession.password = pass;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => OrganizerDashboardScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                OrganizerDashboardScreen(userId: userCredential.user!.uid),
+          ),
         );
       }
     } catch (e) {
