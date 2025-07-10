@@ -255,6 +255,11 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                   buildTextField(_titleController, 'اسم الإعلان',
                       'أدخل عنوان الاعلان', true),
                   const SizedBox(height: 16),
+                  buildTextField(_descriptionController, 'الوصف',
+                      'يرجى إدخال وصف المعرض', true,
+                      maxLines: 3),
+                  const SizedBox(height: 16),
+
                   buildTextField(
                       _qrCodeController, 'رمز QR', 'أدخل رمز ', false),
                   const SizedBox(height: 16),
@@ -326,14 +331,17 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                   ),
                   const SizedBox(height: 16),
                   DatePickerField(
-                      label: 'تاريخ إيقاف الإعلان',
-                      initialDate: _stopDate,
-                      onDateChanged: (picked) =>
-                          setState(() => _stopDate = picked)),
-                  const SizedBox(height: 16),
-                  buildTextField(
-                      _descriptionController, 'الوصف', 'أدخل الوصف هنا', true,
-                      maxLines: 3),
+                    label: 'تاريخ إيقاف الإعلان',
+                    initialDate: _stopDate,
+                    startDateLimit:
+                        _startDate, //  لا يمكن إيقاف الإعلان قبل بداية العرض
+                    endDateLimit: _endDate, //  لا يمكن إيقاف الإعلان بعد نهايته
+                    onDateChanged: (picked) {
+                      setState(() {
+                        _stopDate = picked;
+                      });
+                    },
+                  ),
                   const SizedBox(height: 16),
 
                   // عرض الأجنحة المضافة
