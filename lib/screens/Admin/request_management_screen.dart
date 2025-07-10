@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/Admin/control_panal%20(2).dart';
 import 'package:gallery_management/screens/Admin/gallery_requests_screen.dart';
+import 'package:gallery_management/screens/Admin/ads_request_screen.dart';
 
 //import 'package:gallery_management/screens/Admin/ad_request_management_screen.dart';
 
@@ -79,7 +79,8 @@ class RequestManagementScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ControlPanel(),
+                          builder: (context) =>
+                              const AdsRequestManagementScreen(),
                         ),
                       );
                     },

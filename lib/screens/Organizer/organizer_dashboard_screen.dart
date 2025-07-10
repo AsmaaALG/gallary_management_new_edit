@@ -8,14 +8,14 @@ import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 
 class OrganizerDashboardScreen extends StatelessWidget {
-   final String userId;
+  final String userId;
 
   const OrganizerDashboardScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
-final String currentUserId = userId;
+    final String currentUserId = userId;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -44,91 +44,116 @@ final String currentUserId = userId;
             }
 
             final organizerData = snapshot.data!.data() as Map<String, dynamic>;
+            // تغير الي درته متاع اسم شركة
             final companyId = organizerData['company_id'];
 
-            return Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: 30, horizontal: isWideScreen ? 250 : 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'لوحة تحكم المنظمين',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: primaryColor,
-                      fontFamily: mainFont,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'من خلال هذه الواجهة يمكنك متابعة أحدث الطلبات والإعلانات الجديدة',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: mainFont,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        AdminCard(
-                          title: 'إدارة المعارض',
-                          description:
-                              'يمكنك إدارة المعارض لاضافة وتعديل أي من المعارض.',
-                          isEnabled: true,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ManageGalleriesScreen(
-                                  organizerCompanyId: companyId,
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('company')
+                  .doc(companyId)
+                  .get(),
+              builder: (context, companySnapshot) {
+                if (companySnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (!companySnapshot.hasData || !companySnapshot.data!.exists) {
+                  return Center(child: Text('لم يتم العثور على بيانات الشركة'));
+                }
+
+                final companyData =
+                    companySnapshot.data!.data() as Map<String, dynamic>;
+                final companyName = companyData['name'] ?? '---';
+
+                //
+
+                return Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: 30, horizontal: isWideScreen ? 250 : 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'لوحة تحكم المنظمين ل$companyName',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: primaryColor,
+                          fontFamily: mainFont,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
+                      SizedBox(height: 10),
+                      SizedBox(height: 10),
+                      Text(
+                        'من خلال هذه الواجهة يمكنك متابعة أحدث الطلبات والإعلانات الجديدة',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: mainFont,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            AdminCard(
+                              title: 'إدارة المعارض',
+                              description:
+                                  'يمكنك إدارة المعارض لاضافة وتعديل أي من المعارض.',
+                              isEnabled: true,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ManageGalleriesScreen(
+                                      organizerCompanyId: companyId,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            AdminCard(
+                              title: 'إدارة الإعلانات',
+                              description:
+                                  'يمكنك إدارة الإعلانات والترويج للمعارض بالإضافة إلى إدارة طلبات الحجز لكل معرض.',
+                              isEnabled: true,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ManageAdsScreen(
+                                          organizerCompanyId: companyId)),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              onPressed: () {
+                                Auth().signOut(context);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SignInScreen(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "تسجيل الخروج",
+                                style: TextStyle(
+                                  fontFamily: mainFont,
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                        AdminCard(
-                          title: 'إدارة الإعلانات',
-                          description:
-                              'يمكنك إدارة الإعلانات والترويج للمعارض بالإضافة إلى إدارة طلبات الحجز لكل معرض.',
-                          isEnabled: true,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ManageAdsScreen(
-                                      organizerCompanyId: companyId)),
-                            );
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        TextButton(
-                          onPressed: () {
-                            Auth().signOut(context);
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SignInScreen(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            "تسجيل الخروج",
-                            style: TextStyle(
-                              fontFamily: mainFont,
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         ),

@@ -34,9 +34,12 @@ class _DatePickerFieldState extends State<DatePickerField> {
 
   Future<void> _pickDate() async {
     final DateTime now = DateTime.now();
-    final DateTime initial = _selectedDate ?? now;
     final DateTime first = widget.startDateLimit ?? DateTime(2000);
     final DateTime last = widget.endDateLimit ?? DateTime(2100);
+
+    DateTime initial = _selectedDate ?? now;
+    if (initial.isBefore(first)) initial = first;
+    if (initial.isAfter(last)) initial = last;
 
     final DateTime? picked = await showDatePicker(
       context: context,

@@ -1,4 +1,3 @@
-// gallery_request_management_screen.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
@@ -46,9 +45,11 @@ class _GalleryRequestManagementScreenState
         .update({'status': newStatus});
 
     if (newStatus == 'accepted') {
-      await FirebaseFirestore.instance.collection('2').add({
+      await FirebaseFirestore.instance.collection('galleries').add({
         'title': data['title'],
         'description': data['description'],
+        'city': data['city'],
+        'company_id': data['company_id'],
         'company_name': data['company_name'],
         'location': data['location'],
         'classification id': data['classification id'],
@@ -58,7 +59,6 @@ class _GalleryRequestManagementScreenState
         'image url': data['image url'],
         'map': data['map'],
         'created_at': Timestamp.now(),
-        'owner_id': data['owner_id'],
       });
     }
 
@@ -70,12 +70,10 @@ class _GalleryRequestManagementScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('تأكيد الحذف',
-            style: TextStyle(
-                fontFamily: mainFont,
-                fontWeight: FontWeight.bold,
-                fontSize: 18)),
+            style:
+                TextStyle(fontFamily: mainFont, fontWeight: FontWeight.bold)),
         content: const Text('هل أنت متأكد من حذف هذا الطلب؟',
-            style: TextStyle(fontFamily: mainFont, fontSize: 15)),
+            style: TextStyle(fontFamily: mainFont)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -110,139 +108,164 @@ class _GalleryRequestManagementScreenState
       future: (data['classification id'] != null)
           ? (data['classification id'] as DocumentReference).get()
           : Future.value(null),
-      builder: (context, snapshot) {
-        final classificationName = snapshot.hasData && snapshot.data != null
-            ? (snapshot.data!.data() as Map<String, dynamic>)['name'] ?? '---'
+      builder: (context, classificationSnapshot) {
+        final classificationName = classificationSnapshot.hasData &&
+                classificationSnapshot.data != null
+            ? (classificationSnapshot.data!.data()
+                    as Map<String, dynamic>)['name'] ??
+                '---'
             : '---';
 
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('تاريخ الطلب: $formattedRequestedAt',
-                    style: const TextStyle(
-                        fontFamily: mainFont,
-                        color: Color.fromARGB(255, 133, 132, 132))),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance
+              .collection('city')
+              .doc(data['city'])
+              .get(),
+          builder: (context, citySnapshot) {
+            final cityName = citySnapshot.hasData
+                ? citySnapshot.data!.get('name') ?? '---'
+                : '---';
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      ' عنوان المعرض : ${data['title'] ?? 'بدون عنوان'}',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: mainFont,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: primaryColor),
-                      onPressed: () => _showDeleteConfirmation(doc.id),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text('الوصف: ${data['description'] ?? '---'}',
-                    style: const TextStyle(fontFamily: mainFont)),
-                Text('الشركة: ${data['company_name'] ?? '---'}',
-                    style: const TextStyle(fontFamily: mainFont)),
-                Text('الموقع: ${data['location'] ?? '---'}',
-                    style: const TextStyle(fontFamily: mainFont)),
-                Text('عدد الأجنحة: ${data['suites_count'] ?? 0}',
-                    style: const TextStyle(fontFamily: mainFont)),
-                Text('التصنيف: $classificationName',
-                    style: const TextStyle(fontFamily: mainFont)),
-                const SizedBox(height: 10),
-                Text('تاريخ البداية: ${data['start date'] ?? '---'}',
-                    style: const TextStyle(fontFamily: mainFont)),
-                Text('تاريخ النهاية: ${data['end date'] ?? '---'}',
-                    style: const TextStyle(fontFamily: mainFont)),
-                if (data['map'] != null)
-                  TextButton(
-                    onPressed: () async {
-                      final url = Uri.parse(data['map']);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: const Text('عرض الخريطة',
-                        style: TextStyle(
+                    Text('تاريخ الطلب: $formattedRequestedAt',
+                        style: const TextStyle(
                             fontFamily: mainFont,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold)),
-                  ),
-                if (data['image url'] != null) ...[
-                  const SizedBox(height: 10),
-                  const Text('صورة الغلاف:',
-                      style: TextStyle(fontFamily: mainFont)),
-                  const SizedBox(height: 5),
-                  Image.network(data['image url'], height: 150),
-                ],
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    OutlinedButton(
-                      onPressed: () {
-                        confirmRequest(
-                          context: context,
-                          actionType: 'accept',
-                          onConfirm: () async {
-                            await updateRequestStatus(
-                                docId: doc.id,
-                                newStatus: 'accepted',
-                                data: data);
-                          },
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text('قبول الطلب',
-                          style: TextStyle(
+                            color: Color.fromARGB(255, 133, 132, 132))),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          ' عنوان المعرض : ${data['title'] ?? 'بدون عنوان'}',
+                          style: const TextStyle(
+                              fontSize: 16,
                               fontFamily: mainFont,
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold)),
+                              fontWeight: FontWeight.bold),
+                          maxLines: 5, // عدد الأسطر القصوى
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: primaryColor),
+                          onPressed: () => _showDeleteConfirmation(doc.id),
+                        )
+                      ],
                     ),
-                    const SizedBox(width: 20),
-                    OutlinedButton(
-                      onPressed: () {
-                        confirmRequest(
-                          context: context,
-                          actionType: 'reject',
-                          onConfirm: () async {
-                            await updateRequestStatus(
-                                docId: doc.id,
-                                newStatus: 'rejected',
-                                data: data);
-                          },
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                    const SizedBox(height: 10),
+                    Text(
+                      'الشركة: ${data['company_name'] ?? '---'}',
+                      style: const TextStyle(fontFamily: mainFont),
+                      maxLines: 5, // عدد الأسطر القصوى
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text('المنطقة: $cityName',
+                        style: const TextStyle(fontFamily: mainFont)),
+                    Text(
+                      'الوصف: ${data['description'] ?? '---'}',
+                      style: const TextStyle(fontFamily: mainFont),
+                      maxLines: 5, // عدد الأسطر القصوى
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text('التصنيف: $classificationName',
+                        style: const TextStyle(fontFamily: mainFont)),
+                    Text('عدد الأجنحة: ${data['suites_count'] ?? 0}',
+                        style: const TextStyle(fontFamily: mainFont)),
+                    const SizedBox(height: 10),
+                    Text('تاريخ البداية: ${data['start date'] ?? '---'}',
+                        style: const TextStyle(fontFamily: mainFont)),
+                    Text('تاريخ النهاية: ${data['end date'] ?? '---'}',
+                        style: const TextStyle(fontFamily: mainFont)),
+                    if (data['map'] != null)
+                      TextButton(
+                        onPressed: () async {
+                          final url = Uri.parse(data['map']);
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url,
+                                mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: const Text('عرض الخريطة',
+                            style: TextStyle(
+                                fontFamily: mainFont,
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold)),
                       ),
-                      child: const Text('رفض الطلب',
-                          style: TextStyle(
-                              fontFamily: mainFont,
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold)),
+                    if (data['image url'] != null) ...[
+                      const SizedBox(height: 10),
+                      const Text('صورة الغلاف:',
+                          style: TextStyle(fontFamily: mainFont)),
+                      const SizedBox(height: 5),
+                      Image.network(data['image url'], height: 150),
+                    ],
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        OutlinedButton(
+                          onPressed: () {
+                            confirmRequest(
+                              context: context,
+                              actionType: 'accept',
+                              onConfirm: () async {
+                                await updateRequestStatus(
+                                    docId: doc.id,
+                                    newStatus: 'accepted',
+                                    data: data);
+                              },
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('قبول الطلب',
+                              style: TextStyle(
+                                  fontFamily: mainFont,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(width: 20),
+                        OutlinedButton(
+                          onPressed: () {
+                            confirmRequest(
+                              context: context,
+                              actionType: 'reject',
+                              onConfirm: () async {
+                                await updateRequestStatus(
+                                    docId: doc.id,
+                                    newStatus: 'rejected',
+                                    data: data);
+                              },
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('رفض الطلب',
+                              style: TextStyle(
+                                  fontFamily: mainFont,
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -259,6 +282,15 @@ class _GalleryRequestManagementScreenState
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: const Text(
+            'طلبات إنشاء معرض',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: mainFont,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
           ),
         ),
         body: Padding(

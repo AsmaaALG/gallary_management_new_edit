@@ -107,10 +107,9 @@ class _AddAdsScreenState extends State<AddAdsScreen> {
   }
 
   bool _isValidImageUrl(String url) {
-    final RegExp regex = RegExp(
-      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$',
-      caseSensitive: false,
-    );
+    final RegExp regex =
+        RegExp(r'^https?:\/\/.*\.(png|jpe?g|gif|bmp)', caseSensitive: false);
+
     return regex.hasMatch(url);
   }
 
