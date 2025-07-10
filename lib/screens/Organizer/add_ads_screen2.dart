@@ -326,18 +326,10 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                   ),
                   const SizedBox(height: 16),
                   DatePickerField(
-                    label: 'تاريخ إيقاف الإعلان',
-                    initialDate: _stopDate,
-                    startDateLimit:
-                        _startDate, //  لا يمكن إيقاف الإعلان قبل بداية العرض
-                    endDateLimit: _endDate, //  لا يمكن إيقاف الإعلان بعد نهايته
-                    onDateChanged: (picked) {
-                      setState(() {
-                        _stopDate = picked;
-                      });
-                    },
-                  ),
-
+                      label: 'تاريخ إيقاف الإعلان',
+                      initialDate: _stopDate,
+                      onDateChanged: (picked) =>
+                          setState(() => _stopDate = picked)),
                   const SizedBox(height: 16),
                   buildTextField(
                       _descriptionController, 'الوصف', 'أدخل الوصف هنا', true,

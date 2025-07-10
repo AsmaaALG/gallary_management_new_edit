@@ -103,7 +103,7 @@ class _ManageGalleriesScreenState extends State<ManageAdsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AdsRequestScreen(),
+                    builder: (context) => AdsRequestManagementScreen(),
                   ),
                 );
               },
