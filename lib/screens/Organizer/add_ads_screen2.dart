@@ -186,7 +186,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
       await _firestoreService.addData('ads_requests', adData);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تمت إضافة الإعلان بنجاح')),
+        const SnackBar(content: Text('تم إرسال طلب الإعلان بنجاح')),
       );
 
       Navigator.pop(context);

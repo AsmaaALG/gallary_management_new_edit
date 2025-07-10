@@ -96,8 +96,18 @@ class _SignInScreenState extends State<SignInScreen> {
         );
       }
     } catch (e) {
+      String errorMessage = 'حدث خطأ أثناء محاولة تسجيل الدخول.';
+
+      if (e is FirebaseAuthException) {
+        if (e.code == 'user-not-found' ||
+            e.code == 'invalid-credential' ||
+            e.code == 'wrong-password') {
+          errorMessage = 'تأكد من صحة البريد الإلكتروني أو كلمة المرور';
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('حدث خطأ أثناء محاولة تسجيل الدخول: $e')),
+        SnackBar(content: Text(errorMessage)),
       );
     } finally {
       setState(() => showSpinner = false);

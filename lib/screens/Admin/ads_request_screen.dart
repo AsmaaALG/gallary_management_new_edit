@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/widgets/confirm_ads_request.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
 
 class AdsRequestManagementScreen extends StatefulWidget {
@@ -178,20 +179,42 @@ class _AdsRequestManagementScreenState
                     style: const TextStyle(fontFamily: mainFont)),
                 Text('تاريخ  إيقاف الإعلان: ${data['stopAd'] ?? '---'}',
                     style: const TextStyle(fontFamily: mainFont)),
-                if (data['map'] != null) ...[
-                  const SizedBox(height: 10),
-                  const Text('صورة الخريطة:',
-                      style: TextStyle(fontFamily: mainFont)),
-                  const SizedBox(height: 5),
-                  Image.network(data['map'], height: 150),
-                ],
-                if (data['image url'] != null) ...[
-                  const SizedBox(height: 10),
-                  const Text('صورة الإعلان:',
-                      style: TextStyle(fontFamily: mainFont)),
-                  const SizedBox(height: 5),
-                  Image.network(data['image url'], height: 150),
-                ],
+                if (data['map'] != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: TextButton(
+                      onPressed: () async {
+                        final url = Uri.parse(data['map']);
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url,
+                              mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      child: const Text('عرض الخريطة',
+                          style: TextStyle(
+                              fontFamily: mainFont,
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                if (data['image url'] != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: TextButton(
+                      onPressed: () async {
+                        final url = Uri.parse(data['image url']);
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url,
+                              mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      child: const Text('عرض صورة الغلاف',
+                          style: TextStyle(
+                              fontFamily: mainFont,
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -206,6 +229,7 @@ class _AdsRequestManagementScreenState
                               'title': data['title'],
                               'company_id': data['company_id'],
                               'description': data['description'],
+                              'city': data['city'],
                               'location': data['location'],
                               'classification id': data['classification id'],
                               'start date': data['start date'],
@@ -233,6 +257,23 @@ class _AdsRequestManagementScreenState
                                   .collection('ads')
                                   .add(adData);
                             }
+                            // 3. إنشاء الإشعار المرتبط بالإعلان
+
+                            DocumentReference adRef = await FirebaseFirestore
+                                .instance
+                                .collection('ads')
+                                .add(adData);
+
+                            String adId = adRef.id;
+                            await FirebaseFirestore.instance
+                                .collection('notifications')
+                                .add({
+                              'title': adData['title'],
+                              'body': adData['description'],
+                              'timestamp': FieldValue.serverTimestamp(),
+                              'ad_id': adId,
+                            });
+//
 
                             // تحديث حالة الطلب
                             await FirebaseFirestore.instance

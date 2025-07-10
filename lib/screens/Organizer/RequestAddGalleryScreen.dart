@@ -128,7 +128,7 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
       await _firestoreService.addData('gallery_requests', requestData);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم إرسال الطلب بنجاح')),
+        const SnackBar(content: Text('تم إرسال طلب المعرض بنجاح')),
       );
 
       Navigator.pop(context);
