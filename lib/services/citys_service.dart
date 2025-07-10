@@ -7,8 +7,7 @@ class CitysService {
 
   Future<List<City>> fetchCitys() async {
     try {
-      QuerySnapshot snapshot =
-          await _firestore.collection('city').get();
+      QuerySnapshot snapshot = await _firestore.collection('city').get();
       return snapshot.docs.map((doc) {
         return City(id: doc.id, name: doc['name']);
       }).toList();
@@ -19,7 +18,7 @@ class CitysService {
 
   Future<void> addCity(String name) async {
     try {
-      await _firestore.collection('classification').add({'name': name});
+      await _firestore.collection('city').add({'name': name});
     } catch (e) {
       throw Exception('فشل في إضافة التصنيف: $e');
     }
@@ -29,8 +28,7 @@ class CitysService {
     final adsQuery = await _firestore
         .collection('2')
         .where('city id',
-            isEqualTo:
-                _firestore.collection('city').doc(classificationId))
+            isEqualTo: _firestore.collection('city').doc(classificationId))
         .limit(1)
         .get();
 
@@ -38,9 +36,6 @@ class CitysService {
       throw Exception('لا يمكن حذف المدينة لانها مربوطة بمعارض');
     }
 
-    await _firestore
-        .collection('city')
-        .doc(classificationId)
-        .delete();
+    await _firestore.collection('city').doc(classificationId).delete();
   }
 }

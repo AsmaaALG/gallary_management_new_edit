@@ -5,84 +5,99 @@ import 'package:gallery_management/screens/Admin/suite_images_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EditSuiteScreen extends StatefulWidget {
-  final String suiteId; // معرف الجناح المُراد تعديله
+  final String suiteId;
+  final String galleryId;
 
-  const EditSuiteScreen({super.key, required this.suiteId});
+  const EditSuiteScreen(
+      {super.key, required this.suiteId, required this.galleryId});
 
   @override
   State<EditSuiteScreen> createState() => _EditSuiteScreenState();
 }
 
 class _EditSuiteScreenState extends State<EditSuiteScreen> {
-  final _nameController = TextEditingController();
-  final _descController = TextEditingController();
-  final _imageController = TextEditingController();
-  bool isLoading = true; // حالة تحميل البيانات من قاعدة البيانات
+  final _nameCtl = TextEditingController();
+  final _descCtl = TextEditingController();
+  final _imageCtl = TextEditingController();
+  final _titleCtl = TextEditingController();
+  final _priceCtl = TextEditingController();
+  final _sizeCtl = TextEditingController();
+
+  bool isLoading = true;
   bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
   @override
   void initState() {
     super.initState();
-    fetchSuiteData(); // جلب البيانات عند بداية فتح الصفحة
+    fetchSuiteData();
   }
 
-  // دالة لجلب بيانات الجناح من Firestore
   Future<void> fetchSuiteData() async {
     final doc = await FirebaseFirestore.instance
         .collection('suite')
         .doc(widget.suiteId)
         .get();
     if (doc.exists) {
-      // تعبئة الحقول بالقيم الموجودة في قاعدة البيانات
-      _nameController.text = doc['name'];
-      _descController.text = doc['description'];
-      _imageController.text = doc['main image'];
+      final data = doc.data()!;
+      _nameCtl.text = data['name'] ?? '';
+      _descCtl.text = data['description'] ?? '';
+      _imageCtl.text = data['main image'] ?? '';
+      _titleCtl.text = data['title on map'] ?? '';
+      _priceCtl.text = data['price']?.toString() ?? '';
+      _sizeCtl.text = data['size']?.toString() ?? '';
     }
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
-  // دالة لتحديث بيانات الجناح في Firestore
   Future<void> updateSuite() async {
-    await FirebaseFirestore.instance
-        .collection('suite')
-        .doc(widget.suiteId)
-        .update({
-      'name': _nameController.text,
-      'description': _descController.text,
-      'main image': _imageController.text,
-    });
+    try {
+      final suiteData = {
+        'gallery id': widget.galleryId,
+        'name': _nameCtl.text.trim(),
+        'description': _descCtl.text.trim(),
+        'main image': _imageCtl.text.trim(),
+        'title on map': _titleCtl.text.trim(),
+        'price': double.parse(_priceCtl.text.trim()),
+        'size': double.parse(_sizeCtl.text.trim()),
+      };
 
-    // إظهار رسالة تأكيد
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('تم تعديل بيانات الجناح بنجاح'),
-        backgroundColor: const Color.fromARGB(255, 123, 123, 123),
-      ),
-    );
+      await FirebaseFirestore.instance
+          .collection('suite')
+          .doc(widget.suiteId)
+          .update(suiteData);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم تعديل بيانات الجناح بنجاح'),
+          backgroundColor: Color.fromARGB(255, 123, 123, 123),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('حدث خطأ: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
-  // عنصر مخصص لإنشاء حقل مع عنوان فوقه
-  Widget buildLabeledField(String label, TextEditingController controller,
-      {int maxLines = 1}) {
+  Widget buildTextField(String label, TextEditingController controller,
+      {int maxLines = 1, TextInputType keyboardType = TextInputType.text}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // العنوان
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: mainFont,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(label,
+            style: const TextStyle(
+              fontFamily: mainFont,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            )),
         const SizedBox(height: 8),
-        // حقل النص
         TextField(
           controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
@@ -100,13 +115,13 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 15),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final isWideScreen = MediaQuery.of(context).size.width > 600;
 
     return Directionality(
@@ -116,10 +131,7 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
           title: const Text(
             'تعديل بيانات الجناح',
             style: TextStyle(
-              fontSize: 16,
-              fontFamily: mainFont,
-              color: Colors.white,
-            ),
+                fontSize: 16, fontFamily: mainFont, color: Colors.white),
           ),
           backgroundColor: primaryColor,
           leading: IconButton(
@@ -127,7 +139,6 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        // عرض مؤشر تحميل إذا لم يتم جلب البيانات بعد
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
@@ -137,178 +148,86 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 10),
-
                       const Text(
                         "يمكنك من خلال هذه الواجهة تعديل بيانات الجناح عبر تعبئة الحقول التالية:",
-                        style: TextStyle(
-                          fontFamily: mainFont,
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
+                        style: TextStyle(fontFamily: mainFont, fontSize: 14),
                       ),
                       const SizedBox(height: 25),
-
-                      buildLabeledField('اسم الجناح', _nameController),
-                      const SizedBox(height: 15),
-                      buildLabeledField('وصف الجناح', _descController,
-                          maxLines: 5),
-                      const SizedBox(height: 15),
-                      buildLabeledField('رابط صورة الجناح', _imageController),
-                      const SizedBox(height: 16),
+                      buildTextField('اسم الجناح', _nameCtl),
+                      buildTextField('وصف الجناح', _descCtl, maxLines: 5),
+                      buildTextField('رابط صورة الجناح', _imageCtl),
+                      buildTextField('العنوان على الخريطة', _titleCtl),
+                      buildTextField('السعر', _priceCtl,
+                          keyboardType: TextInputType.number),
+                      buildTextField('المساحة (م²)', _sizeCtl,
+                          keyboardType: TextInputType.number),
                       ElevatedButton(
-                          onPressed: () async {
-                            if (await canLaunchUrl(imgurUrl)) {
-                              await launchUrl(imgurUrl,
-                                  mode: LaunchMode.externalApplication);
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                'افتح Imgur لرفع صورة',
-                                style: TextStyle(
-                                    fontFamily: mainFont, fontSize: 10),
-                              ),
+                        onPressed: () async {
+                          if (await canLaunchUrl(imgurUrl)) {
+                            await launchUrl(imgurUrl,
+                                mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'افتح Imgur لرفع صورة',
+                              style:
+                                  TextStyle(fontFamily: mainFont, fontSize: 10),
                             ),
-                          )),
-
-                      const SizedBox(height: 40),
-
-                      // زر تعديل البيانات
-                      isWeb(context)
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              // crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                SizedBox(
-                                  // width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: updateSuite,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: secondaryColor,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 50),
-                                      child: const Text(
-                                        'تعديل',
-                                        style: TextStyle(
-                                          fontFamily: mainFont,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 15,
-                                ),
-                                // زر الانتقال لعرض صور الجناح
-                                SizedBox(
-                                  // width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              SuiteImageScreen(
-                                                  suiteId: widget.suiteId),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: secondaryColor,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 20),
-                                      child: const Text(
-                                        'عرض صور الجناح',
-                                        style: TextStyle(
-                                          fontFamily: mainFont,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: updateSuite,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: secondaryColor,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'تعديل',
-                                      style: TextStyle(
-                                        fontFamily: mainFont,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 15),
-
-                                // زر الانتقال لعرض صور الجناح
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              SuiteImageScreen(
-                                                  suiteId: widget.suiteId),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: secondaryColor,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'عرض صور الجناح',
-                                      style: TextStyle(
-                                        fontFamily: mainFont,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      Wrap(
+                        spacing: 15,
+                        runSpacing: 10,
+                        alignment: isWeb(context)
+                            ? WrapAlignment.center
+                            : WrapAlignment.start,
+                        children: [
+                          ElevatedButton(
+                            onPressed: updateSuite,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: secondaryColor,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25)),
                             ),
+                            child: const Text(
+                              'تعديل',
+                              style: TextStyle(
+                                  fontFamily: mainFont, color: Colors.black),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      SuiteImageScreen(suiteId: widget.suiteId),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: secondaryColor,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25)),
+                            ),
+                            child: const Text(
+                              'عرض صور الجناح',
+                              style: TextStyle(
+                                  fontFamily: mainFont, color: Colors.black),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

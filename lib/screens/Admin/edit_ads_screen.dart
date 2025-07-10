@@ -372,4 +372,3 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
     );
   }
 }
-  

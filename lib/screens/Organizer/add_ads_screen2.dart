@@ -31,6 +31,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
 
   String? _selectedClassification;
   String? _selectedCity;
+  String? _companyName;
 
   DateTime? _startDate;
   DateTime? _endDate;
@@ -97,6 +98,23 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
       ),
     );
   }
+Future<void> _fetchCompanyName() async {
+    try {
+        final companySnapshot = await FirebaseFirestore.instance
+            .collection('company')
+            .doc(widget.companyId)
+            .get();
+
+        if (companySnapshot.exists) {
+          setState(() {
+            _companyName = companySnapshot['name'];
+          });
+        
+      }
+    } catch (e) {
+      print('خطأ في جلب اسم الشركة: $e');
+    }
+  }
 
   Future<void> _addAd() async {
     if (!_formKey.currentState!.validate()) return;
@@ -157,6 +175,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
         'stopAd': intl.DateFormat('dd-MM-yyyy').format(_stopDate!),
         'status': 'pending',
         'company_id': widget.companyId,
+        'company_name': _companyName,
         'suites': _suites,
         'city': _selectedCity,
         'requested_by': FirebaseAuth.instance.currentUser!.uid,
