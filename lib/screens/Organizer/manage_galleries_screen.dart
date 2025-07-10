@@ -39,7 +39,9 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
               title: 'إدارة المعارض',
               description: 'لا يمكن تحميل البيانات. تحقق من اتصالك بالإنترنت.',
               cards: const [],
-              addScreen: RequestAddGalleryScreen(),
+              addScreen: RequestAddGalleryScreen(
+                companyId: widget.organizerCompanyId,
+              ),
             );
           }
 
@@ -111,7 +113,23 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
                 ? 'لا توجد معارض تابعة لك حالياً. يمكنك البدء بإضافة معرض جديد.'
                 : 'قم بإدارة المعارض الخاصة بشركتك من هنا.',
             cards: cards,
-            addScreen: RequestAddGalleryScreen(),
+            addScreen: RequestAddGalleryScreen(
+              companyId: widget.organizerCompanyId,
+            ),
+            requests: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyGalleryRequestsScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.list_alt_rounded,
+                color: Colors.white,
+              ),
+            ),
           );
         },
       ),

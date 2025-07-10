@@ -55,7 +55,6 @@ class _GalleryRequestManagementScreenState
         'classification id': data['classification id'],
         'start date': data['start date'],
         'end date': data['end date'],
-        'suites_count': data['suites_count'],
         'image url': data['image url'],
         'map': data['map'],
         'created_at': Timestamp.now(),
@@ -131,138 +130,92 @@ class _GalleryRequestManagementScreenState
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('تاريخ الطلب: $formattedRequestedAt',
-                        style: const TextStyle(
-                            fontFamily: mainFont,
-                            color: Color.fromARGB(255, 133, 132, 132))),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Padding(
+                    padding:
+                        EdgeInsets.all(constraints.maxWidth > 600 ? 24 : 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          ' عنوان المعرض : ${data['title'] ?? 'بدون عنوان'}',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              fontFamily: mainFont,
-                              fontWeight: FontWeight.bold),
-                          maxLines: 5, // عدد الأسطر القصوى
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close, color: primaryColor),
-                          onPressed: () => _showDeleteConfirmation(doc.id),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'الشركة: ${data['company_name'] ?? '---'}',
-                      style: const TextStyle(fontFamily: mainFont),
-                      maxLines: 5, // عدد الأسطر القصوى
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text('المنطقة: $cityName',
-                        style: const TextStyle(fontFamily: mainFont)),
-                    Text(
-                      'الوصف: ${data['description'] ?? '---'}',
-                      style: const TextStyle(fontFamily: mainFont),
-                      maxLines: 5, // عدد الأسطر القصوى
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text('التصنيف: $classificationName',
-                        style: const TextStyle(fontFamily: mainFont)),
-                    Text('عدد الأجنحة: ${data['suites_count'] ?? 0}',
-                        style: const TextStyle(fontFamily: mainFont)),
-                    const SizedBox(height: 10),
-                    Text('تاريخ البداية: ${data['start date'] ?? '---'}',
-                        style: const TextStyle(fontFamily: mainFont)),
-                    Text('تاريخ النهاية: ${data['end date'] ?? '---'}',
-                        style: const TextStyle(fontFamily: mainFont)),
-                    if (data['map'] != null)
-                      TextButton(
-                        onPressed: () async {
-                          final url = Uri.parse(data['map']);
-                          if (await canLaunchUrl(url)) {
-                            await launchUrl(url,
-                                mode: LaunchMode.externalApplication);
-                          }
-                        },
-                        child: const Text('عرض الخريطة',
-                            style: TextStyle(
+                        Text('تاريخ الطلب: $formattedRequestedAt',
+                            style: const TextStyle(
                                 fontFamily: mainFont,
-                                color: primaryColor,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    if (data['image url'] != null) ...[
-                      const SizedBox(height: 10),
-                      const Text('صورة الغلاف:',
-                          style: TextStyle(fontFamily: mainFont)),
-                      const SizedBox(height: 5),
-                      Image.network(data['image url'], height: 150),
-                    ],
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        OutlinedButton(
-                          onPressed: () {
-                            confirmRequest(
-                              context: context,
-                              actionType: 'accept',
-                              onConfirm: () async {
-                                await updateRequestStatus(
-                                    docId: doc.id,
-                                    newStatus: 'accepted',
-                                    data: data);
-                              },
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: const Text('قبول الطلب',
-                              style: TextStyle(
-                                  fontFamily: mainFont,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold)),
+                                color: Color.fromARGB(255, 133, 132, 132))),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'عنوان المعرض: ${data['title'] ?? 'بدون عنوان'}',
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: mainFont,
+                                    fontWeight: FontWeight.bold),
+                                softWrap: true,
+                              ),
+                            ),
+                            IconButton(
+                              icon:
+                                  const Icon(Icons.close, color: primaryColor),
+                              onPressed: () => _showDeleteConfirmation(doc.id),
+                            )
+                          ],
                         ),
-                        const SizedBox(width: 20),
-                        OutlinedButton(
-                          onPressed: () {
-                            confirmRequest(
-                              context: context,
-                              actionType: 'reject',
-                              onConfirm: () async {
-                                await updateRequestStatus(
-                                    docId: doc.id,
-                                    newStatus: 'rejected',
-                                    data: data);
+                        const SizedBox(height: 10),
+                        _buildInfoRow('الشركة:', data['company_name'] ?? '---'),
+                        _buildInfoRow('المنطقة:', cityName),
+                        _buildInfoRow('الوصف:', data['description'] ?? '---',
+                            isDescription: true),
+                        _buildInfoRow('التصنيف:', classificationName),
+                        const SizedBox(height: 10),
+                        _buildInfoRow(
+                            'تاريخ البداية:', data['start date'] ?? '---'),
+                        _buildInfoRow(
+                            'تاريخ النهاية:', data['end date'] ?? '---'),
+                        if (data['map'] != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: TextButton(
+                              onPressed: () async {
+                                final url = Uri.parse(data['map']);
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url,
+                                      mode: LaunchMode.externalApplication);
+                                }
                               },
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                              child: const Text('عرض الخريطة',
+                                  style: TextStyle(
+                                      fontFamily: mainFont,
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold)),
+                            ),
                           ),
-                          child: const Text('رفض الطلب',
-                              style: TextStyle(
-                                  fontFamily: mainFont,
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.bold)),
-                        ),
+                        if (data['image url'] != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: TextButton(
+                              onPressed: () async {
+                                final url = Uri.parse(data['image url']);
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url,
+                                      mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              child: const Text('عرض صورة الغلاف',
+                                  style: TextStyle(
+                                      fontFamily: mainFont,
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        const SizedBox(height: 10),
+                        _buildActionButtons(data, doc.id),
                       ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             );
           },
@@ -271,9 +224,112 @@ class _GalleryRequestManagementScreenState
     );
   }
 
+  Widget _buildInfoRow(String label, String value,
+      {bool isDescription = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$label ',
+              style: const TextStyle(
+                  fontFamily: mainFont, fontWeight: FontWeight.bold)),
+          Expanded(
+            child: Text(value,
+                style: const TextStyle(fontFamily: mainFont),
+                softWrap: true,
+                maxLines: isDescription ? null : 3,
+                overflow: isDescription
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(Map<String, dynamic> data, String docId) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 400) {
+          return Row(
+            children: [
+              Expanded(
+                child: _buildAcceptButton(data, docId),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildRejectButton(data, docId),
+              ),
+            ],
+          );
+        } else {
+          return Column(
+            children: [
+              _buildAcceptButton(data, docId),
+              const SizedBox(height: 12),
+              _buildRejectButton(data, docId),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildAcceptButton(Map<String, dynamic> data, String docId) {
+    return OutlinedButton(
+      onPressed: () {
+        confirmRequest(
+          context: context,
+          actionType: 'accept',
+          onConfirm: () async {
+            await updateRequestStatus(
+                docId: docId, newStatus: 'accepted', data: data);
+          },
+        );
+      },
+      style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.white,
+        side: const BorderSide(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        minimumSize: const Size(double.infinity, 48),
+      ),
+      child: const Text('قبول الطلب',
+          style: TextStyle(
+              fontFamily: mainFont,
+              color: Colors.green,
+              fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _buildRejectButton(Map<String, dynamic> data, String docId) {
+    return OutlinedButton(
+      onPressed: () {
+        confirmRequest(
+          context: context,
+          actionType: 'reject',
+          onConfirm: () async {
+            await updateRequestStatus(
+                docId: docId, newStatus: 'rejected', data: data);
+          },
+        );
+      },
+      style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.white,
+        side: const BorderSide(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        minimumSize: const Size(double.infinity, 48),
+      ),
+      child: const Text('رفض الطلب',
+          style: TextStyle(
+              fontFamily: mainFont,
+              color: primaryColor,
+              fontWeight: FontWeight.bold)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isWideScreen = MediaQuery.of(context).size.width > 600;
     return Directionality(
       textDirection: ui.TextDirection.rtl,
       child: Scaffold(
@@ -293,27 +349,33 @@ class _GalleryRequestManagementScreenState
             ),
           ),
         ),
-        body: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: isWideScreen ? 100 : 20, vertical: 20),
-          child: FutureBuilder<List<QueryDocumentSnapshot>>(
-            future: fetchPendingRequests(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(
-                    child: Text('لا توجد طلبات إنشاء معارض',
-                        style: TextStyle(fontFamily: mainFont, fontSize: 15)));
-              } else {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) =>
-                      buildRequestCard(snapshot.data![index]),
-                );
-              }
-            },
-          ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: constraints.maxWidth > 600 ? 100 : 20,
+                  vertical: 20),
+              child: FutureBuilder<List<QueryDocumentSnapshot>>(
+                future: fetchPendingRequests(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                        child: Text('لا توجد طلبات إنشاء معارض',
+                            style:
+                                TextStyle(fontFamily: mainFont, fontSize: 15)));
+                  } else {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) =>
+                          buildRequestCard(snapshot.data![index]),
+                    );
+                  }
+                },
+              ),
+            );
+          },
         ),
       ),
     );

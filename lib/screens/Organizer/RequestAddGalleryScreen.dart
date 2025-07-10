@@ -4,13 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
+import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart';
 
 class RequestAddGalleryScreen extends StatefulWidget {
-  const RequestAddGalleryScreen({super.key});
+  final String companyId;
+  const RequestAddGalleryScreen({super.key, required this.companyId});
 
   @override
   State<RequestAddGalleryScreen> createState() =>
@@ -27,9 +29,9 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
   final TextEditingController _imageUrlController = TextEditingController();
   final TextEditingController _qrCodeController = TextEditingController();
   final TextEditingController _mapController = TextEditingController();
-  final TextEditingController _suitesCountController = TextEditingController();
 
   String? _selectedClassification;
+  String? _selectedCity;
   DateTime? _startDate;
   DateTime? _endDate;
   String? _companyName;
@@ -76,9 +78,24 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
     if (_selectedClassification == null ||
         _startDate == null ||
         _endDate == null ||
-        _companyName == null) {
+        _companyName == null ||
+        _selectedCity == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى تعبئة كل الحقول المطلوبة')),
+      );
+      return;
+    }
+
+    if (!_isValidImageUrl(_imageUrlController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+      );
+      return;
+    }
+
+    if (!_isValidMapUrl(_locationController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال رابط موقع Google Maps صالح')),
       );
       return;
     }
@@ -99,9 +116,11 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
         'QR code': _qrCodeController.text,
         'classification id': classificationRef,
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
+        'company_id': widget.companyId,
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
         'company_name': _companyName,
-        'status': 'pending', // للحالة المستقبلية للقبول أو الرفض
+        'status': 'pending',
+        'city': _selectedCity,
         'requested_by': FirebaseAuth.instance.currentUser!.uid,
         'requested_at': FieldValue.serverTimestamp(),
       };
@@ -122,6 +141,23 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
     }
   }
 
+  // دالة التحقق من رابط الصورة
+  bool _isValidImageUrl(String url) {
+    final RegExp regex = RegExp(r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$',
+        caseSensitive: false);
+    return regex.hasMatch(url);
+  }
+
+  // دالة التحقق من رابط Google Maps
+  bool _isValidMapUrl(String url) {
+    final cleanedUrl = url.trim();
+    final RegExp regex = RegExp(
+      r'^(https?:\/\/)?(www\.google\.com\/maps|goo\.gl\/maps|maps\.app\.goo\.gl)\/.+',
+      caseSensitive: false,
+    );
+    return regex.hasMatch(cleanedUrl);
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -130,7 +166,6 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
     _imageUrlController.dispose();
     _qrCodeController.dispose();
     _mapController.dispose();
-    _suitesCountController.dispose();
     super.dispose();
   }
 
@@ -142,12 +177,13 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          foregroundColor: Colors.white,
+          title: const Text('طلب إضافة معرض',
+              style: TextStyle(
+                  fontSize: 16, fontFamily: mainFont, color: Colors.white)),
           backgroundColor: primaryColor,
-          title: const Text(
-            'طلب إضافة معرض',
-            style: TextStyle(
-                fontSize: 16, fontFamily: mainFont, color: Colors.white),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
         body: Padding(
@@ -157,27 +193,33 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
             key: _formKey,
             child: SingleChildScrollView(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_companyName != null)
-                    Text('اسم الشركة: $_companyName',
-                        style: const TextStyle(
-                            fontFamily: mainFont,
-                            fontWeight: FontWeight.bold,
-                            color: primaryColor)),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('اسم الشركة: $_companyName',
+                          style: const TextStyle(
+                              fontFamily: mainFont,
+                              fontWeight: FontWeight.bold,
+                              color: primaryColor)),
+                    ),
                   const SizedBox(height: 30),
                   buildTextField(
                       _titleController, 'اسم المعرض', 'أدخل اسم المعرض', true),
-                  const SizedBox(height: 20),
-                  buildTextField(_descriptionController, 'الوصف',
-                      'أدخل وصفًا للمعرض', true,
-                      maxLines: 3),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  buildTextField(
+                      _qrCodeController, 'رمز QR', 'أدخل رمز', false),
+                  const SizedBox(height: 16),
                   buildTextField(
                       _locationController, 'الموقع', 'أدخل موقع المعرض', true),
-                  const SizedBox(height: 17),
+                  const SizedBox(height: 16),
                   buildTextField(_imageUrlController, 'رابط صورة الغلاف',
                       'رابط مباشر للصورة', true),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
+                  buildTextField(_mapController, 'رابط خارطة المعرض',
+                      'رابط صورة لخارطة المعرض', false),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () async {
                       final Uri imgurUrl =
@@ -189,67 +231,76 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
                     },
                     child: const Text('افتح Imgur لرفع صورة'),
                   ),
-                  const SizedBox(height: 20),
-                  buildTextField(_mapController, 'رابط خارطة المعرض',
-                      'رابط صورة لخارطة المعرض', false),
-                  const SizedBox(height: 20),
-                  buildTextField(
-                      _qrCodeController, 'رمز QR', 'رمز QR إن وجد', false),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   ClassificationDropdown(
                     selectedClassification: _selectedClassification,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedClassification = value?.id;
-                      });
-                    },
+                    onChanged: (value) =>
+                        setState(() => _selectedClassification = value?.id),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  CityDropdown(
+                    selectedCity: _selectedCity,
+                    onChanged: (value) =>
+                        setState(() => _selectedCity = value?.id),
+                  ),
+                  const SizedBox(height: 16),
                   DatePickerField(
-                    label: 'تاريخ البدء',
-                    initialDate: _startDate,
-                    endDateLimit: _endDate,
-                    onDateChanged: (picked) =>
-                        setState(() => _startDate = picked),
-                  ),
-                  const SizedBox(height: 20),
+                      label: 'تاريخ البدء',
+                      initialDate: _startDate,
+                      endDateLimit: _endDate,
+                      onDateChanged: (picked) {
+                        setState(() {
+                          _startDate = picked;
+                          if (_endDate != null && _endDate!.isBefore(picked)) {
+                            _endDate = null;
+                          }
+                        });
+                      }),
+                  const SizedBox(height: 16),
                   DatePickerField(
                     label: 'تاريخ الانتهاء',
                     initialDate: _endDate,
                     startDateLimit: _startDate,
-                    onDateChanged: (picked) =>
-                        setState(() => _endDate = picked),
-                  ),
-                  const SizedBox(height: 20),
-                  // buildTextField(
-                  //   _suitesCountController,
-                  //   'عدد الأجنحة',
-                  //   'عدد الأجنحة المتوفرة',
-                  //   true,
-                  //   keyboardType: TextInputType.number,
-                  // ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _submitRequest,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      minimumSize:
-                          Size(isWideScreen ? 250 : double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'إرسال الطلب',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: mainFont,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                    onDateChanged: (picked) {
+                      if (_startDate != null && picked.isBefore(_startDate!)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية'),
+                            backgroundColor: Colors.red,
                           ),
+                        );
+                        return;
+                      }
+                      setState(() {
+                        _endDate = picked;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  buildTextField(_descriptionController, 'الوصف',
+                      'أدخل وصفًا للمعرض', true,
+                      maxLines: 3),
+                  const SizedBox(height: 30),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _submitRequest,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        minimumSize:
+                            Size(isWideScreen ? 100 : double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('إرسال الطلب',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: mainFont,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                    ),
                   ),
                 ],
               ),
