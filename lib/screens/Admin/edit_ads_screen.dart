@@ -195,8 +195,9 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   }
 
   bool _isValidImageUrl(String url) {
-    final RegExp regex = RegExp(r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))\$',
-        caseSensitive: false);
+    final RegExp regex =
+        RegExp(r'^https?:\/\/.*\.(png|jpe?g|gif|bmp)', caseSensitive: false);
+
     return regex.hasMatch(url);
   }
 
@@ -307,6 +308,10 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         DatePickerField(
                           label: 'تاريخ إيقاف الإعلان',
                           initialDate: _stopDate,
+                          startDateLimit:
+                              _startDate, //  لا يمكن إيقاف الإعلان قبل بداية العرض
+                          endDateLimit:
+                              _endDate, //  لا يمكن إيقاف الإعلان بعد نهايته
                           onDateChanged: (picked) {
                             setState(() {
                               _stopDate = picked;
