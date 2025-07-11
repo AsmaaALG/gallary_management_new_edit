@@ -22,11 +22,9 @@ class _AdsRequestManagementScreenState
         .where('status', isEqualTo: 'pending')
         .get();
 
-    // فلترة الطلبات التي تحتوي على requested_at
     List<QueryDocumentSnapshot> validDocs =
         snapshot.docs.where((doc) => doc['requested_at'] != null).toList();
 
-    // ترتيبهم تنازليًا (الأحدث أولاً)
     validDocs.sort((a, b) {
       Timestamp aTime = a['requested_at'];
       Timestamp bTime = b['requested_at'];
@@ -116,14 +114,15 @@ class _AdsRequestManagementScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      ' عنوان الإعلان : ${data['title'] ?? 'بدون عنوان'}',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: mainFont,
-                          fontWeight: FontWeight.bold),
-                      maxLines: 5, // عدد الأسطر القصوى
-                      overflow: TextOverflow.ellipsis,
+                    Expanded(
+                      child: Text(
+                        'عنوان الإعلان: ${data['title'] ?? 'بدون عنوان'}',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontFamily: mainFont,
+                            fontWeight: FontWeight.bold),
+                        softWrap: true,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, color: primaryColor),
@@ -135,14 +134,12 @@ class _AdsRequestManagementScreenState
                 Text(
                   'الشركة: ${data['company_name'] ?? '---'}',
                   style: const TextStyle(fontFamily: mainFont),
-                  maxLines: 5, // عدد الأسطر القصوى
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
                 ),
                 FutureBuilder<DocumentSnapshot>(
                   future: FirebaseFirestore.instance
-                      .collection(
-                          'city') // تأكد من اسم المجموعة عندك في Firebase
-                      .doc(data['city']) // هذا String ID
+                      .collection('city')
+                      .doc(data['city'])
                       .get(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -158,26 +155,30 @@ class _AdsRequestManagementScreenState
                     }
                   },
                 ),
+                const SizedBox(height: 8),
                 Text(
                   'الوصف: ${data['description'] ?? '---'}',
                   style: const TextStyle(fontFamily: mainFont),
-                  maxLines: 5, // عدد الأسطر القصوى
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
                 ),
+                const SizedBox(height: 8),
                 Text('التصنيف: $classificationName',
                     style: const TextStyle(fontFamily: mainFont)),
                 if (data['suites'] != null &&
                     data['suites'] is List &&
                     data['suites'].isNotEmpty) ...[
-                  // const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Text('عدد الأجنحة: ${data['suites'].length}',
                       style: const TextStyle(fontFamily: mainFont)),
                 ],
+                const SizedBox(height: 8),
                 Text('تاريخ البداية: ${data['start date'] ?? '---'}',
                     style: const TextStyle(fontFamily: mainFont)),
+                const SizedBox(height: 8),
                 Text('تاريخ النهاية: ${data['end date'] ?? '---'}',
                     style: const TextStyle(fontFamily: mainFont)),
-                Text('تاريخ  إيقاف الإعلان: ${data['stopAd'] ?? '---'}',
+                const SizedBox(height: 8),
+                Text('تاريخ إيقاف الإعلان: ${data['stopAd'] ?? '---'}',
                     style: const TextStyle(fontFamily: mainFont)),
                 if (data['map'] != null)
                   Padding(
@@ -216,7 +217,8 @@ class _AdsRequestManagementScreenState
                     ),
                   ),
                 const SizedBox(height: 20),
-                Row(
+                // Changed from Row to Column to stack buttons vertically
+                Column(
                   children: [
                     OutlinedButton(
                       onPressed: () {
@@ -242,22 +244,18 @@ class _AdsRequestManagementScreenState
                               'status': 'active',
                             };
 
-                            // إضافة الإعلان في جدول ads العام
                             await FirebaseFirestore.instance
                                 .collection('ads')
                                 .add(adData);
 
-                            // إذا كان عنده company_id نضيفه أيضًا في ads الخاصة بالشركة
                             if (companyId != null &&
                                 companyId.toString().isNotEmpty) {
                               await FirebaseFirestore.instance
-                                  .collection(
-                                      'company') // أو استبدلها لو اسم مجموعة المنظم مختلف
+                                  .collection('company')
                                   .doc(companyId)
                                   .collection('ads')
                                   .add(adData);
                             }
-                            // 3. إنشاء الإشعار المرتبط بالإعلان
 
                             DocumentReference adRef = await FirebaseFirestore
                                 .instance
@@ -273,9 +271,7 @@ class _AdsRequestManagementScreenState
                               'timestamp': FieldValue.serverTimestamp(),
                               'ad_id': adId,
                             });
-//
 
-                            // تحديث حالة الطلب
                             await FirebaseFirestore.instance
                                 .collection('ads_requests')
                                 .doc(doc.id)
@@ -287,9 +283,12 @@ class _AdsRequestManagementScreenState
                       },
                       style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 244, 194, 185)),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(40)),
+                        minimumSize: const Size(
+                            double.infinity, 48), // Full width button
                       ),
                       child: const Text('قبول الطلب',
                           style: TextStyle(
@@ -297,7 +296,7 @@ class _AdsRequestManagementScreenState
                               color: Colors.green,
                               fontWeight: FontWeight.bold)),
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(height: 12), // Space between buttons
                     OutlinedButton(
                       onPressed: () {
                         confirmAdRequest(
@@ -315,9 +314,12 @@ class _AdsRequestManagementScreenState
                       },
                       style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 244, 194, 185)),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(40)),
+                        minimumSize: const Size(
+                            double.infinity, 48), // Full width button
                       ),
                       child: const Text('رفض الطلب',
                           style: TextStyle(

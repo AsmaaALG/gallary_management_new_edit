@@ -238,6 +238,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 16),
                         buildTextField(_titleController, 'اسم الإعلان',
                             'يرجى إدخال اسم الإعلان', true),
                         const SizedBox(height: 16),

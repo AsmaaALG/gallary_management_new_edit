@@ -17,12 +17,10 @@ class AddAdminScreen extends StatefulWidget {
 
 class _AddAdminScreenState extends State<AddAdminScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
-
   int selectedState = 0;
 
   bool isValidEmail(String email) {
@@ -48,6 +46,7 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
+    final horizontalPadding = isWideScreen ? 40.0 : 20.0; // تعديل البادينق
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -69,7 +68,8 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(
-              vertical: 30, horizontal: isWideScreen ? 250 : 30),
+              vertical: 30,
+              horizontal: horizontalPadding), // استخدام البادينق المعدل
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
@@ -159,7 +159,7 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text('تمت إضافة المسؤول بنجاح'),
-                                      backgroundColor: Colors.green,
+                                      backgroundColor: Colors.grey,
                                     ),
                                   );
                                 } else {

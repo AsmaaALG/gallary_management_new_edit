@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AddSuiteScreen extends StatefulWidget {
   final String galleryId;
@@ -22,6 +23,7 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
   final TextEditingController _sizeCtl = TextEditingController();
 
   bool _isLoading = false;
+  final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
 
   @override
   void dispose() {
@@ -197,6 +199,25 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
                     validator: _validateImageUrl,
                   ),
                   const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (await canLaunchUrl(imgurUrl)) {
+                        await launchUrl(imgurUrl,
+                            mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          'افتح Imgur لرفع صورة',
+                          style: TextStyle(fontFamily: mainFont, fontSize: 10),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _titleCtl,
                     decoration: buildInputDecoration('عنوان الجناح على الخارطة',
@@ -208,7 +229,6 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
                     controller: _sizeCtl,
                     decoration: buildInputDecoration(
                         'مساحة الجناح بالمتر المربع', 'أدخل مساحة الجناح'),
-                    keyboardType: TextInputType.number,
                     validator: _validateNumber,
                   ),
                   const SizedBox(height: 16),
@@ -216,7 +236,6 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
                     controller: _priceCtl,
                     decoration: buildInputDecoration(
                         'سعر الجناح بالدينار الليبي', 'أدخل سعر الجناح'),
-                    keyboardType: TextInputType.number,
                     validator: _validateNumber,
                   ),
                   const SizedBox(height: 30),

@@ -57,7 +57,8 @@ class _ControlPanelState extends State<ControlPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final isWideScreen = MediaQuery.of(context).size.width > 600;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth > 800 ? screenWidth * 0.15 : 16.0;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -86,11 +87,12 @@ class _ControlPanelState extends State<ControlPanel> {
           ],
         ),
         body: Padding(
-          padding: EdgeInsets.symmetric(
-              vertical: 30, horizontal: isWideScreen ? 250 : 30),
+          padding:
+              EdgeInsets.symmetric(vertical: 10, horizontal: horizontalPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 30),
               Text(
                 'لوحة التحكم',
                 style: TextStyle(
@@ -98,9 +100,8 @@ class _ControlPanelState extends State<ControlPanel> {
                     color: primaryColor,
                     fontFamily: mainFont,
                     fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 'من خلال هذه الواجهة يمكنك متابعة أحدث الطلبات والإعلانات الجديدة',
                 style: TextStyle(
@@ -108,7 +109,7 @@ class _ControlPanelState extends State<ControlPanel> {
                   fontFamily: mainFont,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 30),
               Expanded(
                 child: ListView(
                   children: [
@@ -161,17 +162,6 @@ class _ControlPanelState extends State<ControlPanel> {
                       isEnabled: true,
                     ),
                     AdminCard(
-                      title: 'التقارير والإحصائيات',
-                      description:
-                          'عرض تقارير تفصيلية حول المعارض، المستخدمين، الحجوزات والمفضلات.',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => DashboardScreen()),
-                      ),
-                      isEnabled: true,
-                    ),
-                    AdminCard(
                       title: 'إدارة طلبات  ',
                       description:
                           '  يمكنك إدارة طلبات لإنشاء معرض أو إعلانات  ',
@@ -183,8 +173,20 @@ class _ControlPanelState extends State<ControlPanel> {
                       ),
                       isEnabled: true,
                     ),
-                    SizedBox(height: 20),
-                    TextButton(
+                    AdminCard(
+                      title: 'التقارير والإحصائيات',
+                      description:
+                          'عرض تقارير تفصيلية حول المعارض، المستخدمين، الحجوزات والمفضلات.',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DashboardScreen()),
+                      ),
+                      isEnabled: true,
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: TextButton(
                         onPressed: () {
                           Auth().signOut(context);
                           Navigator.pushReplacement(
@@ -199,7 +201,9 @@ class _ControlPanelState extends State<ControlPanel> {
                               fontFamily: mainFont,
                               color: primaryColor,
                               fontWeight: FontWeight.bold),
-                        ))
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -227,30 +231,41 @@ class AdminCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       color: isEnabled ? null : Colors.grey[200],
-      child: ListTile(
-        title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              fontFamily: mainFont,
-              color: isEnabled ? primaryColor : Colors.grey,
-            ),
-          ),
-        ),
-        subtitle: Text(
-          description,
-          style: TextStyle(
-            fontSize: 14,
-            fontFamily: mainFont,
-            color: isEnabled ? null : Colors.grey,
-          ),
-        ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
         onTap: isEnabled ? onTap : null,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: mainFont,
+                  color: isEnabled ? primaryColor : Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: mainFont,
+                  color: isEnabled ? null : Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -97,7 +97,6 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
         TextField(
           controller: controller,
           maxLines: maxLines,
-          keyboardType: keyboardType,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,

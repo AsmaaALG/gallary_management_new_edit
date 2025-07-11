@@ -290,8 +290,8 @@ class _GalleryRequestManagementScreenState
       },
       style: OutlinedButton.styleFrom(
         backgroundColor: Colors.white,
-        side: const BorderSide(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: const BorderSide(color: Color.fromARGB(255, 244, 194, 185)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
         minimumSize: const Size(double.infinity, 48),
       ),
       child: const Text('قبول الطلب',
@@ -316,8 +316,8 @@ class _GalleryRequestManagementScreenState
       },
       style: OutlinedButton.styleFrom(
         backgroundColor: Colors.white,
-        side: const BorderSide(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: const BorderSide(color: Color.fromARGB(255, 244, 194, 185)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
         minimumSize: const Size(double.infinity, 48),
       ),
       child: const Text('رفض الطلب',

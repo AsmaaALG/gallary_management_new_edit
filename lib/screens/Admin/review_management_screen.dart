@@ -43,7 +43,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(
-              vertical: 30, horizontal: isWideScreen ? 250 : 30),
+              vertical: 30, horizontal: isWideScreen ? 20 : 10),
           child: Column(
             children: [
               const Text(
@@ -52,7 +52,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
               ),
               const SizedBox(height: 20),
 
-              // مربع البحث العادي
+              // مربع البحث
               Container(
                 width: isWideScreen ? 300 : double.infinity,
                 height: 40,
@@ -153,7 +153,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
 
                             return Container(
                               margin: const EdgeInsets.symmetric(
-                                  vertical: 15, horizontal: 20),
+                                  vertical: 15, horizontal: 10),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 border: Border.all(
@@ -163,9 +163,9 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
                                 ),
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(35),
-                                  topRight: Radius.circular(0),
                                   bottomLeft: Radius.circular(35),
                                   bottomRight: Radius.circular(35),
+                                  topRight: Radius.circular(0),
                                 ),
                               ),
                               child: Padding(

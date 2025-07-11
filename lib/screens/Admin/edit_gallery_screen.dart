@@ -5,6 +5,7 @@ import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
+import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart';
@@ -28,7 +29,8 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
   final TextEditingController _qrCodeController = TextEditingController();
   final TextEditingController _mapController = TextEditingController();
 
-  String? _selectedClassification; // للتصنيف المختار
+  String? _selectedClassification;
+  String? _selectedCity;
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isLoading = false;
@@ -37,7 +39,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchGalleryData(); // جلب بيانات المعرض
+    _fetchGalleryData();
   }
 
   Future<void> _fetchGalleryData() async {
@@ -51,9 +53,10 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
         _imageUrlController.text = data['image url'] ?? '';
         _qrCodeController.text = data['QR code'] ?? '';
         _mapController.text = data['map'] ?? '';
+        _selectedCity = data['city'] ?? '';
 
         var classificationRef = data['classification id'] as DocumentReference?;
-        _selectedClassification = classificationRef?.id; // تعيين المعرف مباشرة
+        _selectedClassification = classificationRef?.id;
 
         final dateFormat = intl.DateFormat('dd-MM-yyyy');
         _startDate = data['start date'] != null
@@ -63,14 +66,12 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
             ? dateFormat.parse(data['end date'])
             : null;
         _isInitialized = true;
-
         _isLoading = false;
       });
     } else {
-      // معالجة الحالة عندما لا توجد بيانات
       setState(() {
         _isLoading = false;
-        _isInitialized = true; // تعيين الحالة بعد التحميل
+        _isInitialized = true;
       });
     }
   }
@@ -89,8 +90,13 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
       );
       return;
     }
+    if (_selectedCity == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى اختيار المدينة')),
+      );
+      return;
+    }
 
-    // تحقق من رابط الصورة
     if (!_isValidImageUrl(_imageUrlController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
@@ -102,7 +108,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
     try {
       final classificationRef = FirebaseFirestore.instance
           .collection('classification')
-          .doc(_selectedClassification); // استخدام المعرف مباشرة
+          .doc(_selectedClassification);
 
       DocumentSnapshot classificationDoc = await classificationRef.get();
 
@@ -120,7 +126,8 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
         'image url': _imageUrlController.text,
         'QR code': _qrCodeController.text,
         'map': _mapController.text,
-        'classification id': classificationRef, // تخزين المرجع
+        'classification id': classificationRef,
+        'city': _selectedCity,
         'start date': intl.DateFormat('dd-MM-yyyy').format(_startDate!),
         'end date': intl.DateFormat('dd-MM-yyyy').format(_endDate!),
       };
@@ -140,10 +147,9 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
     }
   }
 
-// دالة للتحقق من رابط الصورة
   bool _isValidImageUrl(String url) {
     final RegExp regex = RegExp(
-      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$', // تحقق من امتدادات الصور
+      r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$',
       caseSensitive: false,
     );
     return regex.hasMatch(url);
@@ -152,6 +158,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
+    final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -275,12 +282,25 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                                 ],
                               ),
                         const SizedBox(height: 16),
-                        buildTextField(
-                            _mapController,
-                            'رابط صورة خارطة المعرض',
-                            'يرجى إدخال رابط الصورة',
-                            false),
-
+                        buildTextField(_mapController, 'رابط صورة خارطة المعرض',
+                            'يرجى إدخال رابط الصورة', false),
+                        const SizedBox(height: 16),
+                        // City Dropdown
+                        CityDropdown(
+                          selectedCity: _selectedCity,
+                          onChanged: (value) => setState(() {
+                            _selectedCity = value?.id;
+                          }),
+                        ),
+                        const SizedBox(height: 16),
+                        ClassificationDropdown(
+                          selectedClassification: _selectedClassification,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedClassification = value?.id;
+                            });
+                          },
+                        ),
                         const SizedBox(height: 16),
                         DatePickerField(
                           label: 'تاريخ البدء',
@@ -320,18 +340,6 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         ),
 
                         const SizedBox(height: 16),
-                        // حقل اختيار التصنيف
-
-                        ClassificationDropdown(
-                          selectedClassification: _selectedClassification,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedClassification = value?.id;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
                         buildTextField(_descriptionController, 'الوصف',
                             'يرجى إدخال وصف المعرض', true,
                             maxLines: 3),
@@ -369,5 +377,5 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
               ),
       ),
     );
-  } 
+  }
 }

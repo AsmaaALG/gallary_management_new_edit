@@ -42,6 +42,12 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    _fetchCompanyName();
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
@@ -58,43 +64,85 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
 
     await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('إضافة جناح'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl, // Add this for RTL support
+        child: AlertDialog(
+          title: const Text('إضافة جناح', textAlign: TextAlign.right),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment:
+                CrossAxisAlignment.end, // Align content to right
+            children: [
+              TextField(
                 controller: nameCtl,
-                decoration: InputDecoration(hintText: 'اسم الجناح')),
-            TextField(
+                textAlign: TextAlign.right, // Right align text
+                decoration: InputDecoration(
+                  hintText: 'اسم الجناح',
+                  hintTextDirection: TextDirection.rtl, // RTL hint text
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
                 controller: areaCtl,
-                decoration: InputDecoration(hintText: 'المساحة')),
-            TextField(
+                textAlign: TextAlign.right,
+                decoration: InputDecoration(
+                  hintText: 'المساحة',
+                  hintTextDirection: TextDirection.rtl,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
                 controller: priceCtl,
-                decoration: InputDecoration(hintText: 'السعر')),
+                textAlign: TextAlign.right,
+                decoration: InputDecoration(
+                  hintText: 'السعر',
+                  hintTextDirection: TextDirection.rtl,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .start, // Align buttons to start (right in RTL)
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('إلغاء'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () {
+                    if (nameCtl.text.trim().isEmpty ||
+                        areaCtl.text.trim().isEmpty ||
+                        priceCtl.text.trim().isEmpty) return;
+                    setState(() {
+                      _suites.add({
+                        'name': nameCtl.text.trim(),
+                        'area': areaCtl.text.trim(),
+                        'price': priceCtl.text.trim(),
+                      });
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('إضافة'),
+                ),
+              ],
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('إلغاء')),
-          TextButton(
-            onPressed: () {
-              if (nameCtl.text.trim().isEmpty ||
-                  areaCtl.text.trim().isEmpty ||
-                  priceCtl.text.trim().isEmpty) return;
-              setState(() {
-                _suites.add({
-                  'name': nameCtl.text.trim(),
-                  'area': areaCtl.text.trim(),
-                  'price': priceCtl.text.trim(),
-                });
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('إضافة'),
-          ),
-        ],
       ),
     );
   }
@@ -161,7 +209,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
         );
         return;
       }
-      _fetchCompanyName();
 
       final adData = {
         'title': _titleController.text,
@@ -202,11 +249,9 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
   bool _isValidImageUrl(String url) {
     final RegExp regex =
         RegExp(r'^https?:\/\/.*\.(png|jpe?g|gif|bmp)', caseSensitive: false);
-
     return regex.hasMatch(url);
   }
 
-// دالة التحقق من رابط Google Maps
   bool _isValidMapUrl(String url) {
     final cleanedUrl = url.trim();
     final RegExp regex = RegExp(
@@ -219,6 +264,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
+    final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -251,7 +297,16 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                             fontWeight: FontWeight.bold,
                             color: primaryColor)),
                   ),
-                  const SizedBox(height: 30),
+                  if (_companyName != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('اسم الشركة: $_companyName',
+                          style: const TextStyle(
+                              fontFamily: mainFont,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 0, 0, 0))),
+                    ),
+                  const SizedBox(height: 16),
                   buildTextField(_titleController, 'اسم الإعلان',
                       'أدخل عنوان الاعلان', true),
                   const SizedBox(height: 16),
@@ -259,7 +314,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       'يرجى إدخال وصف المعرض', true,
                       maxLines: 3),
                   const SizedBox(height: 16),
-
                   buildTextField(
                       _qrCodeController, 'رمز QR', 'أدخل رمز ', false),
                   const SizedBox(height: 16),
@@ -272,7 +326,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                   buildTextField(_mapImageController, 'رابط صورة خارطة المعرض',
                       'أدخل رابط الصورة هنا', true),
                   const SizedBox(height: 16),
-
                   ElevatedButton(
                     onPressed: () async {
                       if (await canLaunchUrl(imgurUrl)) {
@@ -294,7 +347,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                     onChanged: (value) =>
                         setState(() => _selectedCity = value?.id),
                   ),
-
                   const SizedBox(height: 16),
                   DatePickerField(
                       label: 'تاريخ البدء',
@@ -333,9 +385,8 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                   DatePickerField(
                     label: 'تاريخ إيقاف الإعلان',
                     initialDate: _stopDate,
-                    startDateLimit:
-                        _startDate, //  لا يمكن إيقاف الإعلان قبل بداية العرض
-                    endDateLimit: _endDate, //  لا يمكن إيقاف الإعلان بعد نهايته
+                    startDateLimit: _startDate,
+                    endDateLimit: _endDate,
                     onDateChanged: (picked) {
                       setState(() {
                         _stopDate = picked;
@@ -343,8 +394,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // عرض الأجنحة المضافة
                   Text('الأجنحة المضافة:',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   ..._suites.map((suite) => ListTile(
@@ -362,7 +411,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                     icon: const Icon(Icons.add),
                     label: const Text('إضافة جناح'),
                   ),
-
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(

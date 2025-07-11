@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/user_session.dart';
 import 'package:gallery_management/services/firestore_service.dart';
@@ -111,6 +110,7 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
+    final horizontalPadding = isWideScreen ? 40.0 : 20.0; // تعديل البادينق
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -129,7 +129,8 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(
-              vertical: 30, horizontal: isWideScreen ? 250 : 30),
+              vertical: 30,
+              horizontal: horizontalPadding), // استخدام البادينق المعدل
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
@@ -159,7 +160,9 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
                   CompanyDropdown(
                     selectedCompanyId: selectedCompanyId,
                     onChanged: (value) {
-                      selectedCompanyId = value;
+                      setState(() {
+                        selectedCompanyId = value;
+                      });
                     },
                   ),
                   const SizedBox(height: 30),
