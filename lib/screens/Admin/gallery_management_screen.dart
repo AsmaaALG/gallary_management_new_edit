@@ -5,6 +5,7 @@ import 'package:gallery_management/screens/Admin/add_gallery_screen.dart';
 import 'package:gallery_management/screens/Admin/gallery_suite_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/Admin/review_management_screen.dart';
+import 'package:gallery_management/screens/Admin/view_galleryData_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 
@@ -65,7 +66,7 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                GallerySuiteScreen(galleryId: documentId),
+                                ViewGalleryDataScreen(galleryId: documentId),
                           ),
                         );
                       },
