@@ -4,6 +4,7 @@ import 'package:gallery_management/screens/Admin/add_ads_screen.dart';
 import 'package:gallery_management/screens/Admin/booking_requests_screen.dart';
 import 'package:gallery_management/screens/Admin/edit_ads_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
+import 'package:gallery_management/screens/Admin/view_ads_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:intl/intl.dart' as intl;
@@ -53,7 +54,8 @@ class _AdsScreen2State extends State<AdsScreen2> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EditAdsScreen(adId: documentId),
+                        builder: (context) =>
+                            ViewAdsDataScreen(galleryId: documentId),
                       ),
                     );
                   },

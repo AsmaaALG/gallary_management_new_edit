@@ -5,7 +5,6 @@ import 'package:gallery_management/screens/Admin/add_gallery_screen.dart';
 import 'package:gallery_management/screens/Admin/gallery_suite_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/Admin/review_management_screen.dart';
-import 'package:gallery_management/screens/Admin/view_galleryData_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 
@@ -60,13 +59,13 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                   title: doc['title'], // تأكد من وجود حقل 'title'
                   buttons: [
                     {
-                      'icon': Icons.edit,
+                      'icon': Icons.visibility,
                       'action': () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                ViewGalleryDataScreen(galleryId: documentId),
+                                GallerySuiteScreen(galleryId: documentId),
                           ),
                         );
                       },
