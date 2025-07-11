@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/Admin/edit_gallery_screen.dart';
-import 'package:gallery_management/screens/Admin/suite_management_screen.dart';
-import 'package:gallery_management/screens/Admin/partner_management_screen.dart';
+import 'package:gallery_management/screens/Organizer/edit_gallery_screen.dart';
+import 'package:gallery_management/screens/Organizer/partner_management_screen2.dart';
+import 'package:gallery_management/screens/Organizer/suite_management_screen2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gallery_management/screens/Admin/view_galleryData_screen.dart';
 
-class GallerySuiteScreen extends StatelessWidget {
+class GallerySuiteScreen2 extends StatelessWidget {
   final String galleryId;
 
-  const GallerySuiteScreen({super.key, required this.galleryId});
+  const GallerySuiteScreen2({super.key, required this.galleryId});
 
   bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
@@ -78,22 +78,22 @@ class GallerySuiteScreen extends StatelessWidget {
                 children: [
                   OptionCard(
                     width: cardWidth,
-                    title: 'عرض بيانات المعرض',
+                    title: 'تعديل بيانات المعرض',
                     description:
-                        'من خلال هذه اللوحة يمكنك متابعة أحدث التغيرات و المقالات والفعاليات جديدة',
+                        'من خلال هذه اللوحة يمكنك متابعة أحدث التغيرات واضافة المقالات والفعاليات الجديدة',
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              ViewGalleryDataScreen(galleryId: galleryId),
+                              EditGalleryScreen(galleryId: galleryId),
                         ),
                       );
                     },
                   ),
                   OptionCard(
                     width: cardWidth,
-                    title: 'عرض بيانات الأجنحة',
+                    title: 'تعديل بيانات الأجنحة',
                     description:
                         'من خلال هذه اللوحة يمكنك رؤية جميع الأجنحة التابعة للمعرض والتعديل عليها',
                     onTap: () {
@@ -101,14 +101,14 @@ class GallerySuiteScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              SuiteManagementScreen(galleryId: galleryId),
+                              SuiteManagementScreen2(galleryId: galleryId),
                         ),
                       );
                     },
                   ),
                   OptionCard(
                     width: cardWidth,
-                    title: 'عرض بيانات الشركاء',
+                    title: 'تعديل بيانات الشركاء',
                     description:
                         'من خلال هذه اللوحة يمكنك تعديل الشركاء المرتبطين بالمعرض',
                     onTap: () {
@@ -116,7 +116,7 @@ class GallerySuiteScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              PartnerManagementScreen(galleryId: galleryId),
+                              PartnerManagementScreen2(galleryId: galleryId),
                         ),
                       );
                     },

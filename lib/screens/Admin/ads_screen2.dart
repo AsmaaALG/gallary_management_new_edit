@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/screens/Admin/add_ads_screen.dart';
-import 'package:gallery_management/screens/Admin/booking_requests_screen.dart';
-import 'package:gallery_management/screens/Admin/edit_ads_screen.dart';
+import 'package:gallery_management/screens/trush/add_ads_screen.dart';
+import 'package:gallery_management/screens/Organizer/booking_requests_screen.dart';
+import 'package:gallery_management/screens/Organizer/edit_ads_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/Admin/view_ads_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
@@ -49,7 +49,7 @@ class _AdsScreen2State extends State<AdsScreen2> {
               title: doc['title'],
               buttons: [
                 {
-                  'icon': Icons.edit,
+                  'icon': Icons.visibility,
                   'action': () {
                     Navigator.push(
                       context,
@@ -68,18 +68,6 @@ class _AdsScreen2State extends State<AdsScreen2> {
                     });
                   },
                 },
-                {
-                  'icon': Icons.list_alt,
-                  'action': () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            BookingRequestsScreen(adId: documentId),
-                      ),
-                    );
-                  },
-                },
               ],
             );
           }).toList();
@@ -88,7 +76,6 @@ class _AdsScreen2State extends State<AdsScreen2> {
             title: 'إدارة الإعلانات',
             description: 'يمكنك من خلال هذه الواجهة إدارة جميع الإعلانات.',
             cards: cards,
-            addScreen: const AddAdsScreen(),
           );
         },
       ),

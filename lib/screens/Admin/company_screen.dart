@@ -4,6 +4,7 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
+import 'package:gallery_management/screens/Admin/Organizer_screen.dart';
 
 class CompanyScreen extends StatefulWidget {
   const CompanyScreen({super.key});
@@ -118,6 +119,20 @@ class _CompanyScreenState extends State<CompanyScreen> {
             return MainCard(
               title: doc['name'],
               buttons: [
+                {
+                  'icon': Icons.group, // ← أيقونة الأشخاص
+                  'action': () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => OrganizerScreen(
+                          companyId: doc.id,
+                          //  companyName: doc['name'],
+                        ),
+                      ),
+                    );
+                  },
+                },
                 {
                   'icon': Icons.edit,
                   'action': () => _showCompanyDialog(doc: doc),

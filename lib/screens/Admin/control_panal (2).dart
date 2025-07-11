@@ -10,6 +10,7 @@ import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/screens/Admin/dashboard_screen.dart';
 import 'package:gallery_management/screens/Admin/request_management_screen.dart';
+import 'package:gallery_management/screens/Admin/company_screen.dart';
 
 class ControlPanel extends StatefulWidget {
   const ControlPanel({super.key});
@@ -135,7 +136,7 @@ class _ControlPanelState extends State<ControlPanel> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const OrganizingCompanyScreen(),
+                          builder: (context) => const CompanyScreen(),
                         ),
                       ),
                       isEnabled: true,

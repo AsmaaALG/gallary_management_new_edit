@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
-import 'package:gallery_management/screens/Admin/view_suiteData_screen.dart';
 import 'package:gallery_management/screens/Organizer/edit_suite_screen.dart';
 import 'package:gallery_management/screens/Organizer/add_suite_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SuiteManagementScreen extends StatefulWidget {
+class SuiteManagementScreen2 extends StatefulWidget {
   final String galleryId;
   final String? galleryName;
 
-  const SuiteManagementScreen({
+  const SuiteManagementScreen2({
     super.key,
     required this.galleryId,
     this.galleryName,
   });
 
   @override
-  State<SuiteManagementScreen> createState() => _SuiteManagementScreenState();
+  State<SuiteManagementScreen2> createState() => _SuiteManagementScreenState();
 }
 
-class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
+class _SuiteManagementScreenState extends State<SuiteManagementScreen2> {
   final FirestoreService _fs = FirestoreService();
   final TextEditingController _searchCtl = TextEditingController();
 
@@ -75,11 +74,11 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
             title: doc['name'],
             buttons: [
               {
-                'icon': Icons.visibility,
+                'icon': Icons.edit,
                 'action': () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewSuiteDataScreen(
+                        builder: (_) => EditSuiteScreen(
                           suiteId: doc.id,
                           galleryId: widget.galleryId,
                         ),
@@ -87,12 +86,12 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                     ),
                 'heroTag': 'edit_suite_${doc.id}',
               },
-              /*{
+              {
                 'icon': Icons.delete,
                 'action': () => confirmDelete(context, () async {
                       await _fs.deleteSuiteAndImages(doc.id);
                     }),
-              },*/
+              },
             ],
           );
         }).toList();
@@ -100,7 +99,7 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            /*floatingActionButton: FloatingActionButton(
+            floatingActionButton: FloatingActionButton(
               backgroundColor: primaryColor,
               child: const Icon(Icons.add, color: Colors.white),
               onPressed: () => Navigator.push(
@@ -109,11 +108,12 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
                   builder: (_) => AddSuiteScreen(galleryId: widget.galleryId),
                 ),
               ),
-            ),*/
+            ),
             body: MainScreen(
               title: 'التعديل على الأجنحة',
               description: 'قم بتعديل أجنحة المعرض أو إضافة أجنحة جديدة.',
               cards: cards,
+              addScreen: const SizedBox(),
               galleryName: _galleryName ?? '',
             ),
           ),

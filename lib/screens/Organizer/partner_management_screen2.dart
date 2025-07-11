@@ -6,16 +6,16 @@ import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class PartnerManagementScreen extends StatefulWidget {
+class PartnerManagementScreen2 extends StatefulWidget {
   final String galleryId;
-  const PartnerManagementScreen({super.key, required this.galleryId});
+  const PartnerManagementScreen2({super.key, required this.galleryId});
 
   @override
-  State<PartnerManagementScreen> createState() =>
+  State<PartnerManagementScreen2> createState() =>
       _PartnerManagementScreenState();
 }
 
-class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
+class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
   final FirestoreService _fs = FirestoreService();
   final TextEditingController _searchCtl = TextEditingController();
 
@@ -170,7 +170,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
           return MainCard(
             title: d['name'],
             buttons: [
-              /*{
+              {
                 'icon': Icons.edit,
                 'action': () => _showPartnerDialog(doc: d),
               },
@@ -179,7 +179,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
                 'action': () => confirmDelete(context, () async {
                       await _fs.deleteDocument('partners', d.id);
                     }),
-              },*/
+              },
             ],
           );
         }).toList();
@@ -187,17 +187,17 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            /*floatingActionButton: FloatingActionButton(
+            floatingActionButton: FloatingActionButton(
               backgroundColor: primaryColor,
               child: const Icon(Icons.add, color: Colors.white),
               onPressed: () => _showPartnerDialog(),
-            ),*/
+            ),
             body: MainScreen(
               title: 'التعديل على الشركاء',
               description:
                   'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
               cards: cards,
-
+              addScreen: const SizedBox(),
               galleryName: _galleryName ?? '', // <== هنا اسم المعرض بدون bold
             ),
           ),

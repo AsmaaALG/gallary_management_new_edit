@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/Admin/edit_gallery_screen.dart';
+import 'package:gallery_management/screens/Organizer/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/Admin/suite_management_screen.dart';
 import 'package:gallery_management/screens/Admin/partner_management_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,7 +80,7 @@ class GallerySuiteScreen extends StatelessWidget {
                     width: cardWidth,
                     title: 'عرض بيانات المعرض',
                     description:
-                        'من خلال هذه اللوحة يمكنك متابعة أحدث التغيرات و المقالات والفعاليات جديدة',
+                        'من خلال هذه اللوحة يمكنك عرض أحدث التغيرات و المقالات والفعاليات جديدة',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -95,7 +95,7 @@ class GallerySuiteScreen extends StatelessWidget {
                     width: cardWidth,
                     title: 'عرض بيانات الأجنحة',
                     description:
-                        'من خلال هذه اللوحة يمكنك رؤية جميع الأجنحة التابعة للمعرض والتعديل عليها',
+                        'من خلال هذه اللوحة يمكنك رؤية جميع الأجنحة التابعة للمعرض  ',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -110,7 +110,7 @@ class GallerySuiteScreen extends StatelessWidget {
                     width: cardWidth,
                     title: 'عرض بيانات الشركاء',
                     description:
-                        'من خلال هذه اللوحة يمكنك تعديل الشركاء المرتبطين بالمعرض',
+                        'من خلال هذه اللوحة يمكنك عرض الشركاء المرتبطين بالمعرض',
                     onTap: () {
                       Navigator.push(
                         context,
