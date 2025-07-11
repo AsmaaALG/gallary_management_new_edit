@@ -4,6 +4,7 @@ import 'package:gallery_management/screens/Admin/ads_request_screen.dart';
 import 'package:gallery_management/screens/Admin/booking_requests_screen.dart';
 import 'package:gallery_management/screens/Admin/edit_ads_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
+import 'package:gallery_management/screens/Organizer/MyAdsRequestsScreen.dart';
 import 'package:gallery_management/screens/Organizer/add_ads_screen2.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
@@ -103,7 +104,7 @@ class _ManageGalleriesScreenState extends State<ManageAdsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AdsRequestManagementScreen(),
+                    builder: (context) => MyAdsRequestsScreen(),
                   ),
                 );
               },

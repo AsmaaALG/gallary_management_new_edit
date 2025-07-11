@@ -45,7 +45,7 @@ class _GalleryRequestManagementScreenState
         .update({'status': newStatus});
 
     if (newStatus == 'accepted') {
-      await FirebaseFirestore.instance.collection('galleries').add({
+      await FirebaseFirestore.instance.collection('2').add({
         'title': data['title'],
         'description': data['description'],
         'city': data['city'],

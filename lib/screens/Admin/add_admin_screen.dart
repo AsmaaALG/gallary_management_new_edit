@@ -26,9 +26,23 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
   int selectedState = 0;
 
   bool isValidEmail(String email) {
-    final RegExp regex =
-        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$', caseSensitive: false);
-    return regex.hasMatch(email);
+    final RegExp regex = RegExp(
+      r"^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$",
+      caseSensitive: false,
+    );
+
+    final allowedDomains = [
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'outlook.com',
+      'icloud.com',
+    ];
+
+    if (!regex.hasMatch(email)) return false;
+
+    final domain = email.split('@').last.toLowerCase();
+    return allowedDomains.contains(domain);
   }
 
   @override

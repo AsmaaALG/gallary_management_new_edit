@@ -480,6 +480,18 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 10),
                                       Text(
+                                          'الجناح: ${data['selectedSuite'] ?? '---'}',
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontFamily: mainFont)),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                          'نوع العارض: ${data['organizationType'] ?? '---'}',
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontFamily: mainFont)),
+                                      const SizedBox(height: 10),
+                                      Text(
                                           'الوصف: ${data['description'] ?? '---'}',
                                           style: const TextStyle(
                                               fontSize: 14,
@@ -493,10 +505,59 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                               fontSize: 14,
                                               fontFamily: mainFont)),
                                       const SizedBox(height: 20),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
                                         children: [
+                                          ElevatedButton.icon(
+                                            onPressed: () async {
+                                              final email = data['email'] ?? '';
+                                              if (email.isNotEmpty) {
+                                                final Uri emailLaunchUri = Uri(
+                                                  scheme: 'mailto',
+                                                  path: email,
+                                                  query: Uri.encodeFull(
+                                                    'subject=قبول طلب حجز جناح&body=تطبيق معرضي يرحب بك، تم قبول طلبك لحجز جناح في المعرض. يرجى التواصل معنا لتأكيد حضورك واستكمال إجراءات الدفع.',
+                                                  ),
+                                                );
+                                                if (await canLaunchUrl(
+                                                    emailLaunchUri)) {
+                                                  await launchUrl(
+                                                      emailLaunchUri);
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'لا يمكن فتح تطبيق البريد الإلكتروني'),
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Colors.green[300],
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                            ),
+                                            icon: const Icon(Icons.mail_outline,
+                                                size: 18, color: Colors.white),
+                                            label: const Text(
+                                              'قبول الطلب',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontFamily: mainFont,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                              height: 10), // مسافة بين الأزرار
                                           if (isBooked)
                                             Container(
                                               padding:
@@ -509,7 +570,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                                     BorderRadius.circular(20),
                                               ),
                                               child: const Text(
-                                                ' قبول الطلب',
+                                                'إضافة كجناح',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontFamily: mainFont,
@@ -537,7 +598,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
                                                 ),
                                               ),
                                               child: const Text(
-                                                'قبول الطلب',
+                                                'إضافة الجناح للمعرض',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontFamily: mainFont,

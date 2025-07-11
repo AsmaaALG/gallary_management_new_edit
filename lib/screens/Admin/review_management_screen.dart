@@ -47,7 +47,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
           child: Column(
             children: [
               const Text(
-                'من خلال هذه الواجهة يمكنك متابعة أحدث التعليقات وإضافة مقالات وتعليقات جديدة',
+                'من خلال هذه الواجهة يمكنك متابعة جميع التعليقات مع امكانية البحث وحذف اي من التعليقات ',
                 style: TextStyle(fontFamily: mainFont, fontSize: 13),
               ),
               const SizedBox(height: 20),
