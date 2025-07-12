@@ -44,7 +44,6 @@ class OrganizerDashboardScreen extends StatelessWidget {
             }
 
             final organizerData = snapshot.data!.data() as Map<String, dynamic>;
-            // تغير الي درته متاع اسم شركة
             final companyId = organizerData['company_id'];
 
             return FutureBuilder<DocumentSnapshot>(
@@ -66,16 +65,15 @@ class OrganizerDashboardScreen extends StatelessWidget {
                     companySnapshot.data!.data() as Map<String, dynamic>;
                 final companyName = companyData['name'] ?? '---';
 
-                //
-
                 return Padding(
                   padding: EdgeInsets.symmetric(
-                      vertical: 30, horizontal: isWideScreen ? 250 : 30),
+                      vertical: 20,
+                      horizontal: isWideScreen ? 30 : 10), // تقليل البادينق
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'لوحة تحكم المنظمين ل$companyName',
+                        'لوحة تحكم المنظمين لشركة $companyName',
                         style: TextStyle(
                           fontSize: 16,
                           color: primaryColor,
@@ -84,7 +82,6 @@ class OrganizerDashboardScreen extends StatelessWidget {
                         ),
                         textAlign: TextAlign.start,
                       ),
-                      SizedBox(height: 10),
                       SizedBox(height: 10),
                       Text(
                         'من خلال هذه الواجهة يمكنك متابعة أحدث الطلبات والإعلانات الجديدة',

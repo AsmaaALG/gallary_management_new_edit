@@ -231,7 +231,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: EdgeInsets.symmetric(
-                    vertical: 30, horizontal: isWideScreen ? 250 : 30),
+                    vertical: 20,
+                    horizontal: isWideScreen ? 50 : 20), // تقليل البادينق
                 child: Form(
                   key: _formKey,
                   child: SingleChildScrollView(

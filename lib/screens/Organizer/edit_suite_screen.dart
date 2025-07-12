@@ -97,6 +97,7 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
         TextField(
           controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
@@ -142,7 +143,8 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: EdgeInsets.symmetric(
-                    vertical: 30, horizontal: isWideScreen ? 250 : 30),
+                    vertical: 20,
+                    horizontal: isWideScreen ? 30 : 10), // تقليل البادينق
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,22 +164,12 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
                           keyboardType: TextInputType.number),
                       ElevatedButton(
                         onPressed: () async {
-                          if (await canLaunchUrl(imgurUrl)) {
-                            await launchUrl(imgurUrl,
-                                mode: LaunchMode.externalApplication);
+                          const imgurUrl = 'https://imgur.com/upload';
+                          if (await canLaunch(imgurUrl)) {
+                            await launch(imgurUrl);
                           }
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              'افتح Imgur لرفع صورة',
-                              style:
-                                  TextStyle(fontFamily: mainFont, fontSize: 10),
-                            ),
-                          ),
-                        ),
+                        child: const Text('افتح Imgur لرفع صورة'),
                       ),
                       const SizedBox(height: 30),
                       Wrap(
