@@ -188,7 +188,8 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(
-              vertical: 30.0, horizontal: isWideScreen ? 250 : 30),
+              vertical: 20.0,
+              horizontal: isWideScreen ? 30 : 10), // تقليل البادينق
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/Admin/Organizer_screen.dart';
-import 'package:gallery_management/screens/Admin/company_screen.dart';
-import 'package:gallery_management/screens/Admin/edit_gallery_screen.dart';
-import 'package:gallery_management/screens/Admin/suite_management_screen.dart';
-import 'package:gallery_management/screens/Admin/partner_management_screen.dart';
+import 'package:gallery_management/screens/Organizer/edit_gallery_screen.dart';
+import 'package:gallery_management/screens/Organizer/partner_management_screen2.dart';
+import 'package:gallery_management/screens/Organizer/suite_management_screen2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gallery_management/screens/Admin/view_galleryData_screen.dart';
 
-class OrganizingCompanyScreen extends StatelessWidget {
-  const OrganizingCompanyScreen({
-    super.key,
-  });
+class GallerySuiteScreen2 extends StatelessWidget {
+  final String galleryId;
+
+  const GallerySuiteScreen2({super.key, required this.galleryId});
 
   bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
@@ -30,6 +29,33 @@ class OrganizingCompanyScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
           ),
           backgroundColor: primaryColor,
+          title: FutureBuilder<DocumentSnapshot>(
+            future:
+                FirebaseFirestore.instance.collection('2').doc(galleryId).get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('تحميل...');
+              }
+              if (snapshot.hasError ||
+                  !snapshot.hasData ||
+                  !snapshot.data!.exists) {
+                return const Text('حدث خطأ');
+              }
+
+              final data = snapshot.data!.data() as Map<String, dynamic>;
+              final name = data['title'] ?? 'المعرض';
+              return Text(
+                name,
+                maxLines: 2,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                  fontFamily: mainFont,
+                  color: Colors.white,
+                ),
+              );
+            },
+          ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
@@ -37,7 +63,7 @@ class OrganizingCompanyScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'يمكنك من خلال هذه الواجهة ادارة الشركات المنظمة للمعارض',
+                'يمكنك من خلال هذه الواجهة تعديل المعارض عبر تعبئة الحقول التالية',
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: mainFont,
@@ -52,28 +78,45 @@ class OrganizingCompanyScreen extends StatelessWidget {
                 children: [
                   OptionCard(
                     width: cardWidth,
-                    title: 'إدارة الشركات المنظمة',
+                    title: 'تعديل بيانات المعرض',
                     description:
-                        'من خلال هذه اللوحة يمكنك ادارة الشركات المنظمة',
+                        'من خلال هذه اللوحة يمكنك متابعة أحدث التغيرات واضافة المقالات والفعاليات الجديدة',
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CompanyScreen(),
+                          builder: (context) =>
+                              EditGalleryScreen(galleryId: galleryId),
                         ),
                       );
                     },
                   ),
                   OptionCard(
                     width: cardWidth,
-                    title: 'إدارة المنظمين',
+                    title: 'تعديل بيانات الأجنحة',
                     description:
-                        'من خلال هذه اللوحة يمكنك إدارة منظمين المعارض',
+                        'من خلال هذه اللوحة يمكنك رؤية جميع الأجنحة التابعة للمعرض والتعديل عليها',
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => OrganizerScreen(),
+                          builder: (context) =>
+                              SuiteManagementScreen2(galleryId: galleryId),
+                        ),
+                      );
+                    },
+                  ),
+                  OptionCard(
+                    width: cardWidth,
+                    title: 'تعديل بيانات الشركاء',
+                    description:
+                        'من خلال هذه اللوحة يمكنك تعديل الشركاء المرتبطين بالمعرض',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PartnerManagementScreen2(galleryId: galleryId),
                         ),
                       );
                     },

@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/Admin/GalleryStatistic_screen.dart';
-import 'package:gallery_management/screens/Admin/add_gallery_screen.dart';
-import 'package:gallery_management/screens/Admin/gallery_suite_screen.dart';
+import 'package:gallery_management/screens/trush/add_gallery_screen.dart';
+import 'package:gallery_management/screens/Organizer/gallery_suite_screen2.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/Admin/review_management_screen.dart';
 import 'package:gallery_management/screens/Organizer/MyGalleryRequestsScreen.dart';
@@ -64,7 +64,7 @@ class _ManageGalleriesScreenState extends State<ManageGalleriesScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            GallerySuiteScreen(galleryId: documentId),
+                            GallerySuiteScreen2(galleryId: documentId),
                       ),
                     );
                   },

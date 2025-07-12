@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/screens/Admin/Organizer_screen.dart';
+import 'package:gallery_management/screens/Admin/company_screen.dart';
 import 'package:gallery_management/screens/Organizer/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/Admin/suite_management_screen.dart';
 import 'package:gallery_management/screens/Admin/partner_management_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gallery_management/screens/Admin/view_galleryData_screen.dart';
 
-class GallerySuiteScreen extends StatelessWidget {
-  final String galleryId;
-
-  const GallerySuiteScreen({super.key, required this.galleryId});
+class OrganizingCompanyScreen extends StatelessWidget {
+  const OrganizingCompanyScreen({
+    super.key,
+  });
 
   bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
@@ -29,33 +30,6 @@ class GallerySuiteScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
           ),
           backgroundColor: primaryColor,
-          title: FutureBuilder<DocumentSnapshot>(
-            future:
-                FirebaseFirestore.instance.collection('2').doc(galleryId).get(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('تحميل...');
-              }
-              if (snapshot.hasError ||
-                  !snapshot.hasData ||
-                  !snapshot.data!.exists) {
-                return const Text('حدث خطأ');
-              }
-
-              final data = snapshot.data!.data() as Map<String, dynamic>;
-              final name = data['title'] ?? 'المعرض';
-              return Text(
-                name,
-                maxLines: 2,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal,
-                  fontFamily: mainFont,
-                  color: Colors.white,
-                ),
-              );
-            },
-          ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
@@ -63,7 +37,7 @@ class GallerySuiteScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'يمكنك من خلال هذه الواجهة تعديل المعارض عبر تعبئة الحقول التالية',
+                'يمكنك من خلال هذه الواجهة ادارة الشركات المنظمة للمعارض',
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: mainFont,
@@ -78,45 +52,28 @@ class GallerySuiteScreen extends StatelessWidget {
                 children: [
                   OptionCard(
                     width: cardWidth,
-                    title: 'عرض بيانات المعرض',
+                    title: 'إدارة الشركات المنظمة',
                     description:
-                        'من خلال هذه اللوحة يمكنك عرض أحدث التغيرات و المقالات والفعاليات جديدة',
+                        'من خلال هذه اللوحة يمكنك ادارة الشركات المنظمة',
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              ViewGalleryDataScreen(galleryId: galleryId),
+                          builder: (context) => CompanyScreen(),
                         ),
                       );
                     },
                   ),
                   OptionCard(
                     width: cardWidth,
-                    title: 'عرض بيانات الأجنحة',
+                    title: 'إدارة المنظمين',
                     description:
-                        'من خلال هذه اللوحة يمكنك رؤية جميع الأجنحة التابعة للمعرض  ',
+                        'من خلال هذه اللوحة يمكنك إدارة منظمين المعارض',
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              SuiteManagementScreen(galleryId: galleryId),
-                        ),
-                      );
-                    },
-                  ),
-                  OptionCard(
-                    width: cardWidth,
-                    title: 'عرض بيانات الشركاء',
-                    description:
-                        'من خلال هذه اللوحة يمكنك عرض الشركاء المرتبطين بالمعرض',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              PartnerManagementScreen(galleryId: galleryId),
+                          builder: (context) => OrganizerScreen(),
                         ),
                       );
                     },

@@ -1,13 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gallery_management/services/firestore_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AddAdsScreen2 extends StatefulWidget {
@@ -54,6 +54,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
     _locationController.dispose();
     _imageUrlController.dispose();
     _qrCodeController.dispose();
+    _mapImageController.dispose();
     super.dispose();
   }
 
@@ -65,20 +66,19 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
     await showDialog(
       context: context,
       builder: (_) => Directionality(
-        textDirection: TextDirection.rtl, // Add this for RTL support
+        textDirection: TextDirection.rtl,
         child: AlertDialog(
           title: const Text('إضافة جناح', textAlign: TextAlign.right),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment:
-                CrossAxisAlignment.end, // Align content to right
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               TextField(
                 controller: nameCtl,
-                textAlign: TextAlign.right, // Right align text
+                textAlign: TextAlign.right,
                 decoration: InputDecoration(
                   hintText: 'اسم الجناح',
-                  hintTextDirection: TextDirection.rtl, // RTL hint text
+                  hintTextDirection: TextDirection.rtl,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -115,8 +115,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
           ),
           actions: [
             Row(
-              mainAxisAlignment: MainAxisAlignment
-                  .start, // Align buttons to start (right in RTL)
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -265,7 +264,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
-    final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -282,7 +280,8 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(
-              vertical: 30, horizontal: isWideScreen ? 250 : 30),
+              vertical: 20,
+              horizontal: isWideScreen ? 50 : 20), // تقليل البادينق
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -329,9 +328,9 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () async {
-                      if (await canLaunchUrl(imgurUrl)) {
-                        await launchUrl(imgurUrl,
-                            mode: LaunchMode.externalApplication);
+                      const imgurUrl = 'https://imgur.com/upload';
+                      if (await canLaunch(imgurUrl)) {
+                        await launch(imgurUrl);
                       }
                     },
                     child: const Text('افتح Imgur لرفع صورة'),
@@ -419,7 +418,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         minimumSize:
-                            Size(isWideScreen ? 100 : double.infinity, 50),
+                            Size(isWideScreen ? 250 : double.infinity, 50),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)),
                       ),

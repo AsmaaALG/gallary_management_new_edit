@@ -8,14 +8,15 @@ class MainScreen extends StatefulWidget {
     required this.title,
     required this.description,
     required this.cards,
-    required this.addScreen,
-    this.galleryName,  this.requests, // نضيف اسم المعرض هنا اختياري
+    this.addScreen,
+    this.galleryName,
+    this.requests,
   });
 
   final String title;
   final String description;
   final List<MainCard> cards;
-  final Widget addScreen;
+  final Widget? addScreen;
   final Widget? requests;
   final String? galleryName;
 
@@ -62,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
                         color: Colors.white,
                         fontFamily: mainFont,
                         fontWeight: FontWeight.normal,
-                        fontSize: isWide ? 16 : 14, // حجم أكبر في الويب
+                        fontSize: isWide ? 16 : 14,
                       ),
                       overflow: TextOverflow.ellipsis,
                     );
@@ -70,9 +71,11 @@ class _MainScreenState extends State<MainScreen> {
                 )
               : null,
           actions: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: widget.requests,)
+            if (widget.requests != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: widget.requests!,
+              )
           ],
           centerTitle: false,
         ),
@@ -175,16 +178,18 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => widget.addScreen),
-            );
-          },
-          backgroundColor: primaryColor,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
+        floatingActionButton: widget.addScreen != null
+            ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => widget.addScreen!),
+                  );
+                },
+                backgroundColor: primaryColor,
+                child: const Icon(Icons.add, color: Colors.white),
+              )
+            : null,
       ),
     );
   }
