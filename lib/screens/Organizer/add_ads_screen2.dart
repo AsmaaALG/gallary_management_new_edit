@@ -133,6 +133,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                         'name': nameCtl.text.trim(),
                         'area': areaCtl.text.trim(),
                         'price': priceCtl.text.trim(),
+                        'status': 0,
                       });
                     });
                     Navigator.pop(context);
