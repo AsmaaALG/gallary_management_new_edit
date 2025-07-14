@@ -70,12 +70,12 @@ class OrganizingCompanyScreen extends StatelessWidget {
                     description:
                         'من خلال هذه اللوحة يمكنك إدارة منظمين المعارض',
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => OrganizerScreen(),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => OrganizerScreen(),
+                      //   ),
+                      // );
                     },
                   ),
                 ],

@@ -8,7 +8,8 @@ import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:gallery_management/widgets/company_dropdown.dart';
 
 class AddOrganizerScreen extends StatefulWidget {
-  const AddOrganizerScreen({Key? key}) : super(key: key);
+  final String companyId;
+  const AddOrganizerScreen({Key? key, required this.companyId}) : super(key: key,);
 
   @override
   State<AddOrganizerScreen> createState() => _AddOrganizerScreenState();
@@ -60,12 +61,12 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
         return;
       }
 
-      if (selectedCompanyId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('يرجى اختيار شركة')),
-        );
-        return;
-      }
+      // if (selectedCompanyId == null) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     const SnackBar(content: Text('يرجى اختيار شركة')),
+      //   );
+      //   return;
+      // }
 
       try {
         final success = await FirestoreService().createOrganizer(
@@ -73,7 +74,7 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
           lastName: lastNameController.text.trim(),
           email: emailController.text.trim(),
           password: passwordController.text.trim(),
-          companyId: selectedCompanyId!,
+          companyId: widget.companyId,
         );
 
         if (success) {
@@ -156,12 +157,12 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
                   buildTextField(passwordController, 'كلمة المرور',
                       'أدخل كلمة المرور', true),
                   const SizedBox(height: 16),
-                  CompanyDropdown(
-                    selectedCompanyId: selectedCompanyId,
-                    onChanged: (value) {
-                      selectedCompanyId = value;
-                    },
-                  ),
+                  // CompanyDropdown(
+                  //   selectedCompanyId: selectedCompanyId,
+                  //   onChanged: (value) {
+                  //     selectedCompanyId = value;
+                  //   },
+                  // ),
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(

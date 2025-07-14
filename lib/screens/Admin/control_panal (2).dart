@@ -11,6 +11,7 @@ import 'package:gallery_management/services/auth.dart';
 import 'package:gallery_management/screens/Admin/dashboard_screen.dart';
 import 'package:gallery_management/screens/Admin/request_management_screen.dart';
 import 'package:gallery_management/screens/Admin/company_screen.dart';
+import 'package:gallery_management/services/firestore_service.dart';
 
 class ControlPanel extends StatefulWidget {
   const ControlPanel({super.key});
@@ -28,6 +29,7 @@ class _ControlPanelState extends State<ControlPanel> {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
     _fetchUserData();
+    FirestoreService().convertAdsToGalleries();
   }
 
   Future<void> _fetchUserData() async {

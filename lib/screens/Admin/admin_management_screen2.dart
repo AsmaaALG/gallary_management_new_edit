@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/Admin/add_admin_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
+import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 
@@ -52,10 +54,31 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
                   'icon': Icons.delete_rounded,
                   'action': () {
                     confirmDelete(context, () async {
+                      final user = FirebaseAuth.instance.currentUser;
+
+                      final deletedEmail = doc['email'];
+
+                      // تنفيذ الحذف من قاعدة البيانات
                       await _firestoreService.deleteAdmin(doc.id);
+
+                      // تحقق إذا كان المحذوف هو المستخدم الحالي
+                      if (user != null && deletedEmail == user.email) {
+                        // تسجيل الخروج
+                        await FirebaseAuth.instance.signOut();
+
+                        // التوجه لواجهة تسجيل الدخول وحذف سجل التنقل
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SignInScreen()),
+                            (route) => false,
+                          );
+                        }
+                      }
                     });
                   },
-                },
+                }
               ],
             );
           }).toList();

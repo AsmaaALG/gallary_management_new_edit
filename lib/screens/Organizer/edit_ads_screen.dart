@@ -175,14 +175,68 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
           ),
           TextButton(
             onPressed: () {
-              if (nameCtl.text.trim().isEmpty ||
-                  areaCtl.text.trim().isEmpty ||
-                  priceCtl.text.trim().isEmpty) return;
+              final name = nameCtl.text.trim();
+              final area = areaCtl.text.trim();
+              final price = priceCtl.text.trim();
+
+              // تحقق من الطول
+              if (name.length > 5 || area.length > 5 || price.length > 5) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('يجب ألا يتجاوز كل حقل 5 خانات')),
+                );
+                return;
+              }
+
+              // تحقق من الاسم: حروف إنجليزية وأرقام فقط
+              final nameValid = RegExp(r'^[a-zA-Z0-9]+$');
+              if (!nameValid.hasMatch(name)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text(
+                          'الاسم يجب أن يحتوي على حروف إنجليزية وأرقام فقط')),
+                );
+                return;
+              }
+
+              // تحقق من المساحة: أرقام ورموز فقط
+              final areaValid = RegExp(r'^[0-9\W_]+$');
+              if (!areaValid.hasMatch(area)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content:
+                          Text('المساحة يجب أن تحتوي على أرقام ورموز فقط')),
+                );
+                return;
+              }
+
+              // تحقق من السعر: أرقام فقط
+              final priceValid = RegExp(r'^[0-9\W_]+$');
+              if (!priceValid.hasMatch(price)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('السعر يجب أن يحتوي على أرقام فقط')),
+                );
+                return;
+              }
+
+              // تحقق من التكرار (غير حساس لحالة الأحرف)
+              final nameLower = name.toLowerCase();
+              final alreadyExists = _suites.any((suite) =>
+                  suite['name'].toString().toLowerCase() == nameLower);
+              if (alreadyExists) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('اسم الجناح مكرر')),
+                );
+                return;
+              }
+
               setState(() {
                 _suites.add({
-                  'name': nameCtl.text.trim(),
-                  'area': areaCtl.text.trim(),
-                  'price': priceCtl.text.trim(),
+                  'name': name,
+                  'area': area,
+                  'price': price,
+                  'status': 0,
                 });
               });
               Navigator.pop(context);

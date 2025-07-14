@@ -8,6 +8,7 @@ import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gallery_management/screens/Organizer/organizer_dashboard_screen.dart';
+import 'package:gallery_management/services/firestore_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // استدعاء الدالة بعد تهيئة Firebase
+  await FirestoreService().convertAdsToGalleries();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -29,7 +33,6 @@ class MyApp extends StatelessWidget {
 
   MyApp({super.key});
 
-  // ✅ التحقق من مكان وجود UID في جدول admin أو Organizer
   Future<String?> checkUserRole(String uid) async {
     final adminDoc =
         await FirebaseFirestore.instance.collection('admin').doc(uid).get();

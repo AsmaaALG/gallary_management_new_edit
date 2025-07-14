@@ -2,20 +2,53 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/route_observer.dart';
 import 'package:gallery_management/screens/Organizer/manage_ads_screen.dart';
+import 'package:gallery_management/services/firestore_service.dart';
 import 'manage_galleries_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 
-class OrganizerDashboardScreen extends StatelessWidget {
+// تأكد أن هذا متوفر في main.dart
+// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
+class OrganizerDashboardScreen extends StatefulWidget {
   final String userId;
 
   const OrganizerDashboardScreen({super.key, required this.userId});
 
   @override
+  State<OrganizerDashboardScreen> createState() =>
+      _OrganizerDashboardScreenState();
+}
+
+class _OrganizerDashboardScreenState extends State<OrganizerDashboardScreen>
+    with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+
+    // أول مرة يتم الدخول للشاشة
+    FirestoreService().convertAdsToGalleries();
+  }
+
+  @override
+  void didPopNext() {
+    // عند الرجوع من شاشة فرعية إلى هذه الشاشة
+    FirestoreService().convertAdsToGalleries();
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
-    final String currentUserId = userId;
+    final String currentUserId = widget.userId;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -67,8 +100,7 @@ class OrganizerDashboardScreen extends StatelessWidget {
 
                 return Padding(
                   padding: EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: isWideScreen ? 30 : 10), // تقليل البادينق
+                      vertical: 20, horizontal: isWideScreen ? 30 : 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

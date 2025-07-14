@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gallery_management/models/ad_model.dart';
 import 'package:gallery_management/models/user_session.dart';
+import 'package:intl/intl.dart';
 
 class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
@@ -332,6 +334,11 @@ class FirestoreService {
 
 //////////////////////////////////////////////////////////////////
   ///طلبات الحجز
+
+  Future<void> addAcceptedRequest(Map<String, dynamic> data) async {
+    await FirebaseFirestore.instance.collection('accepted_requests').add(data);
+  }
+
 // دالة تجيب الطلبات الخاصة بمعرض معين باستخدام adId
   Future<List<Map<String, dynamic>>> getBookingRequestsForAd(
       String adId) async {
@@ -342,13 +349,132 @@ class FirestoreService {
           .get();
 
       return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+
         return {
-          'docId': doc.id, // ← مهم جداً
-          ...doc.data() as Map<String, dynamic>,
+          'docId': doc.id,
+          ...data,
+          'accepted': data['accepted'] ?? false, // ← مضاف
+          'disabled': data['disabled'] ?? false, // ← مضاف
         };
       }).toList();
     } catch (e) {
       print("خطأ أثناء جلب الطلبات: $e");
+      return [];
+    }
+  }
+
+  Stream<List<Map<String, dynamic>>> streamBookingRequestsForAd(String adId) {
+    return FirebaseFirestore.instance
+        .collection('bookingRequests')
+        .where('adId', isEqualTo: adId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              data['docId'] = doc.id; // مهم جداً
+              return data;
+            }).toList());
+  }
+
+  Future<void> updateSuiteStatusInAd(String adId, String suiteName,
+      {bool available = false}) async {
+    final adRef = FirebaseFirestore.instance.collection('ads').doc(adId);
+    final adDoc = await adRef.get();
+
+    if (adDoc.exists) {
+      List<dynamic> suites = adDoc['suites'] ?? [];
+      for (var suite in suites) {
+        if (suite['name'] == suiteName) {
+          suite['status'] = available ? 0 : 1;
+          break;
+        }
+      }
+      await adRef.update({'suites': suites});
+    }
+  }
+
+// 2. تعطيل باقي الطلبات التي تطلب نفس الجناح
+  Future<void> disableOtherRequestsForSameSuite(
+      String adId, String suiteName, String currentDocId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('space_form')
+        .where('adId', isEqualTo: adId)
+        .get();
+
+    for (var doc in snapshot.docs) {
+      if (doc.id != currentDocId && doc['selectedSuite']['name'] == suiteName) {
+        await doc.reference.update({'disabled': true});
+      }
+    }
+  }
+
+// 3. تعليم الطلب الحالي بأنه مقبول
+  Future<void> markRequestAsAccepted(String docId) async {
+    await FirebaseFirestore.instance
+        .collection('space_form')
+        .doc(docId)
+        .update({'accepted': true});
+  }
+
+  /// إعادة تفعيل الطلبات الأخرى التي تطلب نفس الجناح
+  Future<void> enableOtherRequestsForSameSuite(
+      String adId, String suiteName) async {
+    try {
+      final query = await _firestore
+          .collection('space_form')
+          .where('adId', isEqualTo: adId)
+          .where('selectedSuite.name', isEqualTo: suiteName)
+          .get();
+
+      for (final doc in query.docs) {
+        await doc.reference.update({'disabled': false});
+      }
+    } catch (e) {
+      print("خطأ أثناء إعادة تفعيل الطلبات: $e");
+    }
+  }
+
+  /// إزالة حالة القبول من الطلب المحدد
+  Future<void> unmarkRequestAsAccepted(String docId) async {
+    try {
+      await _firestore.collection('space_form').doc(docId).update({
+        'accepted': false,
+        'disabled': false,
+      });
+    } catch (e) {
+      print("فشل إزالة حالة القبول: $e");
+    }
+  }
+Future<String?> getGalleryIdByAdId(String adId) async {
+  final snapshot = await FirebaseFirestore.instance
+      .collection('2')
+      .where('ad_id', isEqualTo: adId)
+      .limit(1)
+      .get();
+
+  if (snapshot.docs.isNotEmpty) {
+    return snapshot.docs.first.id;
+  }
+  return null; // لم يتم فتح المعرض بعد
+}
+
+  Future<List<Map<String, dynamic>>> getAcceptedBookingRequests(
+      String adId) async {
+    try {
+      final query = await _firestore
+          .collection('space_form')
+          .where('adId', isEqualTo: adId)
+          .where('accepted', isEqualTo: true)
+          .get();
+
+      return query.docs
+          .map((doc) => {
+                'docId': doc.id,
+                ...doc.data(),
+              })
+          .toList();
+    } catch (e) {
+      print("خطأ أثناء جلب الطلبات المقبولة: $e");
       return [];
     }
   }
@@ -374,7 +500,6 @@ class FirestoreService {
         .snapshots();
   }
 
-////
   ///دالة إضافة جناح جديد
   Future<void> addSuite({
     required String name,
@@ -390,7 +515,6 @@ class FirestoreService {
     });
   }
 
-  ///
   ///دالة حذف جناح وصوره المرتبطة به
   Future<void> deleteSuiteAndImages(String suiteId) async {
     try {
@@ -477,5 +601,164 @@ class FirestoreService {
 
   Future<void> deletePartner(String partnerId) async {
     await _firestore.collection('partners').doc(partnerId).delete();
+  }
+
+  /////////////////////////////////////////////////////////////////
+  ///
+
+  Future<void> convertAdsToGalleries() async {
+    final now = DateTime.now();
+    final adsRef = FirebaseFirestore.instance.collection('ads');
+    final galleriesRef = FirebaseFirestore.instance.collection('2');
+    final notificationsRef =
+        FirebaseFirestore.instance.collection('notifications');
+    final spaceFormRef = FirebaseFirestore.instance.collection('space_form');
+    final suiteRef = FirebaseFirestore.instance.collection('suite');
+
+    try {
+      final adsSnapshot = await adsRef.get();
+
+      for (final doc in adsSnapshot.docs) {
+        final ad = AdModel.fromMap(doc.data(), doc.id);
+
+        // -------- 1. تحويل الإعلان إلى معرض عند تاريخ البداية --------
+        if (ad.startDate.isNotEmpty) {
+          try {
+            final startDate = DateFormat('dd-MM-yyyy').parse(ad.startDate);
+
+            if (!now.isBefore(startDate)) {
+              // تحقق إن تم تحويل الإعلان من قبل إلى معرض
+              final existingGallery = await galleriesRef
+                  .where('ad_id', isEqualTo: ad.id)
+                  .limit(1)
+                  .get();
+
+              if (existingGallery.docs.isEmpty) {
+                // تحويل الإعلان إلى معرض
+                final galleryDoc = await galleriesRef.add({
+                  'title': ad.title,
+                  'description': ad.description,
+                  'image url': ad.imageUrl,
+                  'location': ad.location,
+                  'start date': ad.startDate,
+                  'end date': ad.endDate,
+                  'QR code': ad.qrCode ?? '',
+                  'classification id': ad.classificationId,
+                  'company_id': ad.company_id,
+                  'map': ad.map,
+                  'city': ad.city,
+                  'ad_id': ad.id,
+                });
+
+                print("تم تحويل الإعلان '${ad.id}' إلى معرض.");
+
+                // -------- 1.1 تحويل الطلبات المقبولة إلى أجنحة --------
+                final acceptedForms = await spaceFormRef
+                    .where('accepted', isEqualTo: true)
+                    .where('adId', isEqualTo: ad.id)
+                    .get();
+
+                for (final formDoc in acceptedForms.docs) {
+                  final data = formDoc.data();
+                  final selectedSuite = data['selectedSuite'];
+
+                  await suiteRef.add({
+                    'name': data['wingName'] ?? 'جناح بدون اسم',
+                    'description': data['description'] ?? '',
+                    'price': int.tryParse(selectedSuite['price'] ?? '0') ?? 0,
+                    'size': int.tryParse(selectedSuite['area'] ?? '0') ?? 0,
+                    'title on map': selectedSuite['name'] ?? '',
+                    'gallery id': galleryDoc.id,
+                  });
+
+                  // حذف الطلب بعد التحويل
+                  await spaceFormRef.doc(formDoc.id).delete();
+
+                  print("تم تحويل الطلب '${formDoc.id}' إلى جناح وحذفه.");
+                }
+              } else {
+                final gallery = await galleriesRef
+                    .where('ad_id', isEqualTo: ad.id)
+                    .limit(1)
+                    .get();
+                final galleryId;
+
+                if (gallery.docs.isNotEmpty) {
+                  galleryId = gallery.docs.first.id;
+                } else {
+                  galleryId = null;
+                }
+
+                final acceptedForms = await spaceFormRef
+                    .where('accepted', isEqualTo: true)
+                    .where('adId', isEqualTo: ad.id)
+                    .get();
+
+                for (final formDoc in acceptedForms.docs) {
+                  final data = formDoc.data();
+                  final selectedSuite = data['selectedSuite'];
+
+                  await suiteRef.add({
+                    'name': data['wingName'] ?? 'جناح بدون اسم',
+                    'description': data['description'] ?? '',
+                    'price': int.tryParse(selectedSuite['price'] ?? '0') ?? 0,
+                    'size': int.tryParse(selectedSuite['area'] ?? '0') ?? 0,
+                    'title on map': selectedSuite['name'] ?? '',
+                    'gallery id': galleryId ?? '',
+                  });
+
+                  // حذف الطلب بعد التحويل
+                  await spaceFormRef.doc(formDoc.id).delete();
+
+                  print("تم تحويل الإعلان '${ad.id}' مسبقًا.");
+                }
+              }
+            }
+          } catch (e) {
+            print("خطأ في تاريخ البداية للإعلان '${ad.id}': $e");
+          }
+        }
+
+        // -------- 2. حذف الإعلان عند الوصول لتاريخ stopAd --------
+        if (ad.stopAd.isNotEmpty) {
+          try {
+            final stopDate = DateFormat('dd-MM-yyyy').parse(ad.stopAd);
+
+            if (!now.isBefore(stopDate)) {
+              // 1. حذف الإعلان
+              await adsRef.doc(ad.id).delete();
+
+              // 2. حذف الإشعارات المرتبطة
+              final notifSnapshot =
+                  await notificationsRef.where('ad_id', isEqualTo: ad.id).get();
+
+              for (final notifDoc in notifSnapshot.docs) {
+                await notificationsRef.doc(notifDoc.id).delete();
+              }
+
+              // 3. حذف الطلبات المرتبطة (space_form)
+              final formsSnapshot = await FirebaseFirestore.instance
+                  .collection('space_form')
+                  .where('adId', isEqualTo: ad.id)
+                  .get();
+
+              for (final formDoc in formsSnapshot.docs) {
+                await FirebaseFirestore.instance
+                    .collection('space_form')
+                    .doc(formDoc.id)
+                    .delete();
+              }
+
+              print(
+                  "تم حذف الإعلان '${ad.id}'، الإشعارات، والطلبات المرتبطة به.");
+            }
+          } catch (e) {
+            print("خطأ في تاريخ stopAd للإعلان '${ad.id}': $e");
+          }
+        }
+      }
+    } catch (e) {
+      print("خطأ أثناء تنفيذ المعالجة: $e");
+    }
   }
 }

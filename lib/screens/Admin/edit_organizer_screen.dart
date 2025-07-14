@@ -20,7 +20,9 @@ class _EditOrganizerScreenState extends State<EditOrganizerScreen> {
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  // final TextEditingController passwordController = TextEditingController();
 
+  bool obscurePassword = true;
   String? selectedCompanyId;
   bool isLoading = true;
 
@@ -36,6 +38,7 @@ class _EditOrganizerScreenState extends State<EditOrganizerScreen> {
         firstNameController.text = data['first name'] ?? '';
         lastNameController.text = data['last name'] ?? '';
         emailController.text = data['email'] ?? '';
+        // passwordController.text = data['password'] ?? '';
         selectedCompanyId = data['company_id'];
       }
 
@@ -56,7 +59,7 @@ class _EditOrganizerScreenState extends State<EditOrganizerScreen> {
             .update({
           'first name': firstNameController.text.trim(),
           'last name': lastNameController.text.trim(),
-          'email': emailController.text.trim(),
+          // 'password': passwordController.text.trim(),
           'company_id': selectedCompanyId,
         });
 
@@ -124,15 +127,43 @@ class _EditOrganizerScreenState extends State<EditOrganizerScreen> {
                         buildTextField(lastNameController, 'الاسم الأخير',
                             'أدخل الاسم الأخير', true),
                         const SizedBox(height: 16),
-                        buildTextField(emailController, 'البريد الإلكتروني',
-                            'أدخل البريد الإلكتروني', true),
-                        const SizedBox(height: 16),
-                        CompanyDropdown(
-                          selectedCompanyId: selectedCompanyId,
-                          onChanged: (value) {
-                            selectedCompanyId = value;
-                          },
+                        buildTextField(
+                          emailController,
+                          'البريد الإلكتروني',
+                          '',
+                          false,
+                          readOnly: true,
+                          enabled: false,
                         ),
+                        const SizedBox(height: 16),
+                        // buildTextField(
+                        //   passwordController,
+                        //   'كلمة المرور',
+                        //   'أدخل كلمة المرور',
+                        //   true,
+                        //   isPassword: true,
+                        //   obscureText: obscurePassword,
+                        //   toggleObscure: () {
+                        //     setState(() {
+                        //       obscurePassword = !obscurePassword;
+                        //     });
+                        //   },
+                        //   validator: (value) {
+                        //     if (value == null || value.trim().isEmpty) {
+                        //       return 'الرجاء إدخال كلمة المرور';
+                        //     } else if (value.trim().length < 6) {
+                        //       return 'كلمة المرور يجب ألا تقل عن 6 خانات';
+                        //     }
+                        //     return null;
+                        //   },
+                        // ),
+                        // const SizedBox(height: 16),
+                        // CompanyDropdown(
+                        //   selectedCompanyId: selectedCompanyId,
+                        //   onChanged: (value) {
+                        //     selectedCompanyId = value;
+                        //   },
+                        // ),
                         const SizedBox(height: 30),
                         Center(
                           child: ElevatedButton(

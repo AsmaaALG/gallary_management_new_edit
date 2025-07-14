@@ -81,7 +81,7 @@ class _ManageGalleriesScreenState extends State<ManageAdsScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            BookingRequestsScreen(adId: documentId),
+                            BookingRequestsScreen(adId: documentId, adname: data['title'],),
                       ),
                     );
                   },

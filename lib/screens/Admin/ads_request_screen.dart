@@ -244,9 +244,6 @@ class _AdsRequestManagementScreenState
                               'status': 'active',
                             };
 
-                            await FirebaseFirestore.instance
-                                .collection('ads')
-                                .add(adData);
 
                             if (companyId != null &&
                                 companyId.toString().isNotEmpty) {

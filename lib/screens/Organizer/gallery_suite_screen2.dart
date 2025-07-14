@@ -17,7 +17,7 @@ class GallerySuiteScreen2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double cardWidth = isWeb(context)
-        ? screenWidth / 2 - 40 // مساحة لبطاقتين في صف واحد مع فراغ
+        ? screenWidth / 2 - 40 
         : double.infinity;
 
     return Directionality(
