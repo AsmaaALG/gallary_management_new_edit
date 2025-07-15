@@ -51,19 +51,19 @@ class _OrganizerScreenState extends State<OrganizerScreen> {
             return MainCard(
               title: doc['email'],
               buttons: [
-                {
-                  'icon': Icons.edit,
-                  'action': () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EditOrganizerScreen(
-                          organizerId: documentId,
-                        ),
-                      ),
-                    );
-                  },
-                },
+                // {
+                //   'icon': Icons.edit,
+                //   'action': () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) => EditOrganizerScreen(
+                //           organizerId: documentId,
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // },
                 {
                   'icon': Icons.delete_rounded,
                   'action': () {

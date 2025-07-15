@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/models/city.dart';
 import 'package:gallery_management/services/citys_service.dart';
@@ -15,6 +16,22 @@ class CityDropdown extends StatefulWidget {
 
   @override
   State<CityDropdown> createState() => _CityDropdownState();
+}
+
+Future<bool> isCityUsed(String cityId) async {
+  final galleries = await FirebaseFirestore.instance
+      .collection('2')
+      .where('city', isEqualTo: cityId)
+      .limit(1)
+      .get();
+
+  final ads = await FirebaseFirestore.instance
+      .collection('ads')
+      .where('city', isEqualTo: cityId)
+      .limit(1)
+      .get();
+
+  return galleries.docs.isNotEmpty || ads.docs.isNotEmpty;
 }
 
 class _CityDropdownState extends State<CityDropdown> {
@@ -116,12 +133,20 @@ class _CityDropdownState extends State<CityDropdown> {
 
     if (confirmed == true) {
       try {
+        final used = await isCityUsed(id);
+        if (used) {
+          _showSnackBar('لا يمكنك حذف المدن المستخدمة!');
+          return;
+        }
+
         await _citysService.deleteCity(id);
         await _fetchCities();
+
         if (_selectedId == id) {
           setState(() => _selectedId = null);
           widget.onChanged(null);
         }
+
         _showSnackBar('تم حذف المدينة');
       } catch (e) {
         _showSnackBar(e.toString());

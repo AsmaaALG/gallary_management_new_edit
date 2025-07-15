@@ -16,6 +16,7 @@ class DynamicViewCard extends StatelessWidget {
   final int suitesCount;
   final String imageUrl;
   final String mapUrl;
+  final String companyName;
 
   const DynamicViewCard({
     Key? key,
@@ -31,6 +32,7 @@ class DynamicViewCard extends StatelessWidget {
     required this.suitesCount,
     required this.imageUrl,
     required this.mapUrl,
+    required this.companyName,
   }) : super(key: key);
 
   @override
@@ -48,6 +50,7 @@ class DynamicViewCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  _buildInfoRow('الشركة المنظمة', companyName),
                   _buildInfoRow('العنوان', title),
                   _buildInfoRow('الوصف', description),
                   _buildLinkRow('الموقع', location),

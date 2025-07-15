@@ -9,7 +9,10 @@ import 'package:gallery_management/widgets/company_dropdown.dart';
 
 class AddOrganizerScreen extends StatefulWidget {
   final String companyId;
-  const AddOrganizerScreen({Key? key, required this.companyId}) : super(key: key,);
+  const AddOrganizerScreen({Key? key, required this.companyId})
+      : super(
+          key: key,
+        );
 
   @override
   State<AddOrganizerScreen> createState() => _AddOrganizerScreenState();
@@ -75,19 +78,21 @@ class _AddOrganizerScreenState extends State<AddOrganizerScreen> {
           email: emailController.text.trim(),
           password: passwordController.text.trim(),
           companyId: widget.companyId,
+          currentEmail: UserSession.email!,
+          currentPassword: UserSession.password!,
         );
 
         if (success) {
-          if (UserSession.email != null && UserSession.password != null) {
-            await FirebaseAuth.instance.signOut();
+          // if (UserSession.email != null && UserSession.password != null) {
+          //   await FirebaseAuth.instance.signOut();
 
-            // تعيين تسجيل الجلسة محليًا
-            await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
-              email: UserSession.email!,
-              password: UserSession.password!,
-            );
-          }
+          //   // تعيين تسجيل الجلسة محليًا
+          //   await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+          //   await FirebaseAuth.instance.signInWithEmailAndPassword(
+          //     email: UserSession.email!,
+          //     password: UserSession.password!,
+          //   );
+          // }
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/classification_service.dart';
@@ -27,6 +28,22 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
     super.initState();
     _selectedId = widget.selectedClassification;
     _fetchClassifications();
+  }
+
+  Future<bool> isClassificationUsed(String classificationId) async {
+    final galleries = await FirebaseFirestore.instance
+        .collection('2')
+        .where('classification id', isEqualTo: classificationId)
+        .limit(1)
+        .get();
+
+    final ads = await FirebaseFirestore.instance
+        .collection('ads')
+        .where('classification id', isEqualTo: classificationId)
+        .limit(1)
+        .get();
+
+    return galleries.docs.isNotEmpty || ads.docs.isNotEmpty;
   }
 
   Future<void> _fetchClassifications() async {
@@ -115,6 +132,12 @@ class _ClassificationDropdownState extends State<ClassificationDropdown> {
 
     if (confirmed == true) {
       try {
+        final used = await isClassificationUsed(id);
+        if (used) {
+          _showSnackBar('لا يمكنك حذف التصنيفات المستخدمة مسبقا!');
+          return;
+        }
+
         await _classificationService.deleteClassification(id);
         await _fetchClassifications();
         if (_selectedId == id) {

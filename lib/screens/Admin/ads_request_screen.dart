@@ -244,7 +244,6 @@ class _AdsRequestManagementScreenState
                               'status': 'active',
                             };
 
-
                             if (companyId != null &&
                                 companyId.toString().isNotEmpty) {
                               await FirebaseFirestore.instance
@@ -267,6 +266,7 @@ class _AdsRequestManagementScreenState
                               'body': adData['description'],
                               'timestamp': FieldValue.serverTimestamp(),
                               'ad_id': adId,
+                              'seenBy': [],
                             });
 
                             await FirebaseFirestore.instance

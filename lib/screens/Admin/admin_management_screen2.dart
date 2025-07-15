@@ -44,29 +44,42 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
             return MainCard(
               title: doc['email'],
               buttons: [
-                {
-                  'icon': Icons.edit,
-                  'action': () {
-                    _editAdminDialog(context, doc);
-                  },
-                },
+                // {
+                //   'icon': Icons.edit,
+                //   'action': () {
+                //     _editAdminDialog(context, doc);
+                //   },
+                // },
                 {
                   'icon': Icons.delete_rounded,
-                  'action': () {
+                  'action': () async {
+                    final adminsSnapshot = await FirebaseFirestore.instance
+                        .collection('admin')
+                        .get();
+
+                    //  ادمن واحد فقط
+                    if (adminsSnapshot.docs.length == 1) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'لا يمكن حذف آخر مسؤول في النظام',
+                            textDirection: TextDirection.rtl,
+                          ),
+                          backgroundColor: Colors.grey,
+                        ),
+                      );
+                      return;
+                    }
+
+                    // تابع الحذف إذا كان عدد المسؤولين أكثر من واحد
                     confirmDelete(context, () async {
                       final user = FirebaseAuth.instance.currentUser;
-
                       final deletedEmail = doc['email'];
 
-                      // تنفيذ الحذف من قاعدة البيانات
                       await _firestoreService.deleteAdmin(doc.id);
 
-                      // تحقق إذا كان المحذوف هو المستخدم الحالي
                       if (user != null && deletedEmail == user.email) {
-                        // تسجيل الخروج
                         await FirebaseAuth.instance.signOut();
-
-                        // التوجه لواجهة تسجيل الدخول وحذف سجل التنقل
                         if (context.mounted) {
                           Navigator.pushAndRemoveUntil(
                             context,
@@ -98,181 +111,181 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
   }
 
   // نافذة تعديل بيانات المسؤول
-  Future<void> _editAdminDialog(
-      BuildContext context, QueryDocumentSnapshot admin) async {
-    final data = admin.data() as Map<String, dynamic>;
-    final emailController = TextEditingController(text: data['email'] ?? '');
-    final firstNameController =
-        TextEditingController(text: data['first_name'] ?? '');
-    final lastNameController =
-        TextEditingController(text: data['last_name'] ?? '');
-    final passwordController =
-        TextEditingController(text: data['password'] ?? '');
-    int stateValue = data['state'] ?? 0;
+  // Future<void> _editAdminDialog(
+  //     BuildContext context, QueryDocumentSnapshot admin) async {
+  //   final data = admin.data() as Map<String, dynamic>;
+  //   final emailController = TextEditingController(text: data['email'] ?? '');
+  //   final firstNameController =
+  //       TextEditingController(text: data['first_name'] ?? '');
+  //   final lastNameController =
+  //       TextEditingController(text: data['last_name'] ?? '');
+  //   final passwordController =
+  //       TextEditingController(text: data['password'] ?? '');
+  //   int stateValue = data['state'] ?? 0;
 
-    bool obscurePassword = true;
+  //   bool obscurePassword = true;
 
-    final _formKey = GlobalKey<FormState>();
+  //   final _formKey = GlobalKey<FormState>();
 
-    await showDialog(
-      context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text(
-                'تعديل بيانات المسؤول',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontFamily: mainFont,
-                  color: primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: emailController,
-                        textAlign: TextAlign.right,
-                        decoration: const InputDecoration(
-                            labelText: 'البريد الإلكتروني'),
-                        readOnly: true,
-                        enabled: false,
-                      ),
-                      TextFormField(
-                        controller: firstNameController,
-                        textAlign: TextAlign.right,
-                        decoration:
-                            const InputDecoration(labelText: 'الاسم الأول'),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'الرجاء إدخال الاسم الأول';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        controller: lastNameController,
-                        textAlign: TextAlign.right,
-                        decoration:
-                            const InputDecoration(labelText: 'الاسم الأخير'),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'الرجاء إدخال الاسم الأخير';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        controller: passwordController,
-                        obscureText: obscurePassword,
-                        textAlign: TextAlign.right,
-                        decoration: InputDecoration(
-                          labelText: 'كلمة المرور',
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                obscurePassword = !obscurePassword;
-                              });
-                            },
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'الرجاء إدخال كلمة المرور';
-                          } else if (value.trim().length < 6) {
-                            return 'كلمة المرور يجب ألا تقل عن 6 خانات';
-                          }
-                          return null;
-                        },
-                      ),
-                      DropdownButtonFormField<int>(
-                        value: stateValue,
-                        decoration:
-                            const InputDecoration(labelText: 'الصلاحيات'),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 1,
-                            child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text('صلاحيات كاملة')),
-                          ),
-                          DropdownMenuItem(
-                            value: 0,
-                            child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text('صلاحيات محدودة')),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              stateValue = value;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text(
-                    'إلغاء',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: mainFont,
-                      color: Color.fromARGB(255, 104, 104, 104),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _firestoreService.updateAdmin(
-                        admin.id,
-                        firstNameController.text.trim(),
-                        lastNameController.text.trim(),
-                        passwordController.text.trim(),
-                        stateValue,
-                      );
-                      Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('تم تحديث بيانات المسؤول بنجاح'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text(
-                    'تحديث',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: mainFont,
-                      color: primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
+  //   await showDialog(
+  //     context: context,
+  //     builder: (ctx) => Directionality(
+  //       textDirection: TextDirection.rtl,
+  //       child: StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return AlertDialog(
+  //             title: const Text(
+  //               'تعديل بيانات المسؤول',
+  //               style: TextStyle(
+  //                 fontSize: 14,
+  //                 fontFamily: mainFont,
+  //                 color: primaryColor,
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //             content: Form(
+  //               key: _formKey,
+  //               child: SingleChildScrollView(
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   children: [
+  //                     TextFormField(
+  //                       controller: emailController,
+  //                       textAlign: TextAlign.right,
+  //                       decoration: const InputDecoration(
+  //                           labelText: 'البريد الإلكتروني'),
+  //                       readOnly: true,
+  //                       enabled: false,
+  //                     ),
+  //                     TextFormField(
+  //                       controller: firstNameController,
+  //                       textAlign: TextAlign.right,
+  //                       decoration:
+  //                           const InputDecoration(labelText: 'الاسم الأول'),
+  //                       validator: (value) {
+  //                         if (value == null || value.trim().isEmpty) {
+  //                           return 'الرجاء إدخال الاسم الأول';
+  //                         }
+  //                         return null;
+  //                       },
+  //                     ),
+  //                     TextFormField(
+  //                       controller: lastNameController,
+  //                       textAlign: TextAlign.right,
+  //                       decoration:
+  //                           const InputDecoration(labelText: 'الاسم الأخير'),
+  //                       validator: (value) {
+  //                         if (value == null || value.trim().isEmpty) {
+  //                           return 'الرجاء إدخال الاسم الأخير';
+  //                         }
+  //                         return null;
+  //                       },
+  //                     ),
+  //                     TextFormField(
+  //                       controller: passwordController,
+  //                       obscureText: obscurePassword,
+  //                       textAlign: TextAlign.right,
+  //                       decoration: InputDecoration(
+  //                         labelText: 'كلمة المرور',
+  //                         suffixIcon: IconButton(
+  //                           icon: Icon(
+  //                             obscurePassword
+  //                                 ? Icons.visibility_off
+  //                                 : Icons.visibility,
+  //                           ),
+  //                           onPressed: () {
+  //                             setState(() {
+  //                               obscurePassword = !obscurePassword;
+  //                             });
+  //                           },
+  //                         ),
+  //                       ),
+  //                       validator: (value) {
+  //                         if (value == null || value.trim().isEmpty) {
+  //                           return 'الرجاء إدخال كلمة المرور';
+  //                         } else if (value.trim().length < 6) {
+  //                           return 'كلمة المرور يجب ألا تقل عن 6 خانات';
+  //                         }
+  //                         return null;
+  //                       },
+  //                     ),
+  //                     DropdownButtonFormField<int>(
+  //                       value: stateValue,
+  //                       decoration:
+  //                           const InputDecoration(labelText: 'الصلاحيات'),
+  //                       items: const [
+  //                         DropdownMenuItem(
+  //                           value: 1,
+  //                           child: Align(
+  //                               alignment: Alignment.centerRight,
+  //                               child: Text('صلاحيات كاملة')),
+  //                         ),
+  //                         DropdownMenuItem(
+  //                           value: 0,
+  //                           child: Align(
+  //                               alignment: Alignment.centerRight,
+  //                               child: Text('صلاحيات محدودة')),
+  //                         ),
+  //                       ],
+  //                       onChanged: (value) {
+  //                         if (value != null) {
+  //                           setState(() {
+  //                             stateValue = value;
+  //                           });
+  //                         }
+  //                       },
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.pop(ctx),
+  //                 child: const Text(
+  //                   'إلغاء',
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     fontFamily: mainFont,
+  //                     color: Color.fromARGB(255, 104, 104, 104),
+  //                     fontWeight: FontWeight.bold,
+  //                   ),
+  //                 ),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () {
+  //                   if (_formKey.currentState!.validate()) {
+  //                     _firestoreService.updateAdmin(
+  //                       admin.id,
+  //                       firstNameController.text.trim(),
+  //                       lastNameController.text.trim(),
+  //                       passwordController.text.trim(),
+  //                       stateValue,
+  //                     );
+  //                     Navigator.pop(ctx);
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       const SnackBar(
+  //                         content: Text('تم تحديث بيانات المسؤول بنجاح'),
+  //                         backgroundColor: Colors.green,
+  //                       ),
+  //                     );
+  //                   }
+  //                 },
+  //                 child: const Text(
+  //                   'تحديث',
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     fontFamily: mainFont,
+  //                     color: primaryColor,
+  //                     fontWeight: FontWeight.bold,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
 }

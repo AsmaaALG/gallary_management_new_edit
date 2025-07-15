@@ -23,40 +23,44 @@ class FirestoreService {
 
   // Sign up باستخدام Auth
   Future<bool> createUser({
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String password,
-    required int state,
-  }) async {
-    try {
-      // إنشاء المستخدم في Firebase Auth
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  required String firstName,
+  required String lastName,
+  required String email,
+  required String password,
+  required int state,
+  required String currentEmail,
+  required String currentPassword,
+}) async {
+  try {
+    // إنشاء المستخدم الجديد
+    UserCredential newUser =
+        await _auth.createUserWithEmailAndPassword(email: email, password: password);
 
-      // جلب UID الخاص بالمستخدم
-      String uid = userCredential.user!.uid;
+    // حفظ بياناته في Firestore
+    await _firestore.collection('admin').doc(newUser.user!.uid).set({
+      'id': newUser.user!.uid,
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'password': password,
+      'state': state,
+    });
 
-      // تخزين البيانات في Firestore
-      final docRef =
-          _firestore.collection('admin').doc(uid); // استخدام الـ UID كـ ID
-      await docRef.set({
-        'id': uid,
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'password': password,
-        'state': state,
-      });
-      return true;
-    } catch (e) {
-      print("خطأ أثناء إنشاء المستخدم: $e");
-      return false;
-    }
+    // تسجيل الخروج من المستخدم الجديد
+    await _auth.signOut();
+
+    // إعادة تسجيل الدخول بالمستخدم الأصلي
+    await _auth.signInWithEmailAndPassword(
+      email: currentEmail,
+      password: currentPassword,
+    );
+
+    return true;
+  } catch (e) {
+    print("خطأ أثناء إنشاء المستخدم: $e");
+    return false;
   }
+}
 
 ////////////////////////////
   Future<bool> createOrganizer({
@@ -65,12 +69,14 @@ class FirestoreService {
     required String email,
     required String password,
     required String companyId,
+    required String currentEmail,
+  required String currentPassword,
   }) async {
     try {
       // حفظ الجلسة الحالية قبل التسجيل
-      final currentUser = FirebaseAuth.instance.currentUser;
-      final currentEmail = UserSession.email;
-      final currentPassword = UserSession.password;
+      // final currentUser = FirebaseAuth.instance.currentUser;
+      // final currentEmail = UserSession.email;
+      // final currentPassword = UserSession.password;
 
       // تسجيل المستخدم الجديد (سيتم تسجيل دخول تلقائي بالحساب الجديد)
       UserCredential userCredential = await FirebaseAuth.instance
@@ -88,14 +94,22 @@ class FirestoreService {
         'company_id': companyId,
       });
 
-      // إعادة تسجيل الدخول بالحساب السابق (الأدمن)
-      if (currentEmail != null && currentPassword != null) {
-        await FirebaseAuth.instance.signOut(); // <- مهم جدًا
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: currentEmail,
-          password: currentPassword,
-        );
-      }
+      // // إعادة تسجيل الدخول بالحساب السابق (الأدمن)
+      // if (currentEmail != null && currentPassword != null) {
+      //   await FirebaseAuth.instance.signOut(); // <- مهم جدًا
+      //   await FirebaseAuth.instance.signInWithEmailAndPassword(
+      //     email: currentEmail,
+      //     password: currentPassword,
+      //   );
+      // }
+ // تسجيل الخروج من المستخدم الجديد
+    await _auth.signOut();
+
+    // إعادة تسجيل الدخول بالمستخدم الأصلي
+    await _auth.signInWithEmailAndPassword(
+      email: currentEmail,
+      password: currentPassword,
+    );
 
       return true;
     } catch (e) {

@@ -16,6 +16,15 @@ class CompanyScreen extends StatefulWidget {
 class _CompanyScreenState extends State<CompanyScreen> {
   final FirestoreService _firestoreService = FirestoreService();
 
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, textDirection: TextDirection.rtl),
+        backgroundColor: Colors.grey,
+      ),
+    );
+  }
+
   Future<void> _showCompanyDialog({DocumentSnapshot? doc}) async {
     final nameCtl = TextEditingController(text: doc?['name'] ?? '');
     final commercialNumberCtl =
@@ -54,23 +63,47 @@ class _CompanyScreenState extends State<CompanyScreen> {
           ),
           TextButton(
             onPressed: () async {
-              if (nameCtl.text.trim().isEmpty ||
-                  commercialNumberCtl.text.trim().isEmpty) return;
+              final name = nameCtl.text.trim();
+              final number = commercialNumberCtl.text.trim();
+
+              if (name.isEmpty || number.isEmpty) {
+                _showSnackBar('يرجى تعبئة جميع الحقول');
+                return;
+              }
+
+              if (!RegExp(r'^\d+$').hasMatch(number)) {
+                _showSnackBar('الرقم التجاري يجب أن يحتوي على أرقام فقط');
+                return;
+              }
+
+              final companies =
+                  await FirebaseFirestore.instance.collection('company').get();
+
+              final isDuplicate = companies.docs.any((d) {
+                final isSameDoc = doc != null && d.id == doc.id;
+                final sameName = d['name'].toString().trim() == name;
+                final sameNumber =
+                    d['Commercial number'].toString().trim() == number;
+                return !isSameDoc && (sameName || sameNumber);
+              });
+
+              if (isDuplicate) {
+                _showSnackBar('اسم الشركة أو الرقم التجاري مستخدم مسبقًا');
+                return;
+              }
 
               if (doc == null) {
-                // إضافة شركة جديدة
                 await FirebaseFirestore.instance.collection('company').add({
-                  'name': nameCtl.text.trim(),
-                  'Commercial number': commercialNumberCtl.text.trim(),
+                  'name': name,
+                  'Commercial number': number,
                 });
               } else {
-                // تحديث الشركة
                 await FirebaseFirestore.instance
                     .collection('company')
                     .doc(doc.id)
                     .update({
-                  'name': nameCtl.text.trim(),
-                  'Commercial number': commercialNumberCtl.text.trim(),
+                  'name': name,
+                  'Commercial number': number,
                 });
               }
 
@@ -100,6 +133,46 @@ class _CompanyScreenState extends State<CompanyScreen> {
         ),
       );
 
+  Future<bool> isCompanyUsed(String companyId) async {
+    final galleries = await FirebaseFirestore.instance
+        .collection('2')
+        .where('company_id', isEqualTo: companyId)
+        .limit(1)
+        .get();
+
+    final ads = await FirebaseFirestore.instance
+        .collection('ads')
+        .where('company_id', isEqualTo: companyId)
+        .limit(1)
+        .get();
+
+    return galleries.docs.isNotEmpty || ads.docs.isNotEmpty;
+  }
+
+  Future<bool> deleteCompanyWithOrganizers(String companyId) async {
+    final used = await isCompanyUsed(companyId);
+    if (used) {
+      _showSnackBar('لا يمكن حذف الشركة لأنها مستخدمة في معارض أو إعلانات');
+      return false;
+    }
+
+    final organizers = await FirebaseFirestore.instance
+        .collection('Organizer')
+        .where('company_id', isEqualTo: companyId)
+        .get();
+
+    for (var org in organizers.docs) {
+      await FirebaseFirestore.instance
+          .collection('Organizer')
+          .doc(org.id)
+          .delete();
+    }
+
+    await _firestoreService.deleteDocument('company', companyId);
+    _showSnackBar('تم حذف الشركة');
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -120,15 +193,12 @@ class _CompanyScreenState extends State<CompanyScreen> {
               title: doc['name'],
               buttons: [
                 {
-                  'icon': Icons.group, // ← أيقونة الأشخاص
+                  'icon': Icons.group,
                   'action': () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => OrganizerScreen(
-                          companyId: doc.id,
-                          //  companyName: doc['name'],
-                        ),
+                        builder: (_) => OrganizerScreen(companyId: doc.id),
                       ),
                     );
                   },
@@ -139,10 +209,11 @@ class _CompanyScreenState extends State<CompanyScreen> {
                 },
                 {
                   'icon': Icons.delete_rounded,
-                  'action': () => confirmDelete(context, () async {
-                        await _firestoreService.deleteDocument(
-                            'company', doc.id);
-                      }),
+                  'action': () => showDeleteConfirmationDialog(
+                        context: context,
+                        content: 'هل تريد حذف هذه الشركة؟',
+                        onConfirm: () => deleteCompanyWithOrganizers(doc.id),
+                      ),
                 },
               ],
             );
@@ -159,11 +230,52 @@ class _CompanyScreenState extends State<CompanyScreen> {
               description:
                   'من خلال هذه الواجهة يمكنك متابعة بيانات جميع الشركات المنظمة للمعارض',
               cards: cards,
-              addScreen: const SizedBox(), // غير مستخدم الآن
+              addScreen: const SizedBox(),
             ),
           );
         },
       ),
     );
+  }
+
+  Future<void> showDeleteConfirmationDialog({
+    required BuildContext context,
+    required Future<bool> Function() onConfirm,
+    String title = 'تأكيد الحذف',
+    String content = 'هل أنت متأكد أنك تريد الحذف؟',
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: Text(title),
+            content: Text(content),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('إلغاء'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'حذف',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      final success = await onConfirm();
+      // الرسائل تُعرض من داخل دالة onConfirm (كما فعلنا مع deleteCompanyWithOrganizers)
+      if (!success) {
+        // يمكنك أيضًا عرض Snackbar هنا لو أردت فصل الرسائل
+      }
+    }
   }
 }

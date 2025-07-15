@@ -145,17 +145,12 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                                   email: emailController.text.trim(),
                                   password: passwordController.text.trim(),
                                   state: selectedState,
+                                  currentEmail: UserSession.email!,
+                                  currentPassword: UserSession.password!,
                                 );
+
                                 if (success) {
                                   Navigator.pop(context);
-                                  if (UserSession.email != null &&
-                                      UserSession.password != null) {
-                                    await FirebaseAuth.instance
-                                        .signInWithEmailAndPassword(
-                                      email: UserSession.email!,
-                                      password: UserSession.password!,
-                                    );
-                                  }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text('تمت إضافة المسؤول بنجاح'),
