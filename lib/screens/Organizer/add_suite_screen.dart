@@ -21,6 +21,7 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
   final TextEditingController _titleCtl = TextEditingController();
   final TextEditingController _priceCtl = TextEditingController();
   final TextEditingController _sizeCtl = TextEditingController();
+  final validMapTitleRegex = RegExp(r'^[a-zA-Z0-9\s]+$');
 
   bool _isLoading = false;
   final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
@@ -34,6 +35,37 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
     _priceCtl.dispose();
     _sizeCtl.dispose();
     super.dispose();
+  }
+
+  Future<String?> _validateMapTitle(String? value) async {
+    if (value == null || value.trim().isEmpty) {
+      return 'يرجى ملء هذا الحقل';
+    }
+
+    final title = value.trim();
+
+    // تحقق من أن العنوان يحتوي فقط على أحرف إنجليزية وأرقام
+    final validMapTitleRegex = RegExp(r'^[a-zA-Z0-9\s]+$');
+    if (!validMapTitleRegex.hasMatch(title)) {
+      return 'العنوان يجب أن يحتوي على حروف إنجليزية وأرقام فقط';
+    }
+
+    // جلب كل الأجنحة من Firestore (أو من نفس المعرض فقط إذا أردت لاحقًا)
+    final snapshot = await FirebaseFirestore.instance.collection('suite').get();
+    final lowerTitle = title.toLowerCase();
+
+    // تحقق إذا كان العنوان موجود بالفعل بدون حساسية لحالة الأحرف
+    final exists = snapshot.docs.any((doc) {
+      final existingTitle =
+          (doc.data()['title on map'] ?? '').toString().toLowerCase();
+      return existingTitle == lowerTitle;
+    });
+
+    if (exists) {
+      return 'العنوان "$value" مستخدم بالفعل، يرجى اختيار عنوان آخر';
+    }
+
+    return null;
   }
 
   InputDecoration buildInputDecoration(String label, String hint) {
@@ -58,6 +90,21 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final title = _titleCtl.text.trim();
+
+    // تحقق من عنوان الخريطة إذا لم يكن فارغًا
+    if (title.isNotEmpty) {
+      final titleError = await _validateMapTitle(title);
+      if (titleError != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(titleError)),
+          );
+        }
+        return;
+      }
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -70,15 +117,21 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
         'name': _nameCtl.text.trim(),
         'description': _descCtl.text.trim(),
         'main image': _imageCtl.text.trim(),
-        'title on map': _titleCtl.text.trim(),
-        'price': double.parse(_priceCtl.text.trim()),
-        'size': double.parse(_sizeCtl.text.trim()),
       };
+
+      // // فقط أضف الحقول إذا لم تكن فارغة
+      // if (title.isNotEmpty) suiteData['title on map'] = title;
+      // if (_priceCtl.text.trim().isNotEmpty) {
+      //   suiteData['price'] = double.parse(_priceCtl.text.trim()) as String;
+      // }
+      // if (_sizeCtl.text.trim().isNotEmpty) {
+      //   suiteData['size'] = double.parse(_sizeCtl.text.trim()) as String;
+      // }
 
       await docRef.set(suiteData);
 
       if (mounted) {
-        Navigator.pop(context, true); // ترجع نجاح الإضافة
+        Navigator.pop(context, true); // نجاح الإضافة
       }
     } catch (e) {
       if (mounted) {
@@ -102,7 +155,7 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
 
   String? _validateNumber(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'يرجى ملء هذا الحقل';
+      return null;
     }
     final n = num.tryParse(value.trim());
     if (n == null) {
@@ -220,23 +273,29 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _titleCtl,
-                    decoration: buildInputDecoration('عنوان الجناح على الخارطة',
-                        'أدخل عنوان الجناح على الخارطة'),
-                    validator: _validateNotEmpty,
+                    decoration: buildInputDecoration(
+                      'عنوان الجناح على الخارطة',
+                      'يمكن تركه فارغًا',
+                    ),
+                    validator: (_) => null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _sizeCtl,
                     decoration: buildInputDecoration(
-                        'مساحة الجناح بالمتر المربع', 'أدخل مساحة الجناح'),
-                    validator: _validateNumber,
+                      'مساحة الجناح بالمتر المربع',
+                      'يمكن تركها فارغة',
+                    ),
+                    validator: _validateNumber, // بدون تحقق
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _priceCtl,
                     decoration: buildInputDecoration(
-                        'سعر الجناح بالدينار الليبي', 'أدخل سعر الجناح'),
-                    validator: _validateNumber,
+                      'سعر الجناح بالدينار الليبي',
+                      'يمكن تركه فارغًا',
+                    ),
+                    validator: _validateNumber, // بدون تحقق
                   ),
                   const SizedBox(height: 30),
                   Center(

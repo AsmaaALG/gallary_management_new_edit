@@ -8,8 +8,11 @@ class EditSuiteScreen extends StatefulWidget {
   final String suiteId;
   final String galleryId;
 
-  const EditSuiteScreen(
-      {super.key, required this.suiteId, required this.galleryId});
+  const EditSuiteScreen({
+    super.key,
+    required this.suiteId,
+    required this.galleryId,
+  });
 
   @override
   State<EditSuiteScreen> createState() => _EditSuiteScreenState();
@@ -49,17 +52,86 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
     setState(() => isLoading = false);
   }
 
+  Future<bool> validateInputs() async {
+    final title = _titleCtl.text.trim();
+    final priceText = _priceCtl.text.trim();
+    final sizeText = _sizeCtl.text.trim();
+
+    if (title.isNotEmpty) {
+      final validRegex = RegExp(r'^[a-zA-Z0-9\s]+$');
+      if (!validRegex.hasMatch(title)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('العنوان يجب أن يحتوي فقط على حروف إنجليزية وأرقام')),
+        );
+        return false;
+      }
+
+      final snapshot =
+          await FirebaseFirestore.instance.collection('suite').get();
+
+      final isDuplicate = snapshot.docs.any((doc) {
+        final existingId = doc.id;
+        final existingTitle =
+            (doc.data()['title on map'] ?? '').toString().toLowerCase();
+        return existingId != widget.suiteId &&
+            existingTitle == title.toLowerCase();
+      });
+
+      if (isDuplicate) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('العنوان "$title" مستخدم بالفعل، يرجى اختيار عنوان آخر')),
+        );
+        return false;
+      }
+    }
+
+    if (priceText.isNotEmpty) {
+      final price = double.tryParse(priceText);
+      if (price == null || price <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('يرجى إدخال سعر صحيح ')),
+        );
+        return false;
+      }
+    }
+
+    if (sizeText.isNotEmpty) {
+      final size = double.tryParse(sizeText);
+      if (size == null || size <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('يرجى إدخال مساحة صحيحة ')),
+        );
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   Future<void> updateSuite() async {
+    final isValid = await validateInputs();
+    if (!isValid) return;
+
     try {
-      final suiteData = {
+      final Map<String, dynamic> suiteData = {
         'gallery id': widget.galleryId,
         'name': _nameCtl.text.trim(),
         'description': _descCtl.text.trim(),
         'main image': _imageCtl.text.trim(),
-        'title on map': _titleCtl.text.trim(),
-        'price': double.parse(_priceCtl.text.trim()),
-        'size': double.parse(_sizeCtl.text.trim()),
       };
+
+      final title = _titleCtl.text.trim();
+      if (title.isNotEmpty) suiteData['title on map'] = title;
+
+      final priceText = _priceCtl.text.trim();
+      if (priceText.isNotEmpty) {
+        suiteData['price'] = double.parse(priceText);
+      }
+
+      final sizeText = _sizeCtl.text.trim();
+      if (sizeText.isNotEmpty) {
+        suiteData['size'] = double.parse(sizeText);
+      }
 
       await FirebaseFirestore.instance
           .collection('suite')
@@ -143,8 +215,9 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: EdgeInsets.symmetric(
-                    vertical: 20,
-                    horizontal: isWideScreen ? 30 : 10), // تقليل البادينق
+                  vertical: 20,
+                  horizontal: isWideScreen ? 30 : 10,
+                ),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,8 +272,8 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      SuiteImageScreen(suiteId: widget.suiteId),
+                                  builder: (context) => SuiteImageScreen(
+                                      suiteId: widget.suiteId),
                                 ),
                               );
                             },

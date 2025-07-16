@@ -135,13 +135,15 @@ class _ControlPanelState extends State<ControlPanel> {
                       title: 'إدارة الشركات المنظمة',
                       description:
                           'يمكنك إدارة المشركات المنظمة والمنظمين التابعين لها',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CompanyScreen(),
-                        ),
-                      ),
-                      isEnabled: true,
+                      onTap: _userState == 1
+                          ? () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const CompanyScreen(),
+                                ),
+                              )
+                          : _showPermissionDeniedMessage,
+                      isEnabled: _userState == 1,
                     ),
                     AdminCard(
                       title: 'إدارة المعارض',
