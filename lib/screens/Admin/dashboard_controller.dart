@@ -7,8 +7,10 @@ import 'package:intl/intl.dart';
 class DashboardController {
   int totalGalleries = 0;
   int totalUsers = 0;
-  int totalReservations = 0;
+  // int totalReservations = 0;
   int totalAds = 0;
+  int totalCompanies = 0;
+
   bool isLoading = false;
   String errorMessage = '';
   DateTime? lastUpdated;
@@ -38,8 +40,9 @@ class DashboardController {
       final results = await Future.wait([
         _fetchCollectionCount('2'),
         _fetchCollectionCount('users'),
-        _fetchCollectionCount('space_form'),
+        // _fetchCollectionCount('space_form'),
         _fetchCollectionCount('ads'),
+        _fetchCollectionCount('company'),
       ]);
 
       await _fetchCategoryVisits();
@@ -48,8 +51,8 @@ class DashboardController {
 
       totalGalleries = results[0]!;
       totalUsers = results[1]!;
-      totalReservations = results[2]!;
-      totalAds = results[3]!;
+      totalAds = results[2]!;
+      totalCompanies = results[3]!;
       lastUpdated = DateTime.now();
     } catch (e) {
       errorMessage = 'حدث خطأ في جلب البيانات: ${e.toString()}';

@@ -47,6 +47,12 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
     }
   }
 
+  bool _isValidImageUrl(String url) {
+    final RegExp regex =
+        RegExp(r'^https?:\/\/.*\.(png|jpe?g|gif|bmp)', caseSensitive: false);
+    return regex.hasMatch(url);
+  }
+
   Future<void> _showPartnerDialog({DocumentSnapshot? doc}) async {
     final nameCtl = TextEditingController(text: doc?['name'] ?? '');
     final imageCtl = TextEditingController(text: doc?['image'] ?? '');
@@ -106,8 +112,18 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
                   const Text('إلغاء', style: TextStyle(fontFamily: mainFont))),
           TextButton(
               onPressed: () async {
-                if (nameCtl.text.trim().isEmpty || imageCtl.text.trim().isEmpty)
+                if (nameCtl.text.trim().isEmpty ||
+                    imageCtl.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('يرجى ملئ جميع الحقول')));
                   return;
+                }
+                if (!_isValidImageUrl(imageCtl.text.trim())) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+                  );
+                  return;
+                }
 
                 if (doc == null) {
                   await _fs.addPartner(
@@ -197,7 +213,6 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
               description:
                   'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
               cards: cards,
-              addScreen: const SizedBox(),
               galleryName: _galleryName ?? '', // <== هنا اسم المعرض بدون bold
             ),
           ),

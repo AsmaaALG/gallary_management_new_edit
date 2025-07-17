@@ -86,7 +86,7 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
       return;
     }
 
-    if (!_isValidImageUrl(_imageUrlController.text)) {
+    if (!_isValidImageUrl(_imageUrlController.text)||!_isValidImageUrl(_mapController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
       );

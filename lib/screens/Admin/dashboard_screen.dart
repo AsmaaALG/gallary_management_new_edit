@@ -121,6 +121,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       _controller.totalAds,
                                       Icons.ads_click,
                                       const Color.fromARGB(255, 244, 177, 7)),
+                                  StatCard(
+                                    'الشركات',
+                                    _controller.totalCompanies,
+                                    Icons.business,
+                                    const Color.fromARGB(255, 244, 177, 7),
+                                  ),
                                 ],
                               ),
 

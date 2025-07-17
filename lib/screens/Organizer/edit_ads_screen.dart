@@ -91,7 +91,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       );
       return;
     }
-    if (!_isValidImageUrl(_imageUrlController.text)) {
+    if (!_isValidImageUrl(_imageUrlController.text) ||
+        !_isValidImageUrl(_mapImageController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
       );

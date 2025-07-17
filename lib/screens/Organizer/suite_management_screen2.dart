@@ -113,7 +113,6 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen2> {
               title: 'التعديل على الأجنحة',
               description: 'قم بتعديل أجنحة المعرض أو إضافة أجنحة جديدة.',
               cards: cards,
-              addScreen: const SizedBox(),
               galleryName: _galleryName ?? '',
             ),
           ),

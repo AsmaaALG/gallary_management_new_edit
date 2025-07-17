@@ -196,7 +196,6 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
           ),
         ),
 
-        // محتوى الشاشة
         body: Padding(
           padding: const EdgeInsets.all(20.0), // Padding من جميع الجهات
           child: Column(
@@ -222,7 +221,6 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
               ),
               SizedBox(height: 10),
 
-              // عرض الصور من قاعدة البيانات
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance

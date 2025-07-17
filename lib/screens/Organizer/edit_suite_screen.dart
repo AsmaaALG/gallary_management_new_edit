@@ -51,7 +51,11 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
     }
     setState(() => isLoading = false);
   }
-
+  bool _isValidImageUrl(String url) {
+    final RegExp regex =
+        RegExp(r'^https?:\/\/.*\.(png|jpe?g|gif|bmp)', caseSensitive: false);
+    return regex.hasMatch(url);
+  }
   Future<bool> validateInputs() async {
     final title = _titleCtl.text.trim();
     final priceText = _priceCtl.text.trim();
@@ -84,7 +88,12 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
         return false;
       }
     }
-
+if (!_isValidImageUrl(_imageCtl.text) ) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+      );
+      return false;
+    }
     if (priceText.isNotEmpty) {
       final price = double.tryParse(priceText);
       if (price == null || price <= 0) {

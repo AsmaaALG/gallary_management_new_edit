@@ -78,7 +78,7 @@ class _MyGalleryRequestsScreenState extends State<MyGalleryRequestsScreen> {
             fontSize: 15,
           ),
         ),
-        actionsAlignment: MainAxisAlignment.center, // توسيط الأزرار
+        actionsAlignment: MainAxisAlignment.center, 
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -118,11 +118,11 @@ class _MyGalleryRequestsScreenState extends State<MyGalleryRequestsScreen> {
 
     return FutureBuilder(
       future: Future.wait([
-        // Fetch classification name
+
         (data['classification id'] != null)
             ? (data['classification id'] as DocumentReference).get()
             : Future.value(null),
-        // Fetch city name
+
         (data['city'] != null)
             ? FirebaseFirestore.instance
                 .collection('city')

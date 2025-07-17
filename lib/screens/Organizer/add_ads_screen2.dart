@@ -148,7 +148,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    // تحقق من الاسم: حروف إنجليزية وأرقام فقط
+                    // حروف إنجليزية وأرقام فقط
                     final nameValid = RegExp(r'^[a-zA-Z0-9]+$');
                     if (!nameValid.hasMatch(name)) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -159,7 +159,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    // تحقق من المساحة: أرقام ورموز فقط
+                    // أرقام ورموز فقط
                     final areaValid = RegExp(r'^[0-9\W_]+$');
                     if (!areaValid.hasMatch(area)) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +170,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    // تحقق من السعر: أرقام فقط
+                    //  أرقام فقط
                     final priceValid = RegExp(r'^[0-9\W_]+$');
                     if (!priceValid.hasMatch(price)) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -180,7 +180,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    // تحقق من التكرار (غير حساس لحالة الأحرف)
+                    // تحقق من التكرار)
                     final nameLower = name.toLowerCase();
                     final alreadyExists = _suites.any((suite) =>
                         suite['name'].toString().toLowerCase() == nameLower);
@@ -245,7 +245,8 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
       return;
     }
 
-    if (!_isValidImageUrl(_imageUrlController.text)) {
+    if (!_isValidImageUrl(_imageUrlController.text) ||
+        !_isValidImageUrl(_mapImageController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
       );

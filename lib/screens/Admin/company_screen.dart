@@ -230,7 +230,6 @@ class _CompanyScreenState extends State<CompanyScreen> {
               description:
                   'من خلال هذه الواجهة يمكنك متابعة بيانات جميع الشركات المنظمة للمعارض',
               cards: cards,
-              addScreen: const SizedBox(),
             ),
           );
         },

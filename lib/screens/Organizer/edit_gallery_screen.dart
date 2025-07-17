@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/models/classification.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
@@ -97,9 +96,15 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
       return;
     }
 
-    if (!_isValidImageUrl(_imageUrlController.text)) {
+    if (!_isValidImageUrl(_imageUrlController.text)||!_isValidImageUrl(_mapController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+      );
+      return;
+    }
+    if (!_isValidMapUrl(_locationController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى إدخال رابط موقع Google Maps صالح')),
       );
       return;
     }
@@ -153,6 +158,14 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
       caseSensitive: false,
     );
     return regex.hasMatch(url);
+  }
+  bool _isValidMapUrl(String url) {
+    final cleanedUrl = url.trim();
+    final RegExp regex = RegExp(
+      r'^(https?:\/\/)?(www\.google\.com\/maps|goo\.gl\/maps|maps\.app\.goo\.gl)\/.+',
+      caseSensitive: false,
+    );
+    return regex.hasMatch(cleanedUrl);
   }
 
   @override
