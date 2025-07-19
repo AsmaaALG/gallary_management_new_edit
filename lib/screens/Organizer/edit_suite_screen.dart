@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:gallery_management/screens/Admin/suite_images_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,8 +26,11 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
   final _titleCtl = TextEditingController();
   final _priceCtl = TextEditingController();
   final _sizeCtl = TextEditingController();
+  String? uploadedImageUrl;
 
   bool isLoading = true;
+  bool _isUploading = false;
+
   bool isWeb(BuildContext context) => MediaQuery.of(context).size.width > 600;
 
   @override
@@ -51,11 +55,13 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
     }
     setState(() => isLoading = false);
   }
+
   bool _isValidImageUrl(String url) {
     final RegExp regex =
         RegExp(r'^https?:\/\/.*\.(png|jpe?g|gif|bmp)', caseSensitive: false);
     return regex.hasMatch(url);
   }
+
   Future<bool> validateInputs() async {
     final title = _titleCtl.text.trim();
     final priceText = _priceCtl.text.trim();
@@ -65,40 +71,50 @@ class _EditSuiteScreenState extends State<EditSuiteScreen> {
       final validRegex = RegExp(r'^[a-zA-Z0-9\s]+$');
       if (!validRegex.hasMatch(title)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('العنوان يجب أن يحتوي فقط على حروف إنجليزية وأرقام')),
+          const SnackBar(
+            content: Text('العنوان يجب أن يحتوي فقط على حروف إنجليزية وأرقام'),
+          ),
         );
         return false;
       }
 
-      final snapshot =
-          await FirebaseFirestore.instance.collection('suite').get();
+      // تحقق من تكرار العنوان داخل نفس المعرض فقط
+      final snapshot = await FirebaseFirestore.instance
+          .collection('suite')
+          .where('gallery id', isEqualTo: widget.galleryId)
+          .get();
 
       final isDuplicate = snapshot.docs.any((doc) {
         final existingId = doc.id;
         final existingTitle =
             (doc.data()['title on map'] ?? '').toString().toLowerCase();
         return existingId != widget.suiteId &&
-            existingTitle == title.toLowerCase();
+            existingTitle == title.toLowerCase(); // 🔹 استثناء الجناح الحالي
       });
 
       if (isDuplicate) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('العنوان "$title" مستخدم بالفعل، يرجى اختيار عنوان آخر')),
+          SnackBar(
+            content: Text(
+                'العنوان "$title" مستخدم بالفعل داخل هذا المعرض، يرجى اختيار عنوان آخر'),
+          ),
         );
         return false;
       }
     }
-if (!_isValidImageUrl(_imageCtl.text) ) {
+
+    if (_imageCtl.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+        const SnackBar(content: Text('يرجى اختيار صورة')),
       );
       return false;
     }
+
     if (priceText.isNotEmpty) {
       final price = double.tryParse(priceText);
       if (price == null || price <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('يرجى إدخال سعر صحيح ')),
+          const SnackBar(content: Text('يرجى إدخال سعر صحيح')),
         );
         return false;
       }
@@ -108,7 +124,7 @@ if (!_isValidImageUrl(_imageCtl.text) ) {
       final size = double.tryParse(sizeText);
       if (size == null || size <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('يرجى إدخال مساحة صحيحة ')),
+          const SnackBar(content: Text('يرجى إدخال مساحة صحيحة')),
         );
         return false;
       }
@@ -127,6 +143,9 @@ if (!_isValidImageUrl(_imageCtl.text) ) {
         'name': _nameCtl.text.trim(),
         'description': _descCtl.text.trim(),
         'main image': _imageCtl.text.trim(),
+        'title on map': _titleCtl.text.trim(),
+        'price': _priceCtl.text.trim(),
+        'size': _sizeCtl.text.trim()
       };
 
       final title = _titleCtl.text.trim();
@@ -238,21 +257,65 @@ if (!_isValidImageUrl(_imageCtl.text) ) {
                       const SizedBox(height: 25),
                       buildTextField('اسم الجناح', _nameCtl),
                       buildTextField('وصف الجناح', _descCtl, maxLines: 5),
-                      buildTextField('رابط صورة الجناح', _imageCtl),
+                      ElevatedButton(
+                        onPressed: _isUploading
+                            ? null 
+                            : () async {
+                                setState(() {
+                                  _isUploading = true;
+                                });
+
+                                final imageUrl = await pickAndUploadImage(
+                                  imgbbApiKey:
+                                      '95daff58b10157f2de7ddd93301132e2',
+                                );
+
+                                if (imageUrl != null) {
+                                  setState(() {
+                                    uploadedImageUrl = imageUrl;
+                                    _imageCtl.text = imageUrl;
+                                  });
+                                }
+
+                                setState(() {
+                                  _isUploading = false;
+                                });
+                              },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: _isUploading
+                                ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  )
+                                : Text(
+                                    'اختيار صورة الجناح',
+                                    style: TextStyle(
+                                        fontFamily: mainFont, fontSize: 10),
+                                  ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
                       buildTextField('العنوان على الخريطة', _titleCtl),
                       buildTextField('السعر', _priceCtl,
                           keyboardType: TextInputType.number),
                       buildTextField('المساحة (م²)', _sizeCtl,
                           keyboardType: TextInputType.number),
-                      ElevatedButton(
-                        onPressed: () async {
-                          const imgurUrl = 'https://imgur.com/upload';
-                          if (await canLaunch(imgurUrl)) {
-                            await launch(imgurUrl);
-                          }
-                        },
-                        child: const Text('افتح Imgur لرفع صورة'),
-                      ),
+                      // ElevatedButton(
+                      //   onPressed: () async {
+                      //     const imgurUrl = 'https://imgur.com/upload';
+                      //     if (await canLaunch(imgurUrl)) {
+                      //       await launch(imgurUrl);
+                      //     }
+                      //   },
+                      //   child: const Text('افتح Imgur لرفع صورة'),
+                      // ),
                       const SizedBox(height: 30),
                       Wrap(
                         spacing: 15,
@@ -281,8 +344,8 @@ if (!_isValidImageUrl(_imageCtl.text) ) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => SuiteImageScreen(
-                                      suiteId: widget.suiteId),
+                                  builder: (context) =>
+                                      SuiteImageScreen(suiteId: widget.suiteId),
                                 ),
                               );
                             },

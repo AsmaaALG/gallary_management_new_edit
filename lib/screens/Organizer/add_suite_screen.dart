@@ -1,7 +1,7 @@
+import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AddSuiteScreen extends StatefulWidget {
   final String galleryId;
@@ -22,6 +22,8 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
   final TextEditingController _priceCtl = TextEditingController();
   final TextEditingController _sizeCtl = TextEditingController();
   final validMapTitleRegex = RegExp(r'^[a-zA-Z0-9\s]+$');
+  String? uploadedImageUrl;
+  bool _isUploading = false;
 
   bool _isLoading = false;
   final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
@@ -37,7 +39,7 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
     super.dispose();
   }
 
-  Future<String?> _validateMapTitle(String? value) async {
+  Future<String?> _validateMapTitle(String? value, String galleryId) async {
     if (value == null || value.trim().isEmpty) {
       return 'يرجى ملء هذا الحقل';
     }
@@ -50,11 +52,15 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
       return 'العنوان يجب أن يحتوي على حروف إنجليزية وأرقام فقط';
     }
 
-    // جلب كل الأجنحة من Firestore (أو من نفس المعرض فقط إذا أردت لاحقًا)
-    final snapshot = await FirebaseFirestore.instance.collection('suite').get();
+    // جلب الأجنحة التي تنتمي لنفس المعرض فقط
+    final snapshot = await FirebaseFirestore.instance
+        .collection('suite')
+        .where('gallery id', isEqualTo: galleryId)
+        .get();
+
     final lowerTitle = title.toLowerCase();
 
-    // تحقق إذا كان العنوان موجود بالفعل بدون حساسية لحالة الأحرف
+    // تحقق إذا كان العنوان موجود مسبقًا بدون حساسية لحالة الأحرف
     final exists = snapshot.docs.any((doc) {
       final existingTitle =
           (doc.data()['title on map'] ?? '').toString().toLowerCase();
@@ -62,7 +68,7 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
     });
 
     if (exists) {
-      return 'العنوان "$value" مستخدم بالفعل، يرجى اختيار عنوان آخر';
+      return 'العنوان "$value" مستخدم بالفعل داخل هذا المعرض، يرجى اختيار عنوان آخر';
     }
 
     return null;
@@ -92,9 +98,8 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
 
     final title = _titleCtl.text.trim();
 
-    // تحقق من عنوان الخريطة إذا لم يكن فارغًا
     if (title.isNotEmpty) {
-      final titleError = await _validateMapTitle(title);
+      final titleError = await _validateMapTitle(title, widget.galleryId);
       if (titleError != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -117,9 +122,11 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
         'name': _nameCtl.text.trim(),
         'description': _descCtl.text.trim(),
         'main image': _imageCtl.text.trim(),
+        'title on map': _titleCtl.text.trim(),
+        'price': _priceCtl.text.trim(),
+        'size': _sizeCtl.text.trim()
       };
 
-      // // فقط أضف الحقول إذا لم تكن فارغة
       // if (title.isNotEmpty) suiteData['title on map'] = title;
       // if (_priceCtl.text.trim().isNotEmpty) {
       //   suiteData['price'] = double.parse(_priceCtl.text.trim()) as String;
@@ -245,31 +252,56 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
                     validator: _validateNotEmpty,
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _imageCtl,
-                    decoration: buildInputDecoration(
-                        'رابط صورة الجناح', 'أدخل رابط الصورة هنا'),
-                    validator: _validateImageUrl,
-                  ),
+                  // TextFormField(
+                  //   controller: _imageCtl,
+                  //   decoration: buildInputDecoration(
+                  //       'رابط صورة الجناح', 'أدخل رابط الصورة هنا'),
+                  //   validator: _validateImageUrl,
+                  // ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () async {
-                      if (await canLaunchUrl(imgurUrl)) {
-                        await launchUrl(imgurUrl,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
+                    onPressed: _isUploading
+                        ? null // لتعطيل الزر أثناء الرفع
+                        : () async {
+                            setState(() {
+                              _isUploading = true;
+                            });
+
+                            final imageUrl = await pickAndUploadImage(
+                              imgbbApiKey: '95daff58b10157f2de7ddd93301132e2',
+                            );
+
+                            if (imageUrl != null) {
+                              setState(() {
+                                uploadedImageUrl = imageUrl;
+                                _imageCtl.text = imageUrl;
+                              });
+                            }
+
+                            setState(() {
+                              _isUploading = false;
+                            });
+                          },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       child: Align(
                         alignment: Alignment.centerRight,
-                        child: Text(
-                          'افتح Imgur لرفع صورة',
-                          style: TextStyle(fontFamily: mainFont, fontSize: 10),
-                        ),
+                        child: _isUploading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                'اختيار صورة الجناح',
+                                style: TextStyle(
+                                    fontFamily: mainFont, fontSize: 10),
+                              ),
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _titleCtl,

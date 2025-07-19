@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:intl/intl.dart' as intl;
@@ -33,6 +34,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   DateTime? _endDate;
   DateTime? _stopDate;
   List<Map<String, dynamic>> _suites = [];
+  String? uploadedImageUrl;
+  bool _isUploading = false;
 
   bool _isLoading = false;
 
@@ -304,11 +307,93 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         buildTextField(_locationController, 'الموقع',
                             'يرجى إدخال الموقع', true),
                         const SizedBox(height: 16),
-                        buildTextField(_imageUrlController, 'رابط الصورة',
-                            'يرجى إدخال رابط الصورة', true),
+                        ElevatedButton(
+                          onPressed: _isUploading
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isUploading = true;
+                                  });
+
+                                  final imageUrl = await pickAndUploadImage(
+                                    imgbbApiKey:
+                                        '95daff58b10157f2de7ddd93301132e2',
+                                  );
+
+                                  if (imageUrl != null) {
+                                    setState(() {
+                                      uploadedImageUrl = imageUrl;
+                                      _imageUrlController.text = imageUrl;
+                                    });
+                                  }
+
+                                  setState(() {
+                                    _isUploading = false;
+                                  });
+                                },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: _isUploading
+                                  ? SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : Text(
+                                      'اختر صورة الغلاف',
+                                      style: TextStyle(
+                                          fontFamily: mainFont, fontSize: 10),
+                                    ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 16),
-                        buildTextField(_mapImageController, 'رابط خارطة المعرض',
-                            'يرجى إدخال رابط الخارطة', true),
+                        ElevatedButton(
+                          onPressed: _isUploading
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isUploading = true;
+                                  });
+
+                                  final imageUrl = await pickAndUploadImage(
+                                    imgbbApiKey:
+                                        '95daff58b10157f2de7ddd93301132e2',
+                                  );
+
+                                  if (imageUrl != null) {
+                                    setState(() {
+                                      uploadedImageUrl = imageUrl;
+                                      _mapImageController.text = imageUrl;
+                                    });
+                                  }
+
+                                  setState(() {
+                                    _isUploading = false;
+                                  });
+                                },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: _isUploading
+                                  ? SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : Text(
+                                      'اختر صورةالخارطة',
+                                      style: TextStyle(
+                                          fontFamily: mainFont, fontSize: 10),
+                                    ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         ClassificationDropdown(
                           selectedClassification: _selectedClassification,

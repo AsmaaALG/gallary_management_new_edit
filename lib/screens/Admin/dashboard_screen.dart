@@ -177,33 +177,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                               SizedBox(height: sectionSpacing),
-                              Text(
-                                'نسبة الطلبات لكل تصنيف',
-                                style: TextStyle(
-                                  fontSize: isDesktop ? 18 : 16,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: mainFont,
-                                  color: primaryColor,
-                                ),
-                              ),
-                              SizedBox(height: 12),
-                              Card(
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                                child: Padding(
-                                  padding: EdgeInsets.all(cardPadding),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                          height: chartHeight,
-                                          child: PieChartWidget(_controller)),
-                                      SizedBox(height: 16),
-                                      PieChartLegend(context, _controller),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              // Text(
+                              //   'نسبة الطلبات لكل تصنيف',
+                              //   style: TextStyle(
+                              //     fontSize: isDesktop ? 18 : 16,
+                              //     fontWeight: FontWeight.bold,
+                              //     fontFamily: mainFont,
+                              //     color: primaryColor,
+                              //   ),
+                              // ),
+                              // SizedBox(height: 12),
+                              // Card(
+                              //   elevation: 4,
+                              //   shape: RoundedRectangleBorder(
+                              //       borderRadius: BorderRadius.circular(12)),
+                              //   child: Padding(
+                              //     padding: EdgeInsets.all(cardPadding),
+                              //     child: Column(
+                              //       children: [
+                              //         SizedBox(
+                              //             height: chartHeight,
+                              //             child: PieChartWidget(_controller)),
+                              //         SizedBox(height: 16),
+                              //         PieChartLegend(context, _controller),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
                               SizedBox(height: 16),
                             ],
                           ),

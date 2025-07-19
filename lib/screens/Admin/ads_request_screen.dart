@@ -217,7 +217,6 @@ class _AdsRequestManagementScreenState
                     ),
                   ),
                 const SizedBox(height: 20),
-                // Changed from Row to Column to stack buttons vertically
                 Column(
                   children: [
                     OutlinedButton(
@@ -285,7 +284,7 @@ class _AdsRequestManagementScreenState
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40)),
                         minimumSize: const Size(
-                            double.infinity, 48), // Full width button
+                            double.infinity, 48), 
                       ),
                       child: const Text('قبول الطلب',
                           style: TextStyle(
@@ -293,7 +292,7 @@ class _AdsRequestManagementScreenState
                               color: Colors.green,
                               fontWeight: FontWeight.bold)),
                     ),
-                    const SizedBox(height: 12), // Space between buttons
+                    const SizedBox(height: 12), 
                     OutlinedButton(
                       onPressed: () {
                         confirmAdRequest(
@@ -316,7 +315,7 @@ class _AdsRequestManagementScreenState
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40)),
                         minimumSize: const Size(
-                            double.infinity, 48), // Full width button
+                            double.infinity, 48), 
                       ),
                       child: const Text('رفض الطلب',
                           style: TextStyle(

@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:url_launcher/url_launcher.dart';
 
 class EditGalleryScreen extends StatefulWidget {
   final String galleryId;
@@ -34,6 +34,8 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
   DateTime? _endDate;
   bool _isLoading = false;
   bool _isInitialized = false;
+  String? uploadedImageUrl;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -96,12 +98,13 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
       return;
     }
 
-    if (!_isValidImageUrl(_imageUrlController.text)||!_isValidImageUrl(_mapController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
-      );
-      return;
-    }
+    // if (!_isValidImageUrl(_imageUrlController.text) ||
+    //     !_isValidImageUrl(_mapController.text)) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+    //   );
+    //   return;
+    // }
     if (!_isValidMapUrl(_locationController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط موقع Google Maps صالح')),
@@ -159,6 +162,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
     );
     return regex.hasMatch(url);
   }
+
   bool _isValidMapUrl(String url) {
     final cleanedUrl = url.trim();
     final RegExp regex = RegExp(
@@ -171,7 +175,6 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
-    final Uri imgurUrl = Uri.parse('https://imgur.com/upload');
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -225,80 +228,98 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                         buildTextField(_qrCodeController, 'رمز الQR',
                             'يرجى إدخال رمز QR', false),
                         const SizedBox(height: 16),
-                        isWideScreen
-                            ? Row(
-                                children: [
-                                  Expanded(
-                                    flex: isWideScreen ? 3 : 2,
-                                    child: buildTextField(
-                                        _imageUrlController,
-                                        'رابط صورة غلاف المعرض',
-                                        'يرجى إدخال رابط الصورة',
-                                        true),
-                                  ),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                        onPressed: () async {
-                                          if (await canLaunchUrl(imgurUrl)) {
-                                            await launchUrl(imgurUrl,
-                                                mode: LaunchMode
-                                                    .externalApplication);
-                                          }
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 15),
-                                          child: Text(
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            'افتح Imgur لرفع صورة',
-                                            style: TextStyle(
-                                                fontFamily: mainFont,
-                                                fontSize: 10),
-                                          ),
-                                        )),
-                                  ),
-                                ],
-                              )
-                            : Column(
-                                children: [
-                                  buildTextField(
-                                      _imageUrlController,
-                                      'رابط صورة غلاف المعرض',
-                                      'يرجى إدخال رابط الصورة',
-                                      true),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                      onPressed: () async {
-                                        if (await canLaunchUrl(imgurUrl)) {
-                                          await launchUrl(imgurUrl,
-                                              mode: LaunchMode
-                                                  .externalApplication);
-                                        }
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 15),
-                                        child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Text(
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            'افتح Imgur لرفع صورة',
-                                            style: TextStyle(
-                                                fontFamily: mainFont,
-                                                fontSize: 10),
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
+                        ElevatedButton(
+                          onPressed: _isUploading
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isUploading = true;
+                                  });
+
+                                  final imageUrl = await pickAndUploadImage(
+                                    imgbbApiKey:
+                                        '95daff58b10157f2de7ddd93301132e2',
+                                  );
+
+                                  if (imageUrl != null) {
+                                    setState(() {
+                                      uploadedImageUrl = imageUrl;
+                                      _imageUrlController.text = imageUrl;
+                                    });
+                                  }
+
+                                  setState(() {
+                                    _isUploading = false;
+                                  });
+                                },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: _isUploading
+                                  ? SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : Text(
+                                      'اختر صورة الغلاف',
+                                      style: TextStyle(
+                                          fontFamily: mainFont, fontSize: 10),
+                                    ),
+                            ),
+                          ),
+                        ),
+
                         const SizedBox(height: 16),
-                        buildTextField(_mapController, 'رابط صورة خارطة المعرض',
-                            'يرجى إدخال رابط الصورة', false),
+                        ElevatedButton(
+                          onPressed: _isUploading
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isUploading = true;
+                                  });
+
+                                  final imageUrl = await pickAndUploadImage(
+                                    imgbbApiKey:
+                                        '95daff58b10157f2de7ddd93301132e2',
+                                  );
+
+                                  if (imageUrl != null) {
+                                    setState(() {
+                                      uploadedImageUrl = imageUrl;
+                                      _mapController.text = imageUrl;
+                                    });
+                                  }
+
+                                  setState(() {
+                                    _isUploading = false;
+                                  });
+                                },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: _isUploading
+                                  ? SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : Text(
+                                      'اختر صورةالخارطة',
+                                      style: TextStyle(
+                                          fontFamily: mainFont, fontSize: 10),
+                                    ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 16),
+                        // buildTextField(_mapController, 'رابط صورة خارطة المعرض',
+                        //     'يرجى إدخال رابط الصورة', false),
+                        // const SizedBox(height: 16),
                         // City Dropdown
                         CityDropdown(
                           selectedCity: _selectedCity,

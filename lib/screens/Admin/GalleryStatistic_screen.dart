@@ -130,29 +130,22 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
 
   double _calculateSuccessRate({
     required int totalVisits,
-    required double averageRating, // من 0 إلى 5
+    required double averageRating,
   }) {
-    // الأوزان النسبية
-    const double visitsWeight = 0.5; // 50%
-    const double ratingWeight = 0.5; // 50%
+    const double visitsWeight = 0.5;
+    const double ratingWeight = 0.5;
 
-    // تحديد الحد الأعلى المنطقي للزيارات لتحديد النجاح
-    const int maxVisits =
-        200; // المعرض الأكثر نجاحاً يُفترض له 200 زيارة أو أكثر
+    const int maxVisits = 200;
 
-    // حساب نسبة الزيارات من 0 إلى 100
     double visitsScore = (totalVisits / maxVisits) * 100;
-    visitsScore = visitsScore.clamp(0, 100); // لمنع التجاوز
+    visitsScore = visitsScore.clamp(0, 100);
 
-    // حساب نسبة التقييم من 0 إلى 100
     double ratingScore = (averageRating / 5.0) * 100;
     ratingScore = ratingScore.clamp(0, 100);
 
-    // حساب النسبة الكلية للنجاح
     double successRate =
         (visitsScore * visitsWeight) + (ratingScore * ratingWeight);
 
-    // النتيجة النهائية محصورة بين 0 و 100
     return successRate.clamp(0, 100);
   }
 
@@ -253,7 +246,7 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
     final chartHeight = isDesktop ? 250.0 : 200.0;
 
     return Directionality(
-      textDirection: TextDirection.rtl, // هذا السطر هو الأهم لتطبيق RTL
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -379,118 +372,118 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
                                 ],
                               ),
                             ),
-                            Container(
-                              width: isWide
-                                  ? constraints.maxWidth / 2 - 30
-                                  : double.infinity,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'إحصائيات طلبات الحجز',
-                                    style: TextStyle(
-                                      fontSize: isDesktop ? 18 : 15,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: mainFont,
-                                      color: primaryColor,
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                          255, 255, 255, 255),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        const SizedBox(height: 16),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Column(
-                                              children: [
-                                                Text(
-                                                  ' مقبولة',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontFamily: mainFont,
-                                                    color: Colors.grey[700],
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  '${rejectedBookingPercentage.toStringAsFixed(0)}%',
-                                                  style: const TextStyle(
-                                                    fontSize: 24,
-                                                    fontFamily: mainFont,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.green,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Column(
-                                              children: [
-                                                Text(
-                                                  'غير مقبولة',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontFamily: mainFont,
-                                                    color: Colors.grey[700],
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  '${acceptedBookingPercentage.toStringAsFixed(0)}%',
-                                                  style: const TextStyle(
-                                                    fontSize: 24,
-                                                    fontFamily: mainFont,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Color.fromARGB(
-                                                        255, 112, 112, 112),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 16),
-                                        SizedBox(
-                                          height: 20,
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: rejectedBookingPercentage
-                                                    .round(),
-                                                child: Container(
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                          color: Colors.green),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: acceptedBookingPercentage
-                                                    .round(),
-                                                child: Container(
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                    color: Color.fromARGB(
-                                                        255, 212, 210, 210),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // Container(
+                            //   width: isWide
+                            //       ? constraints.maxWidth / 2 - 30
+                            //       : double.infinity,
+                            //   child: Column(
+                            //     crossAxisAlignment: CrossAxisAlignment.start,
+                            //     children: [
+                            //       Text(
+                            //         'إحصائيات طلبات الحجز',
+                            //         style: TextStyle(
+                            //           fontSize: isDesktop ? 18 : 15,
+                            //           fontWeight: FontWeight.bold,
+                            //           fontFamily: mainFont,
+                            //           color: primaryColor,
+                            //         ),
+                            //       ),
+                            //       SizedBox(height: 20),
+                            //       Container(
+                            //         padding: const EdgeInsets.all(16),
+                            //         decoration: BoxDecoration(
+                            //           color: const Color.fromARGB(
+                            //               255, 255, 255, 255),
+                            //           borderRadius: BorderRadius.circular(12),
+                            //         ),
+                            //         child: Column(
+                            //           children: [
+                            //             const SizedBox(height: 16),
+                            //             Row(
+                            //               mainAxisAlignment:
+                            //                   MainAxisAlignment.spaceEvenly,
+                            //               children: [
+                            //                 Column(
+                            //                   children: [
+                            //                     Text(
+                            //                       ' مقبولة',
+                            //                       style: TextStyle(
+                            //                         fontSize: 14,
+                            //                         fontFamily: mainFont,
+                            //                         color: Colors.grey[700],
+                            //                       ),
+                            //                     ),
+                            //                     const SizedBox(height: 8),
+                            //                     Text(
+                            //                       '${rejectedBookingPercentage.toStringAsFixed(0)}%',
+                            //                       style: const TextStyle(
+                            //                         fontSize: 24,
+                            //                         fontFamily: mainFont,
+                            //                         fontWeight: FontWeight.bold,
+                            //                         color: Colors.green,
+                            //                       ),
+                            //                     ),
+                            //                   ],
+                            //                 ),
+                            //                 Column(
+                            //                   children: [
+                            //                     Text(
+                            //                       'غير مقبولة',
+                            //                       style: TextStyle(
+                            //                         fontSize: 14,
+                            //                         fontFamily: mainFont,
+                            //                         color: Colors.grey[700],
+                            //                       ),
+                            //                     ),
+                            //                     const SizedBox(height: 8),
+                            //                     Text(
+                            //                       '${acceptedBookingPercentage.toStringAsFixed(0)}%',
+                            //                       style: const TextStyle(
+                            //                         fontSize: 24,
+                            //                         fontFamily: mainFont,
+                            //                         fontWeight: FontWeight.bold,
+                            //                         color: Color.fromARGB(
+                            //                             255, 112, 112, 112),
+                            //                       ),
+                            //                     ),
+                            //                   ],
+                            //                 ),
+                            //               ],
+                            //             ),
+                            //             const SizedBox(height: 16),
+                            //             SizedBox(
+                            //               height: 20,
+                            //               child: Row(
+                            //                 children: [
+                            //                   Expanded(
+                            //                     flex: rejectedBookingPercentage
+                            //                         .round(),
+                            //                     child: Container(
+                            //                       decoration:
+                            //                           const BoxDecoration(
+                            //                               color: Colors.green),
+                            //                     ),
+                            //                   ),
+                            //                   Expanded(
+                            //                     flex: acceptedBookingPercentage
+                            //                         .round(),
+                            //                     child: Container(
+                            //                       decoration:
+                            //                           const BoxDecoration(
+                            //                         color: Color.fromARGB(
+                            //                             255, 212, 210, 210),
+                            //                       ),
+                            //                     ),
+                            //                   ),
+                            //                 ],
+                            //               ),
+                            //             ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                             Container(
                               width: isWide
                                   ? constraints.maxWidth / 2 - 30

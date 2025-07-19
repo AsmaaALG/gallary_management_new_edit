@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
@@ -21,6 +22,8 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
 
   String? _galleryName;
   bool _isLoading = true;
+  bool _isUploading = false;
+  String? uploadedImageUrl;
 
   @override
   void initState() {
@@ -77,29 +80,72 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
                 children: [
                   _field(nameCtl, 'اسم الشريك'),
                   const SizedBox(height: 10),
-                  _field(imageCtl, 'رابط الصورة'),
-                  const SizedBox(height: 10),
+                  // _field(imageCtl, 'رابط الصورة'),
+                  // const SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () async {
-                      if (await canLaunchUrl(imgurUrl)) {
-                        await launchUrl(imgurUrl,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 15),
+                    onPressed: _isUploading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isUploading = true;
+                            });
+
+                            final imageUrl = await pickAndUploadImage(
+                              imgbbApiKey: '95daff58b10157f2de7ddd93301132e2',
+                            );
+
+                            if (imageUrl != null) {
+                              setState(() {
+                                uploadedImageUrl = imageUrl;
+                                imageCtl.text = imageUrl;
+                              });
+                            }
+
+                            setState(() {
+                              _isUploading = false;
+                            });
+                          },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                       child: Align(
                         alignment: Alignment.centerRight,
-                        child: Text(
-                          'افتح Imgur لرفع صورة',
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontFamily: mainFont, fontSize: 10),
-                        ),
+                        child: _isUploading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                'اختيار الصورة',
+                                style: TextStyle(
+                                    fontFamily: mainFont, fontSize: 10),
+                              ),
                       ),
                     ),
                   ),
+
+                  // ElevatedButton(
+                  //   onPressed: () async {
+                  //     if (await canLaunchUrl(imgurUrl)) {
+                  //       await launchUrl(imgurUrl,
+                  //           mode: LaunchMode.externalApplication);
+                  //     }
+                  //   },
+                  //   child: const Padding(
+                  //     padding: EdgeInsets.symmetric(vertical: 15),
+                  //     child: Align(
+                  //       alignment: Alignment.centerRight,
+                  //       child: Text(
+                  //         'افتح Imgur لرفع صورة',
+                  //         textAlign: TextAlign.center,
+                  //         maxLines: 2,
+                  //         overflow: TextOverflow.ellipsis,
+                  //         style: TextStyle(fontFamily: mainFont, fontSize: 10),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

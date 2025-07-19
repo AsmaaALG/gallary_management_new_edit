@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
+import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/build_text_field.dart';
 import 'package:gallery_management/widgets/city_dropdown.dart';
@@ -35,6 +36,8 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   String? _companyName;
+  String? uploadedImageUrl;
+  bool _isUploading = false;
 
   bool _isLoading = false;
 
@@ -215,22 +218,93 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
                   buildTextField(
                       _locationController, 'الموقع', 'أدخل موقع المعرض', true),
                   const SizedBox(height: 16),
-                  buildTextField(_imageUrlController, 'رابط صورة الغلاف',
-                      'رابط مباشر للصورة', true),
-                  const SizedBox(height: 16),
-                  buildTextField(_mapController, 'رابط خارطة المعرض',
-                      'رابط صورة لخارطة المعرض', false),
+                  // buildTextField(_imageUrlController, 'رابط صورة الغلاف',
+                  //     'رابط مباشر للصورة', true),
+                   ElevatedButton(
+                    onPressed: _isUploading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isUploading = true;
+                            });
+
+                            final imageUrl = await pickAndUploadImage(
+                              imgbbApiKey: '95daff58b10157f2de7ddd93301132e2',
+                            );
+
+                            if (imageUrl != null) {
+                              setState(() {
+                                uploadedImageUrl = imageUrl;
+                                _imageUrlController.text = imageUrl;
+                              });
+                            }
+
+                            setState(() {
+                              _isUploading = false;
+                            });
+                          },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _isUploading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                'اختر صورة الغلاف',
+                                style: TextStyle(
+                                    fontFamily: mainFont, fontSize: 10),
+                              ),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () async {
-                      final Uri imgurUrl =
-                          Uri.parse('https://imgur.com/upload');
-                      if (await canLaunchUrl(imgurUrl)) {
-                        await launchUrl(imgurUrl,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: const Text('افتح Imgur لرفع صورة'),
+                    onPressed: _isUploading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isUploading = true;
+                            });
+
+                            final imageUrl = await pickAndUploadImage(
+                              imgbbApiKey: '95daff58b10157f2de7ddd93301132e2',
+                            );
+
+                            if (imageUrl != null) {
+                              setState(() {
+                                uploadedImageUrl = imageUrl;
+                                _mapController.text = imageUrl;
+                              });
+                            }
+
+                            setState(() {
+                              _isUploading = false;
+                            });
+                          },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _isUploading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                'اختر صورةالخارطة',
+                                style: TextStyle(
+                                    fontFamily: mainFont, fontSize: 10),
+                              ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ClassificationDropdown(

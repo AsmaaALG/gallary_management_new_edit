@@ -45,6 +45,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   syncfusion_flutter_gauges: 29.2.5
   url_launcher: ^6.1.7
+  
 
 
 
