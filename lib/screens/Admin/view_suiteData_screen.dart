@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/Admin/suite_images_screen.dart';
 import 'package:gallery_management/screens/Admin/viewSuitePhoto_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ViewSuiteDataScreen extends StatefulWidget {
   final String suiteId;
@@ -116,17 +114,36 @@ class _ViewSuiteDataScreenState extends State<ViewSuiteDataScreen> {
                     children: [
                       buildDisplayField('اسم الجناح', _nameCtl.text),
                       buildDisplayField('وصف الجناح', _descCtl.text),
+                      // صورة الجناح
                       if (_imageCtl.text.isNotEmpty) ...[
-                        buildDisplayField('صورة الجناح', ''),
                         const SizedBox(height: 8),
-                        Image.network(
-                          _imageCtl.text,
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
+                        Text(
+                          'صورة الجناح',
+                          style: TextStyle(
+                            fontFamily: mainFont,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            _imageCtl.text,
+                            height: 400,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Text('تعذر تحميل الصورة',
+                                  style: TextStyle(color: Colors.red));
+                            },
+                          ),
                         ),
                         const SizedBox(height: 15),
+                      ] else ...[
+                        buildDisplayField('صورة الجناح', 'غير متوفر'),
                       ],
+
                       buildDisplayField('العنوان على الخريطة', _titleCtl.text),
                       buildDisplayField('السعر', _priceCtl.text),
                       buildDisplayField('المساحة (م²)', _sizeCtl.text),

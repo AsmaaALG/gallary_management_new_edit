@@ -105,7 +105,7 @@ class _OrganizerDashboardScreenState extends State<OrganizerDashboardScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'لوحة تحكم المنظمين لشركة $companyName',
+                        'لوحة تحكم المنظمين ل$companyName',
                         style: TextStyle(
                           fontSize: 16,
                           color: primaryColor,

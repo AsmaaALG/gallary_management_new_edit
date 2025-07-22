@@ -230,43 +230,54 @@ class DynamicViewCard extends StatelessWidget {
   }
 
   Widget _buildNetworkImage(String title, String? imageUrl) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontFamily: mainFont,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 10),
-        imageUrl != null && imageUrl.isNotEmpty
-            ? Image.network(
-                imageUrl,
-                height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isDesktop = screenWidth > 800;
+        final imageHeight = isDesktop ? 500.0 : 250.0;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: mainFont,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+            imageUrl != null && imageUrl.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      imageUrl,
+                      height: imageHeight,
+                      width: double.infinity,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Text('تعذر تحميل الصورة',
+                            style: TextStyle(color: Colors.red));
+                      },
                     ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return const Text('تعذر تحميل الصورة',
-                      style: TextStyle(color: Colors.red));
-                },
-              )
-            : const Text('لا توجد صورة متاحة',
-                style: TextStyle(color: Colors.grey)),
-      ],
+                  )
+                : const Text('لا توجد صورة متاحة',
+                    style: TextStyle(color: Colors.grey)),
+          ],
+        );
+      },
     );
   }
 }
