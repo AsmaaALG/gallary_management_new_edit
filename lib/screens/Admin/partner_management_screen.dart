@@ -193,9 +193,8 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
               onPressed: () => _showPartnerDialog(),
             ),*/
             body: MainScreen(
-              title: 'التعديل على الشركاء',
-              description:
-                  'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
+              title: 'عرض الشركاء',
+              description: 'من هنا يمكنك عرض شركاء هذا المعرض',
               cards: cards,
 
               galleryName: _galleryName ?? '', // <== هنا اسم المعرض بدون bold

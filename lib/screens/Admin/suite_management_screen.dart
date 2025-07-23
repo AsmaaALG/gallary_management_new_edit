@@ -111,8 +111,8 @@ class _SuiteManagementScreenState extends State<SuiteManagementScreen> {
               ),
             ),*/
             body: MainScreen(
-              title: 'التعديل على الأجنحة',
-              description: 'قم بتعديل أجنحة المعرض أو إضافة أجنحة جديدة.',
+              title: 'عرض الأجنحة',
+              description: 'يمكنك عرض الأجنحة الخاصة بالمعرض.',
               cards: cards,
               galleryName: _galleryName ?? '',
             ),

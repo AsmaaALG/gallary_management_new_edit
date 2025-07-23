@@ -63,7 +63,7 @@ class GallerySuiteScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'يمكنك من خلال هذه الواجهة تعديل المعارض عبر تعبئة الحقول التالية',
+                'يمكنك من خلال هذه الواجهة عرض بيانات المعارض',
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: mainFont,
