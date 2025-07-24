@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:gallery_management/constants.dart';
 
-Widget WeeklyChart(List<FlSpot> data) {
+Widget WeeklyChart(List<FlSpot> data, {bool isRegistrations = false}) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -12,7 +12,7 @@ Widget WeeklyChart(List<FlSpot> data) {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 70.0),
           child: Text(
-            'عدد الطلبات',
+            isRegistrations ? 'عدد التسجيلات' : 'عدد الطلبات',
             style: TextStyle(
               fontSize: 12,
               fontFamily: mainFont,
@@ -50,6 +50,7 @@ Widget WeeklyChart(List<FlSpot> data) {
                         reservedSize: 30,
                         getTitlesWidget: (value, meta) {
                           const days = [
+                            // تم تعديل ترتيب الأيام لتبدأ من الاحد
                             'أحد',
                             'اثنين',
                             'ثلاثاء',
@@ -84,7 +85,8 @@ Widget WeeklyChart(List<FlSpot> data) {
                       barRods: [
                         BarChartRodData(
                           toY: spot.y,
-                          color: secondaryColor,
+                          color:
+                              isRegistrations ? Colors.green : secondaryColor,
                           width: 20,
                           borderRadius: BorderRadius.vertical(
                             top: Radius.circular(6),

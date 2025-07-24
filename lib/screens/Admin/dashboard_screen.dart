@@ -22,9 +22,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadData();
   }
 
+  bool _isLoading = false;
+  String _errorMessage = '';
+
   Future<void> _loadData() async {
-    await _controller.loadData();
-    setState(() {});
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      await _controller.loadData();
+      setState(() {
+        _errorMessage = '';
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'حدث خطأ أثناء جلب البيانات: ${e.toString()}';
+      });
+      debugPrint('Error loading dashboard data: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -45,11 +66,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           backgroundColor: primaryColor,
           centerTitle: true,
           iconTheme: IconThemeData(color: Colors.white),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.refresh, color: Colors.white),
+              onPressed: _loadData,
+              tooltip: 'تحديث البيانات',
+            ),
+          ],
         ),
-        body: _controller.isLoading
+        body: _isLoading
             ? Center(child: CircularProgressIndicator(color: primaryColor))
-            : _controller.errorMessage.isNotEmpty
-                ? Center(child: Text(_controller.errorMessage))
+            : _errorMessage.isNotEmpty
+                ? Center(child: Text(_errorMessage))
                 : LayoutBuilder(
                     builder: (context, constraints) {
                       final isDesktop = constraints.maxWidth > 600;
@@ -177,33 +205,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                               SizedBox(height: sectionSpacing),
-                              // Text(
-                              //   'نسبة الطلبات لكل تصنيف',
-                              //   style: TextStyle(
-                              //     fontSize: isDesktop ? 18 : 16,
-                              //     fontWeight: FontWeight.bold,
-                              //     fontFamily: mainFont,
-                              //     color: primaryColor,
-                              //   ),
-                              // ),
-                              // SizedBox(height: 12),
-                              // Card(
-                              //   elevation: 4,
-                              //   shape: RoundedRectangleBorder(
-                              //       borderRadius: BorderRadius.circular(12)),
-                              //   child: Padding(
-                              //     padding: EdgeInsets.all(cardPadding),
-                              //     child: Column(
-                              //       children: [
-                              //         SizedBox(
-                              //             height: chartHeight,
-                              //             child: PieChartWidget(_controller)),
-                              //         SizedBox(height: 16),
-                              //         PieChartLegend(context, _controller),
-                              //       ],
-                              //     ),
-                              //   ),
-                              // ),
+// قسم التسجيلات الجديدة
+                              SizedBox(height: sectionSpacing),
+                              Text(
+                                'معدل التسجيلات الجديدة (أسبوعي)',
+                                style: TextStyle(
+                                  fontSize: isDesktop ? 18 : 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: mainFont,
+                                  color: primaryColor,
+                                ),
+                              ),
+                              SizedBox(height: 12),
+                              Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: Padding(
+                                  padding: EdgeInsets.all(cardPadding),
+                                  child: SizedBox(
+                                    height: chartHeight,
+                                    child: WeeklyChart(
+                                        _controller.weeklyRegistrations,
+                                        isRegistrations: true),
+                                  ),
+                                ),
+                              ),
                               SizedBox(height: 16),
                             ],
                           ),

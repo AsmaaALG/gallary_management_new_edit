@@ -18,6 +18,9 @@ class DashboardController {
   Map<String, int> categoryVisits = {};
   Map<String, int> categoryReservations = {};
   List<PieChartSectionData> pieChartSections = [];
+  // أضف هذه المتغيرات مع المتغيرات الأخرى الموجودة
+  List<FlSpot> weeklyRegistrations = [];
+  int totalNewRegistrations = 0;
 
   List<Color> categoryColors = [
     secondaryColor,
@@ -31,6 +34,41 @@ class DashboardController {
   ];
 
   List<FlSpot> weeklyData = [];
+  Future<int> _fetchUserRegistrationsForDay(DateTime day) async {
+    final start = DateTime(day.year, day.month, day.day);
+    final end = start.add(Duration(days: 1));
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('created_at',
+            isGreaterThanOrEqualTo: start) // تغيير من timestamp إلى created_at
+        .where('created_at',
+            isLessThan: end) // تغيير من timestamp إلى created_at
+        .get();
+
+    return snapshot.docs.length;
+  }
+
+  Future<void> _fetchWeeklyRegistrations() async {
+    try {
+      final now = DateTime.now();
+      weeklyRegistrations.clear();
+      totalNewRegistrations = 0;
+
+      // بداية الأسبوع (السبت)
+      final int daysFromSaturday = now.weekday % 7;
+      final weekStart = now.subtract(Duration(days: daysFromSaturday));
+
+      for (int i = 0; i < 7; i++) {
+        final day = weekStart.add(Duration(days: i));
+        final count = await _fetchUserRegistrationsForDay(day);
+        weeklyRegistrations.add(FlSpot(i.toDouble(), count.toDouble()));
+        totalNewRegistrations += count;
+      }
+    } catch (e) {
+      debugPrint('خطأ في جلب بيانات التسجيلات الأسبوعية: $e');
+    }
+  }
 
   Future<void> loadData() async {
     isLoading = true;
@@ -48,6 +86,7 @@ class DashboardController {
       await _fetchCategoryVisits();
       await _fetchWeeklyData();
       await _fetchCategoryReservations();
+      await _fetchWeeklyRegistrations();
 
       totalGalleries = results[0]!;
       totalUsers = results[1]!;
@@ -86,7 +125,7 @@ class DashboardController {
     final end = start.add(Duration(days: 1));
 
     final snapshot = await FirebaseFirestore.instance
-        .collection('space_form') 
+        .collection('space_form')
         .where('timestamp', isGreaterThanOrEqualTo: start)
         .where('timestamp', isLessThan: end)
         .get();
