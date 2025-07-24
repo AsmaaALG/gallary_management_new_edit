@@ -182,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                               SizedBox(height: sectionSpacing),
-                              Text(
+                              /*Text(
                                 'تحليل الطلبات المستلمة (أسبوعي)',
                                 style: TextStyle(
                                   fontSize: isDesktop ? 18 : 16,
@@ -204,7 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: sectionSpacing),
+                              SizedBox(height: sectionSpacing),*/
 // قسم التسجيلات الجديدة
                               SizedBox(height: sectionSpacing),
                               Text(
