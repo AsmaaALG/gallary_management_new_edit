@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // استيراد مكتبة Firebase Auth
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/models/user_session.dart';
 import 'package:gallery_management/screens/Admin/control_panal%20(2).dart';
@@ -13,6 +16,13 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+
+  void initState() {
+    super.initState();
+    Timer(Duration(seconds: 1), () {
+    SystemNavigator.pop(); 
+    });
+    }
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   String userType = 'admin'; // Default to admin
