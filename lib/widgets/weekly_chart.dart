@@ -86,7 +86,7 @@ Widget WeeklyChart(List<FlSpot> data, {bool isRegistrations = false}) {
                         BarChartRodData(
                           toY: spot.y,
                           color:
-                              isRegistrations ? Colors.green : secondaryColor,
+                              isRegistrations ? primaryColor : secondaryColor,
                           width: 20,
                           borderRadius: BorderRadius.vertical(
                             top: Radius.circular(6),
