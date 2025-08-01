@@ -1,4 +1,3 @@
-// الكود الكامل لواجهة BookingRequestsScreen مع حذف الطلب المقبول وعدم تخزينه في جدول منفصل
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/screens/Organizer/accepted_booking_requests_screen.dart';
@@ -38,7 +37,7 @@ class _BookingRequestsScreenState extends State<BookingRequestsScreen> {
       final galleryId = await _firestoreService.getGalleryIdByAdId(widget.adId);
 
       if (galleryId != null) {
-        //  تم إنشاء المعرض، قم بإنشاء الجناح
+        //  تم إنشاء المعرض توا نقوم بإنشاء الجناح
         await FirebaseFirestore.instance.collection('suite').add({
           'name': data['wingName'] ?? 'جناح بدون اسم',
           'description': data['description'] ?? '',

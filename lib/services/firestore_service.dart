@@ -21,7 +21,6 @@ class FirestoreService {
     return querySnapshot.docs.isNotEmpty;
   }
 
-  // Sign up باستخدام Auth
   Future<bool> createUser({
   required String firstName,
   required String lastName,
@@ -32,11 +31,9 @@ class FirestoreService {
   required String currentPassword,
 }) async {
   try {
-    // إنشاء المستخدم الجديد
     UserCredential newUser =
         await _auth.createUserWithEmailAndPassword(email: email, password: password);
 
-    // حفظ بياناته في Firestore
     await _firestore.collection('admin').doc(newUser.user!.uid).set({
       'id': newUser.user!.uid,
       'first_name': firstName,
@@ -46,10 +43,8 @@ class FirestoreService {
       'state': state,
     });
 
-    // تسجيل الخروج من المستخدم الجديد
     await _auth.signOut();
 
-    // إعادة تسجيل الدخول بالمستخدم الأصلي
     await _auth.signInWithEmailAndPassword(
       email: currentEmail,
       password: currentPassword,
@@ -78,13 +73,11 @@ class FirestoreService {
       // final currentEmail = UserSession.email;
       // final currentPassword = UserSession.password;
 
-      // تسجيل المستخدم الجديد (سيتم تسجيل دخول تلقائي بالحساب الجديد)
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
       String uid = userCredential.user!.uid;
 
-      // تخزين البيانات في Firestore
       await FirebaseFirestore.instance.collection('Organizer').doc(uid).set({
         'id': uid,
         'first name': firstName,
@@ -102,10 +95,8 @@ class FirestoreService {
       //     password: currentPassword,
       //   );
       // }
- // تسجيل الخروج من المستخدم الجديد
     await _auth.signOut();
 
-    // إعادة تسجيل الدخول بالمستخدم الأصلي
     await _auth.signInWithEmailAndPassword(
       email: currentEmail,
       password: currentPassword,
@@ -138,17 +129,15 @@ class FirestoreService {
       return 'organizer';
     }
 
-    return null; // إذا لم يوجد في أي جدول
+    return null;
   }
 
 //////////////////////////////////////////////////////////////////////////
   ///ادارة الاعلانــــــــــــــات
-  // تحديث إعلان موجود
   Future<void> updateAd(String id, Map<String, dynamic> updatedData) async {
     await _firestore.collection('ads').doc(id).update(updatedData);
   }
 
-  // أضف هذه الدالة إلى ملف firestore_service.dart
   Future<Map<String, dynamic>?> getAdById(String id) async {
     try {
       final doc = await _firestore.collection('ads').doc(id).get();
@@ -259,7 +248,7 @@ class FirestoreService {
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); // حذف كل تعليق مرتبط بالمعرض
+          doc.reference.delete(); 
         }
       });
 
@@ -270,7 +259,7 @@ class FirestoreService {
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); // حذف كل زيارة مرتبطة بالمعرض
+          doc.reference.delete(); 
         }
       });
 
@@ -303,21 +292,21 @@ class FirestoreService {
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); // حذف كل شريك مرتبط بالمعرض
+          doc.reference.delete(); 
         }
       });
 
       // حذف المعرض نفسه
       await _firestore.collection('2').doc(galleryId).delete();
 
-      // حذف المعرض من قائمة المفضلة (إذا كان لديك جدول مفضل)
+      // حذف المعرض من قائمة المفضلة
       await _firestore
           .collection('favorite')
           .where('gallery_id', isEqualTo: galleryId)
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); // حذف من المفضلة
+          doc.reference.delete(); 
         }
       });
 
@@ -334,7 +323,7 @@ class FirestoreService {
       print('تم تحديث بيانات المعرض بنجاح');
     } catch (e) {
       print('حدث خطأ أثناء تحديث بيانات المعرض: $e');
-      throw e; // يمكنك معالجة الخطأ بشكل أكبر إذا لزم الأمر
+      throw e; 
     }
   }
 
@@ -368,8 +357,8 @@ class FirestoreService {
         return {
           'docId': doc.id,
           ...data,
-          'accepted': data['accepted'] ?? false, // ← مضاف
-          'disabled': data['disabled'] ?? false, // ← مضاف
+          'accepted': data['accepted'] ?? false,
+          'disabled': data['disabled'] ?? false,
         };
       }).toList();
     } catch (e) {
@@ -385,7 +374,7 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data();
-              data['docId'] = doc.id; // مهم جداً
+              data['docId'] = doc.id; 
               return data;
             }).toList());
   }
@@ -407,7 +396,7 @@ class FirestoreService {
     }
   }
 
-// 2. تعطيل باقي الطلبات التي تطلب نفس الجناح
+//  تعطيل باقي الطلبات التي تطلب نفس الجناح
   Future<void> disableOtherRequestsForSameSuite(
       String adId, String suiteName, String currentDocId) async {
     final snapshot = await FirebaseFirestore.instance
@@ -422,7 +411,7 @@ class FirestoreService {
     }
   }
 
-// 3. تعليم الطلب الحالي بأنه مقبول
+//  تعليم الطلب الحالي بأنه مقبول
   Future<void> markRequestAsAccepted(String docId) async {
     await FirebaseFirestore.instance
         .collection('space_form')
@@ -566,7 +555,6 @@ Future<String?> getGalleryIdByAdId(String adId) async {
     try {
       Query query = _db.collection(collectionPath);
 
-      // Apply where conditions if provided
       if (whereFields != null) {
         for (var condition in whereFields) {
           String field = condition['field'];
@@ -635,7 +623,7 @@ Future<String?> getGalleryIdByAdId(String adId) async {
       for (final doc in adsSnapshot.docs) {
         final ad = AdModel.fromMap(doc.data(), doc.id);
 
-        // -------- 1. تحويل الإعلان إلى معرض عند تاريخ البداية --------
+        // تحويل الإعلان إلى معرض عند تاريخ البداية 
         if (ad.startDate.isNotEmpty) {
           try {
             final startDate = DateFormat('dd-MM-yyyy').parse(ad.startDate);
@@ -666,7 +654,7 @@ Future<String?> getGalleryIdByAdId(String adId) async {
 
                 print("تم تحويل الإعلان '${ad.id}' إلى معرض.");
 
-                // -------- 1.1 تحويل الطلبات المقبولة إلى أجنحة --------
+                // تحويل الطلبات المقبولة إلى أجنحة 
                 final acceptedForms = await spaceFormRef
                     .where('accepted', isEqualTo: true)
                     .where('adId', isEqualTo: ad.id)
@@ -733,16 +721,16 @@ Future<String?> getGalleryIdByAdId(String adId) async {
           }
         }
 
-        // -------- 2. حذف الإعلان عند الوصول لتاريخ stopAd --------
+        //حذف الإعلان عند الوصول لتاريخ stopAd 
         if (ad.stopAd.isNotEmpty) {
           try {
             final stopDate = DateFormat('dd-MM-yyyy').parse(ad.stopAd);
 
             if (!now.isBefore(stopDate)) {
-              // 1. حذف الإعلان
+              //  حذف الإعلان
               await adsRef.doc(ad.id).delete();
 
-              // 2. حذف الإشعارات المرتبطة
+              // حذف الإشعارات المرتبطة
               final notifSnapshot =
                   await notificationsRef.where('ad_id', isEqualTo: ad.id).get();
 
@@ -750,7 +738,7 @@ Future<String?> getGalleryIdByAdId(String adId) async {
                 await notificationsRef.doc(notifDoc.id).delete();
               }
 
-              // 3. حذف الطلبات المرتبطة (space_form)
+              // حذف الطلبات المرتبطة (space_form)
               final formsSnapshot = await FirebaseFirestore.instance
                   .collection('space_form')
                   .where('adId', isEqualTo: ad.id)

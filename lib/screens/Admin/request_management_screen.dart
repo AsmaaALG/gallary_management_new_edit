@@ -3,7 +3,6 @@ import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/Admin/gallery_requests_screen.dart';
 import 'package:gallery_management/screens/Admin/ads_request_screen.dart';
 
-//import 'package:gallery_management/screens/Admin/ad_request_management_screen.dart';
 
 class RequestManagementScreen extends StatelessWidget {
   const RequestManagementScreen({super.key});
@@ -14,7 +13,7 @@ class RequestManagementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double cardWidth = isWeb(context)
-        ? screenWidth / 2 - 40 // بطاقتين جنب بعض مع هامش
+        ? screenWidth / 2 - 40 // بطاقتين جنب بعض مع الهامش
         : double.infinity;
 
     return Directionality(

@@ -28,7 +28,7 @@ class _GalleryRequestManagementScreenState
     validDocs.sort((a, b) {
       Timestamp aTime = a['requested_at'];
       Timestamp bTime = b['requested_at'];
-      return bTime.compareTo(aTime); // الأحدث أولًا
+      return bTime.compareTo(aTime); //بالترتييييب الأحدث أولًا
     });
 
     return validDocs;

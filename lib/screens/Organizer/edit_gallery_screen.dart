@@ -199,7 +199,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
             : Padding(
                 padding: EdgeInsets.symmetric(
                     vertical: 20,
-                    horizontal: isWideScreen ? 50 : 20), // تقليل البادينق
+                    horizontal: isWideScreen ? 50 : 20),
                 child: Form(
                   key: _formKey,
                   child: SingleChildScrollView(
@@ -218,7 +218,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20), // تقليل الفاصل
+                        const SizedBox(height: 20), 
                         buildTextField(_titleController, 'اسم المعرض',
                             'يرجى إدخال اسم المعرض', true),
                         const SizedBox(height: 16),

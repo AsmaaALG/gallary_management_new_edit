@@ -29,7 +29,6 @@ class MyApp extends StatelessWidget {
 
   MyApp({super.key});
 
-  // ✅ التحقق من مكان وجود UID في جدول admin أو Organizer
   Future<String?> checkUserRole(String uid) async {
     final adminDoc =
         await FirebaseFirestore.instance.collection('admin').doc(uid).get();

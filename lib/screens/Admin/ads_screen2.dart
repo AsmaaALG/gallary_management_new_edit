@@ -1,13 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/screens/trush/add_ads_screen.dart';
-import 'package:gallery_management/screens/Organizer/booking_requests_screen.dart';
-import 'package:gallery_management/screens/Organizer/edit_ads_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/Admin/view_ads_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
 import 'package:gallery_management/widgets/main_card.dart';
-import 'package:intl/intl.dart' as intl;
 
 class AdsScreen2 extends StatefulWidget {
   const AdsScreen2({super.key});

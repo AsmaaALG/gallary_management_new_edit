@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:intl/intl.dart';
 
 class DashboardController {
   int totalGalleries = 0;
@@ -18,7 +17,6 @@ class DashboardController {
   Map<String, int> categoryVisits = {};
   Map<String, int> categoryReservations = {};
   List<PieChartSectionData> pieChartSections = [];
-  // أضف هذه المتغيرات مع المتغيرات الأخرى الموجودة
   List<FlSpot> weeklyRegistrations = [];
   int totalNewRegistrations = 0;
 
@@ -41,9 +39,9 @@ class DashboardController {
     final snapshot = await FirebaseFirestore.instance
         .collection('users')
         .where('created_at',
-            isGreaterThanOrEqualTo: start) // تغيير من timestamp إلى created_at
+            isGreaterThanOrEqualTo: start)
         .where('created_at',
-            isLessThan: end) // تغيير من timestamp إلى created_at
+            isLessThan: end) 
         .get();
 
     return snapshot.docs.length;
@@ -55,7 +53,6 @@ class DashboardController {
       weeklyRegistrations.clear();
       totalNewRegistrations = 0;
 
-      // بداية الأسبوع (السبت)
       final int daysFromSaturday = now.weekday % 7;
       final weekStart = now.subtract(Duration(days: daysFromSaturday));
 

@@ -48,7 +48,7 @@ class _MyGalleryRequestsScreenState extends State<MyAdsRequestsScreen> {
     validDocs.sort((a, b) {
       Timestamp aTime = a['requested_at'];
       Timestamp bTime = b['requested_at'];
-      return bTime.compareTo(aTime); // الأحدث أولًا
+      return bTime.compareTo(aTime); 
     });
 
     return validDocs;
@@ -77,7 +77,7 @@ class _MyGalleryRequestsScreenState extends State<MyAdsRequestsScreen> {
             fontSize: 15,
           ),
         ),
-        actionsAlignment: MainAxisAlignment.center, // توسيط الأزرار
+        actionsAlignment: MainAxisAlignment.center, 
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -117,11 +117,9 @@ class _MyGalleryRequestsScreenState extends State<MyAdsRequestsScreen> {
 
     return FutureBuilder(
       future: Future.wait([
-        // Fetch classification name
         (data['classification id'] != null)
             ? (data['classification id'] as DocumentReference).get()
             : Future.value(null),
-        // Fetch city name
         (data['city'] != null)
             ? FirebaseFirestore.instance
                 .collection('city')

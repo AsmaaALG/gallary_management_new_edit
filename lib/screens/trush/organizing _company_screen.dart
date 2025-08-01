@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
-import 'package:gallery_management/screens/Admin/Organizer_screen.dart';
 import 'package:gallery_management/screens/Admin/company_screen.dart';
-import 'package:gallery_management/screens/Organizer/edit_gallery_screen.dart';
-import 'package:gallery_management/screens/Admin/suite_management_screen.dart';
-import 'package:gallery_management/screens/Admin/partner_management_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class OrganizingCompanyScreen extends StatelessWidget {
   const OrganizingCompanyScreen({
@@ -18,7 +14,7 @@ class OrganizingCompanyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double cardWidth = isWeb(context)
-        ? screenWidth / 2 - 40 // مساحة لبطاقتين في صف واحد مع فراغ
+        ? screenWidth / 2 - 40 
         : double.infinity;
 
     return Directionality(

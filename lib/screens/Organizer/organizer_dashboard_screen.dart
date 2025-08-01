@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/route_observer.dart';
@@ -9,8 +8,6 @@ import 'manage_galleries_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
 import 'package:gallery_management/services/auth.dart';
 
-// تأكد أن هذا متوفر في main.dart
-// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
 class OrganizerDashboardScreen extends StatefulWidget {
   final String userId;
@@ -29,7 +26,7 @@ class _OrganizerDashboardScreenState extends State<OrganizerDashboardScreen>
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
 
-    // أول مرة يتم الدخول للشاشة
+    // أول مرة 
     FirestoreService().convertAdsToGalleries();
   }
 

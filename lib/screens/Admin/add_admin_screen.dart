@@ -46,7 +46,7 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
-    final horizontalPadding = isWideScreen ? 40.0 : 20.0; // تعديل البادينق
+    final horizontalPadding = isWideScreen ? 40.0 : 20.0; 
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -69,7 +69,7 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
         body: Padding(
           padding: EdgeInsets.symmetric(
               vertical: 30,
-              horizontal: horizontalPadding), // استخدام البادينق المعدل
+              horizontal: horizontalPadding), 
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,

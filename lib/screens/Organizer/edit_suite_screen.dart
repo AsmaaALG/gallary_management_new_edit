@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:gallery_management/screens/Admin/suite_images_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class EditSuiteScreen extends StatefulWidget {
   final String suiteId;

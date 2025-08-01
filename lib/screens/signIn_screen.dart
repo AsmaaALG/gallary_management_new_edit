@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // استيراد مكتبة Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery_management/constants.dart';
@@ -17,15 +17,10 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
 
-  void initState() {
-    super.initState();
-    Timer(Duration(seconds: 1), () {
-    SystemNavigator.pop(); 
-    });
-    }
+ 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  String userType = 'admin'; // Default to admin
+  String userType = 'admin'; 
   bool showSpinner = false;
 
   Future<void> _signIn() async {
@@ -46,7 +41,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
     try {
       if (userType == 'admin') {
-        // تحقق من تسجيل الدخول كمسؤول
         UserCredential userCredential =
             await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
@@ -180,7 +174,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Radio buttons for user type selection
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

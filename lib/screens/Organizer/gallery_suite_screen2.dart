@@ -4,7 +4,6 @@ import 'package:gallery_management/screens/Organizer/edit_gallery_screen.dart';
 import 'package:gallery_management/screens/Organizer/partner_management_screen2.dart';
 import 'package:gallery_management/screens/Organizer/suite_management_screen2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gallery_management/screens/Admin/view_galleryData_screen.dart';
 
 class GallerySuiteScreen2 extends StatelessWidget {
   final String galleryId;

@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_management/screens/Admin/GalleryStatistic_screen.dart';
-import 'package:gallery_management/screens/trush/add_gallery_screen.dart';
 import 'package:gallery_management/screens/Admin/gallery_suite_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/Admin/review_management_screen.dart';
@@ -51,12 +50,11 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
                 return Center(child: Text('حدث خطأ أثناء جلب البيانات'));
               }
 
-              // تحويل البيانات إلى قائمة من MainCard
               final cards = snapshot.data!.docs.map((doc) {
-                final documentId = doc.id; // الحصول على معرف المستند
+                final documentId = doc.id; 
 
                 return MainCard(
-                  title: doc['title'], // تأكد من وجود حقل 'title'
+                  title: doc['title'], 
                   buttons: [
                     {
                       'icon': Icons.visibility,

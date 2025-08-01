@@ -24,8 +24,8 @@ class _GalleryStatisticsScreenState extends State<GalleryStatisticsScreen> {
   double averageRating = 0.0;
   bool isLoading = false;
   String errorMessage = '';
-  List<int> weeklyVisits = List.filled(7, 0); // To hold visits for each day
-  double successRate = 0.0; // نسبة النجاح
+  List<int> weeklyVisits = List.filled(7, 0); 
+  double successRate = 0.0; 
   int totalBookingRequests = 0;
   int acceptedBookingRequests = 0;
   int rejectedBookingRequests = 0;

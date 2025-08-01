@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/screens/Admin/edit_organizer_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/add_organizer_screen.dart';
 import 'package:gallery_management/services/firestore_service.dart';
@@ -22,7 +21,6 @@ class _OrganizerScreenState extends State<OrganizerScreen> {
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
 
-    // حدد الاستعلام بناءً على وجود companyId
     final stream = widget.companyId != null
         ? FirebaseFirestore.instance
             .collection('Organizer')
@@ -81,7 +79,7 @@ class _OrganizerScreenState extends State<OrganizerScreen> {
             title: 'إدارة المنظمين',
             description:
                 'من خلال هذه الواجهة يمكنك متابعة بيانات جميع المنظمين',
-            cards: cards.isNotEmpty ? cards : [], // نمرر قائمة فاضية
+            cards: cards.isNotEmpty ? cards : [], 
             addScreen: AddOrganizerScreen(
               companyId: widget.companyId,
             ),

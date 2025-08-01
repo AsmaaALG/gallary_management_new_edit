@@ -21,10 +21,10 @@ class Auth {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      return true; // إذا تم تسجيل الحساب بنجاح
+      return true; 
     } catch (e) {
-      print(e); // طباعة الخطأ في وحدة التحكم
-      return false; // إعادة false في حالة حدوث خطأ
+      print(e); 
+      return false; 
     }
   }
 
@@ -36,5 +36,4 @@ class Auth {
     );
   }
 
-  //delete
 }

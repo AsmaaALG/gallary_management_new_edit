@@ -269,12 +269,10 @@ class _CompanyScreenState extends State<CompanyScreen> {
       },
     );
 
-    if (confirmed == true) {
-      final success = await onConfirm();
-      // الرسائل تُعرض من داخل دالة onConfirm (كما فعلنا مع deleteCompanyWithOrganizers)
-      if (!success) {
-        // يمكنك أيضًا عرض Snackbar هنا لو أردت فصل الرسائل
-      }
-    }
+    // if (confirmed == true) {
+    //   final success = await onConfirm();
+    //   if (!success) {
+    //   }
+    // }
   }
 }

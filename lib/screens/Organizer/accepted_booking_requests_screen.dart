@@ -1,4 +1,3 @@
-// واجهة الطلبات المقبولة (AcceptedBookingRequestsScreen)
 import 'package:flutter/material.dart';
 import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/services/firestore_service.dart';
@@ -30,15 +29,15 @@ class _AcceptedBookingRequestsScreenState
 
   Future<void> _cancelAcceptance(String docId, String suiteName) async {
     try {
-      // 1. تحديث الجناح ليصبح متاح
+      //  نحديث الجناح باش يولي متاح
       await _firestoreService.updateSuiteStatusInAd(widget.adId, suiteName,
           available: true);
 
-      // 2. إعادة تفعيل الطلبات الأخرى التي تطلب نفس الجناح
+      //  إعادة تفعيل الطلبات الأخرى التي تطلب نفس الجناح
       await _firestoreService.enableOtherRequestsForSameSuite(
           widget.adId, suiteName);
 
-      // 3. إزالة حالة القبول من الطلب الحالي
+      //  إزالة حالة القبول من الطلب الحالي
       await _firestoreService.unmarkRequestAsAccepted(docId);
 
       setState(() {

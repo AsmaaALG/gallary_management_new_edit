@@ -9,7 +9,6 @@ import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gallery_management/services/firestore_service.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AddAdsScreen2 extends StatefulWidget {
   final String companyId;
@@ -140,7 +139,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                     final area = areaCtl.text.trim();
                     final price = priceCtl.text.trim();
 
-                    // تحقق من الطول
                     if (name.length > 5 ||
                         area.length > 5 ||
                         price.length > 5) {
@@ -151,7 +149,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    // حروف إنجليزية وأرقام فقط
                     final nameValid = RegExp(r'^[a-zA-Z0-9]+$');
                     if (!nameValid.hasMatch(name)) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +159,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    // أرقام ورموز فقط
                     final areaValid = RegExp(r'^[0-9\W_]+$');
                     if (!areaValid.hasMatch(area)) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -173,7 +169,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    //  أرقام فقط
                     final priceValid = RegExp(r'^[0-9\W_]+$');
                     if (!priceValid.hasMatch(price)) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +178,6 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
                       return;
                     }
 
-                    // تحقق من التكرار)
                     final nameLower = name.toLowerCase();
                     final alreadyExists = _suites.any((suite) =>
                         suite['name'].toString().toLowerCase() == nameLower);
@@ -349,7 +343,7 @@ class _AddAdsScreenState extends State<AddAdsScreen2> {
         body: Padding(
           padding: EdgeInsets.symmetric(
               vertical: 20,
-              horizontal: isWideScreen ? 50 : 20), // تقليل البادينق
+              horizontal: isWideScreen ? 50 : 20), 
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(

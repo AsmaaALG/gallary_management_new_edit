@@ -183,7 +183,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
               final area = areaCtl.text.trim();
               final price = priceCtl.text.trim();
 
-              // تحقق من الطول
               if (name.length > 5 || area.length > 5 || price.length > 5) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -192,7 +191,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                 return;
               }
 
-              // تحقق من الاسم: حروف إنجليزية وأرقام فقط
               final nameValid = RegExp(r'^[a-zA-Z0-9]+$');
               if (!nameValid.hasMatch(name)) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -203,7 +201,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                 return;
               }
 
-              // تحقق من المساحة: أرقام ورموز فقط
               final areaValid = RegExp(r'^[0-9\W_]+$');
               if (!areaValid.hasMatch(area)) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -214,7 +211,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                 return;
               }
 
-              // تحقق من السعر: أرقام فقط
               final priceValid = RegExp(r'^[0-9\W_]+$');
               if (!priceValid.hasMatch(price)) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -224,7 +220,6 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                 return;
               }
 
-              // تحقق من التكرار (غير حساس لحالة الأحرف)
               final nameLower = name.toLowerCase();
               final alreadyExists = _suites.any((suite) =>
                   suite['name'].toString().toLowerCase() == nameLower);
@@ -290,7 +285,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
             : Padding(
                 padding: EdgeInsets.symmetric(
                     vertical: 20,
-                    horizontal: isWideScreen ? 50 : 20), // تقليل البادينق
+                    horizontal: isWideScreen ? 50 : 20), 
                 child: Form(
                   key: _formKey,
                   child: SingleChildScrollView(

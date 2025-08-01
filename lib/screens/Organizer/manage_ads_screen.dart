@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/screens/Admin/ads_request_screen.dart';
 import 'package:gallery_management/screens/Organizer/booking_requests_screen.dart';
 import 'package:gallery_management/screens/Organizer/edit_ads_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';

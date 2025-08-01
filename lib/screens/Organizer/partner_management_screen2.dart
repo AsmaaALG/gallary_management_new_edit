@@ -5,7 +5,6 @@ import 'package:gallery_management/pick_and_up_load_image.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/widgets/main_card.dart';
 import 'package:gallery_management/services/firestore_service.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PartnerManagementScreen2 extends StatefulWidget {
   final String galleryId;
@@ -259,7 +258,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
               description:
                   'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
               cards: cards,
-              galleryName: _galleryName ?? '', // <== هنا اسم المعرض بدون bold
+              galleryName: _galleryName ?? '', 
             ),
           ),
         );

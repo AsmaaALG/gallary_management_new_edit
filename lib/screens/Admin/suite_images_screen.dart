@@ -27,101 +27,101 @@ class _SuiteImageScreenState extends State<SuiteImageScreen> {
     return regex.hasMatch(url);
   }
 
-  void _showAddImageDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        elevation: 90,
-        backgroundColor: const Color.fromARGB(255, 250, 230, 230),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Directionality(
-          textDirection: TextDirection.rtl,
-          child:
-              Text("إضافة صورة جديدة", style: TextStyle(fontFamily: mainFont)),
-        ),
-        content: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _newImageController,
-                decoration: InputDecoration(
-                  hintText: 'رابط الصورة',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: BorderSide(
-                        color: Color.fromARGB(255, 228, 182, 199), width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: BorderSide(
-                        color: Color.fromARGB(255, 244, 210, 221), width: 2),
-                  ),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                ),
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  if (await canLaunchUrl(imgurUrl)) {
-                    await launchUrl(imgurUrl,
-                        mode: LaunchMode.externalApplication);
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      'افتح Imgur لرفع صورة',
-                      style: TextStyle(fontFamily: mainFont, fontSize: 10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("إلغاء",
-                style: TextStyle(fontFamily: mainFont, color: Colors.black)),
-          ),
-          TextButton(
-            onPressed: () async {
-              final imageUrl = _newImageController.text.trim();
-              if (!_isValidImageUrl(imageUrl)) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
-                );
-                return;
-              }
-              if (imageUrl.isEmpty) return;
+  // void _showAddImageDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       elevation: 90,
+  //       backgroundColor: const Color.fromARGB(255, 250, 230, 230),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //       title: Directionality(
+  //         textDirection: TextDirection.rtl,
+  //         child:
+  //             Text("إضافة صورة جديدة", style: TextStyle(fontFamily: mainFont)),
+  //       ),
+  //       content: Directionality(
+  //         textDirection: TextDirection.rtl,
+  //         child: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             TextField(
+  //               controller: _newImageController,
+  //               decoration: InputDecoration(
+  //                 hintText: 'رابط الصورة',
+  //                 border: OutlineInputBorder(
+  //                   borderRadius: BorderRadius.circular(25),
+  //                   borderSide: BorderSide(
+  //                       color: Color.fromARGB(255, 228, 182, 199), width: 1.5),
+  //                 ),
+  //                 focusedBorder: OutlineInputBorder(
+  //                   borderRadius: BorderRadius.circular(25),
+  //                   borderSide: BorderSide(
+  //                       color: Color.fromARGB(255, 244, 210, 221), width: 2),
+  //                 ),
+  //                 contentPadding:
+  //                     EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+  //               ),
+  //             ),
+  //             SizedBox(height: 10),
+  //             ElevatedButton(
+  //               onPressed: () async {
+  //                 if (await canLaunchUrl(imgurUrl)) {
+  //                   await launchUrl(imgurUrl,
+  //                       mode: LaunchMode.externalApplication);
+  //                 }
+  //               },
+  //               child: Padding(
+  //                 padding: const EdgeInsets.symmetric(vertical: 15),
+  //                 child: Align(
+  //                   alignment: Alignment.centerRight,
+  //                   child: Text(
+  //                     textAlign: TextAlign.center,
+  //                     maxLines: 2,
+  //                     overflow: TextOverflow.ellipsis,
+  //                     'افتح Imgur لرفع صورة',
+  //                     style: TextStyle(fontFamily: mainFont, fontSize: 10),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: Text("إلغاء",
+  //               style: TextStyle(fontFamily: mainFont, color: Colors.black)),
+  //         ),
+  //         TextButton(
+  //           onPressed: () async {
+  //             final imageUrl = _newImageController.text.trim();
+  //             if (!_isValidImageUrl(imageUrl)) {
+  //               ScaffoldMessenger.of(context).showSnackBar(
+  //                 const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
+  //               );
+  //               return;
+  //             }
+  //             if (imageUrl.isEmpty) return;
 
-              await FirebaseFirestore.instance.collection('suite image').add({
-                'suite id': widget.suiteId,
-                'image url': imageUrl,
-              });
+  //             await FirebaseFirestore.instance.collection('suite image').add({
+  //               'suite id': widget.suiteId,
+  //               'image url': imageUrl,
+  //             });
 
-              _newImageController.clear();
-              Navigator.pop(context);
-            },
-            child: Text("إضافة",
-                style: TextStyle(
-                    fontFamily: mainFont,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor)),
-          ),
-        ],
-      ),
-    );
-  }
+  //             _newImageController.clear();
+  //             Navigator.pop(context);
+  //           },
+  //           child: Text("إضافة",
+  //               style: TextStyle(
+  //                   fontFamily: mainFont,
+  //                   fontWeight: FontWeight.bold,
+  //                   color: primaryColor)),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void _showDeleteImageDialog(String docId) {
     showDialog(

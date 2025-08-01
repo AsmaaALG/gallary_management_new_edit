@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_management/constants.dart';
 import 'package:gallery_management/screens/Admin/add_admin_screen.dart';
 import 'package:gallery_management/screens/Admin/main_screen.dart';
 import 'package:gallery_management/screens/signIn_screen.dart';
@@ -110,7 +109,6 @@ class _AdminManagementScreen2State extends State<AdminManagementScreen2> {
     );
   }
 
-  // نافذة تعديل بيانات المسؤول
   // Future<void> _editAdminDialog(
   //     BuildContext context, QueryDocumentSnapshot admin) async {
   //   final data = admin.data() as Map<String, dynamic>;

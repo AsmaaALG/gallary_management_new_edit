@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_management/widgets/most_visited_chart.dart';
-import 'package:gallery_management/widgets/pie_chart.dart';
-import 'package:gallery_management/widgets/pie_chart_legend.dart';
 import 'package:gallery_management/widgets/stat_card.dart';
 import 'package:gallery_management/widgets/weekly_chart.dart';
 import 'package:intl/intl.dart';
@@ -124,7 +122,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               SizedBox(height: 16),
 
-                              // بطاقات الإحصائيات
                               GridView.count(
                                 crossAxisCount: isDesktop ? 4 : 2,
                                 crossAxisSpacing: 30,
@@ -205,7 +202,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                               SizedBox(height: sectionSpacing),*/
-// قسم التسجيلات الجديدة
                               SizedBox(height: sectionSpacing),
                               Text(
                                 'معدل التسجيلات الجديدة (أسبوعي)',

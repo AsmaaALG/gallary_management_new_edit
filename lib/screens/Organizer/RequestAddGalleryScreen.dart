@@ -9,7 +9,6 @@ import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:url_launcher/url_launcher.dart';
 
 class RequestAddGalleryScreen extends StatefulWidget {
   final String companyId;
@@ -144,14 +143,12 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
     }
   }
 
-  // دالة التحقق من رابط الصورة
   bool _isValidImageUrl(String url) {
     final RegExp regex = RegExp(r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp))$',
         caseSensitive: false);
     return regex.hasMatch(url);
   }
 
-  // دالة التحقق من رابط Google Maps
   bool _isValidMapUrl(String url) {
     final cleanedUrl = url.trim();
     final RegExp regex = RegExp(
@@ -192,7 +189,7 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
         body: Padding(
           padding: EdgeInsets.symmetric(
               vertical: 20.0,
-              horizontal: isWideScreen ? 30 : 10), // تقليل البادينق
+              horizontal: isWideScreen ? 30 : 10), 
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(

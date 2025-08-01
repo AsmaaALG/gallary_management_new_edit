@@ -46,13 +46,11 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
 
     final title = value.trim();
 
-    // تحقق من أن العنوان يحتوي فقط على أحرف إنجليزية وأرقام
     final validMapTitleRegex = RegExp(r'^[a-zA-Z0-9\s]+$');
     if (!validMapTitleRegex.hasMatch(title)) {
       return 'العنوان يجب أن يحتوي على حروف إنجليزية وأرقام فقط';
     }
 
-    // جلب الأجنحة التي تنتمي لنفس المعرض فقط
     final snapshot = await FirebaseFirestore.instance
         .collection('suite')
         .where('gallery id', isEqualTo: galleryId)
@@ -60,7 +58,6 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
 
     final lowerTitle = title.toLowerCase();
 
-    // تحقق إذا كان العنوان موجود مسبقًا بدون حساسية لحالة الأحرف
     final exists = snapshot.docs.any((doc) {
       final existingTitle =
           (doc.data()['title on map'] ?? '').toString().toLowerCase();
@@ -318,7 +315,7 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
                       'مساحة الجناح بالمتر المربع',
                       'يمكن تركها فارغة',
                     ),
-                    validator: _validateNumber, // بدون تحقق
+                    validator: _validateNumber, 
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -327,7 +324,7 @@ class _AddSuiteScreenState extends State<AddSuiteScreen> {
                       'سعر الجناح بالدينار الليبي',
                       'يمكن تركه فارغًا',
                     ),
-                    validator: _validateNumber, // بدون تحقق
+                    validator: _validateNumber,
                   ),
                   const SizedBox(height: 30),
                   Center(

@@ -52,7 +52,7 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
               ),
               const SizedBox(height: 20),
 
-              // مربع البحث
+              // البحث
               Container(
                 width: isWideScreen ? 300 : double.infinity,
                 height: 40,
@@ -173,7 +173,6 @@ class _ReviewManagementScreenState extends State<ReviewManagementScreen> {
                                     horizontal: 15, vertical: 15),
                                 child: Row(
                                   children: [
-                                    // زر الحذف
                                     GestureDetector(
                                       onTap: () async {
                                         final confirmed = await showDialog(
