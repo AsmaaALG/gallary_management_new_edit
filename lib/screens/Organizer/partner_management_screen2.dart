@@ -18,6 +18,7 @@ class PartnerManagementScreen2 extends StatefulWidget {
 class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
   final FirestoreService _fs = FirestoreService();
   final TextEditingController _searchCtl = TextEditingController();
+  String? adId;
 
   String? _galleryName;
   bool _isLoading = true;
@@ -39,6 +40,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
     if (snapshot.exists) {
       setState(() {
         _galleryName = snapshot.data()?['title'];
+        adId = snapshot.data()?['ad_id'];
         _isLoading = false;
       });
     } else {
@@ -123,28 +125,6 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
                       ),
                     ),
                   ),
-
-                  // ElevatedButton(
-                  //   onPressed: () async {
-                  //     if (await canLaunchUrl(imgurUrl)) {
-                  //       await launchUrl(imgurUrl,
-                  //           mode: LaunchMode.externalApplication);
-                  //     }
-                  //   },
-                  //   child: const Padding(
-                  //     padding: EdgeInsets.symmetric(vertical: 15),
-                  //     child: Align(
-                  //       alignment: Alignment.centerRight,
-                  //       child: Text(
-                  //         'افتح Imgur لرفع صورة',
-                  //         textAlign: TextAlign.center,
-                  //         maxLines: 2,
-                  //         overflow: TextOverflow.ellipsis,
-                  //         style: TextStyle(fontFamily: mainFont, fontSize: 10),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             ),
@@ -175,6 +155,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
                     name: nameCtl.text.trim(),
                     imageUrl: imageCtl.text.trim(),
                     galleryId: widget.galleryId,
+                    adId: adId!,
                   );
                 } else {
                   await _fs.updatePartner(
@@ -258,7 +239,7 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen2> {
               description:
                   'من هنا يمكنك إضافة أو تعديل أو حذف شركاء هذا المعرض',
               cards: cards,
-              galleryName: _galleryName ?? '', 
+              galleryName: _galleryName ?? '',
             ),
           ),
         );

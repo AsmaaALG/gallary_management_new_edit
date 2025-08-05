@@ -252,12 +252,18 @@ class _AdsRequestManagementScreenState
                                   .add(adData);
                             }
 
-                            DocumentReference adRef = await FirebaseFirestore
-                                .instance
-                                .collection('ads')
-                                .add(adData);
+                            // DocumentReference adRef = await FirebaseFirestore
+                            //     .instance
+                            //     .collection('ads')
+                            //     .add(adData);
+                            String adId = doc.id;
 
-                            String adId = adRef.id;
+                            await FirebaseFirestore.instance
+                                .collection('ads')
+                                .doc(adId)
+                                .set(adData);
+
+                            // String adId = adRef.id;
                             await FirebaseFirestore.instance
                                 .collection('notifications')
                                 .add({
@@ -283,8 +289,7 @@ class _AdsRequestManagementScreenState
                             color: Color.fromARGB(255, 244, 194, 185)),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40)),
-                        minimumSize: const Size(
-                            double.infinity, 48), 
+                        minimumSize: const Size(double.infinity, 48),
                       ),
                       child: const Text('قبول الطلب',
                           style: TextStyle(
@@ -292,7 +297,7 @@ class _AdsRequestManagementScreenState
                               color: Colors.green,
                               fontWeight: FontWeight.bold)),
                     ),
-                    const SizedBox(height: 12), 
+                    const SizedBox(height: 12),
                     OutlinedButton(
                       onPressed: () {
                         confirmAdRequest(
@@ -314,8 +319,7 @@ class _AdsRequestManagementScreenState
                             color: Color.fromARGB(255, 244, 194, 185)),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40)),
-                        minimumSize: const Size(
-                            double.infinity, 48), 
+                        minimumSize: const Size(double.infinity, 48),
                       ),
                       child: const Text('رفض الطلب',
                           style: TextStyle(

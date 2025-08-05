@@ -79,8 +79,10 @@ class _ManageGalleriesScreenState extends State<ManageAdsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            BookingRequestsScreen(adId: documentId, adname: data['title'],),
+                        builder: (context) => BookingRequestsScreen(
+                          adId: documentId,
+                          adname: data['title'],
+                        ),
                       ),
                     );
                   },

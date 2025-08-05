@@ -26,7 +26,6 @@ class _GalleryManagementScreenState extends State<GalleryManagementScreen> {
     _fetchGalleries();
   }
 
-  // دالة لجلب المعارض من Firebase
   Future<void> _fetchGalleries() async {
     List<Map<String, dynamic>> galleries =
         await _firestoreService.getAllData('2');

@@ -47,95 +47,95 @@ class _PartnerManagementScreenState extends State<PartnerManagementScreen> {
     }
   }
 
-  Future<void> _showPartnerDialog({DocumentSnapshot? doc}) async {
-    final nameCtl = TextEditingController(text: doc?['name'] ?? '');
-    final imageCtl = TextEditingController(text: doc?['image'] ?? '');
+  // Future<void> _showPartnerDialog({DocumentSnapshot? doc}) async {
+  //   final nameCtl = TextEditingController(text: doc?['name'] ?? '');
+  //   final imageCtl = TextEditingController(text: doc?['image'] ?? '');
 
-    await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 250, 230, 230),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Text(doc == null ? 'إضافة شريك' : 'تعديل الشريك',
-              style: const TextStyle(fontFamily: mainFont)),
-        ),
-        content: Directionality(
-          textDirection: TextDirection.rtl,
-          child: SizedBox(
-            width: 260,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _field(nameCtl, 'اسم الشريك'),
-                  const SizedBox(height: 10),
-                  _field(imageCtl, 'رابط الصورة'),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (await canLaunchUrl(imgurUrl)) {
-                        await launchUrl(imgurUrl,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 15),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          'افتح Imgur لرفع صورة',
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontFamily: mainFont, fontSize: 10),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child:
-                  const Text('إلغاء', style: TextStyle(fontFamily: mainFont))),
-          TextButton(
-              onPressed: () async {
-                if (nameCtl.text.trim().isEmpty || imageCtl.text.trim().isEmpty)
-                  return;
+  //   await showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       backgroundColor: const Color.fromARGB(255, 250, 230, 230),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //       title: Directionality(
+  //         textDirection: TextDirection.rtl,
+  //         child: Text(doc == null ? 'إضافة شريك' : 'تعديل الشريك',
+  //             style: const TextStyle(fontFamily: mainFont)),
+  //       ),
+  //       content: Directionality(
+  //         textDirection: TextDirection.rtl,
+  //         child: SizedBox(
+  //           width: 260,
+  //           child: SingleChildScrollView(
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 _field(nameCtl, 'اسم الشريك'),
+  //                 const SizedBox(height: 10),
+  //                 _field(imageCtl, 'رابط الصورة'),
+  //                 const SizedBox(height: 10),
+  //                 ElevatedButton(
+  //                   onPressed: () async {
+  //                     if (await canLaunchUrl(imgurUrl)) {
+  //                       await launchUrl(imgurUrl,
+  //                           mode: LaunchMode.externalApplication);
+  //                     }
+  //                   },
+  //                   child: const Padding(
+  //                     padding: EdgeInsets.symmetric(vertical: 15),
+  //                     child: Align(
+  //                       alignment: Alignment.centerRight,
+  //                       child: Text(
+  //                         'افتح Imgur لرفع صورة',
+  //                         textAlign: TextAlign.center,
+  //                         maxLines: 2,
+  //                         overflow: TextOverflow.ellipsis,
+  //                         style: TextStyle(fontFamily: mainFont, fontSize: 10),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             child:
+  //                 const Text('إلغاء', style: TextStyle(fontFamily: mainFont))),
+  //         TextButton(
+  //             onPressed: () async {
+  //               if (nameCtl.text.trim().isEmpty || imageCtl.text.trim().isEmpty)
+  //                 return;
 
-                if (doc == null) {
-                  await _fs.addPartner(
-                    name: nameCtl.text.trim(),
-                    imageUrl: imageCtl.text.trim(),
-                    galleryId: widget.galleryId,
-                  );
-                } else {
-                  await _fs.updatePartner(
-                    doc.id,
-                    name: nameCtl.text.trim(),
-                    imageUrl: imageCtl.text.trim(),
-                  );
-                }
-                Navigator.pop(context);
-              },
-              child: Text(
-                doc == null ? 'إضافة' : 'حفظ',
-                style: const TextStyle(
-                  fontFamily: mainFont,
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor,
-                ),
-              )),
-        ],
-      ),
-    );
-  }
+  //               if (doc == null) {
+  //                 await _fs.addPartner(
+  //                   name: nameCtl.text.trim(),
+  //                   imageUrl: imageCtl.text.trim(),
+  //                   galleryId: widget.galleryId,
+  //                 );
+  //               } else {
+  //                 await _fs.updatePartner(
+  //                   doc.id,
+  //                   name: nameCtl.text.trim(),
+  //                   imageUrl: imageCtl.text.trim(),
+  //                 );
+  //               }
+  //               Navigator.pop(context);
+  //             },
+  //             child: Text(
+  //               doc == null ? 'إضافة' : 'حفظ',
+  //               style: const TextStyle(
+  //                 fontFamily: mainFont,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: primaryColor,
+  //               ),
+  //             )),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _field(TextEditingController c, String hint) => TextField(
         controller: c,

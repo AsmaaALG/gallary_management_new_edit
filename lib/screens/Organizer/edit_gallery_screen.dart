@@ -8,6 +8,7 @@ import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:url_launcher/url_launcher.dart';
 
 class EditGalleryScreen extends StatefulWidget {
   final String galleryId;
@@ -198,8 +199,7 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: EdgeInsets.symmetric(
-                    vertical: 20,
-                    horizontal: isWideScreen ? 50 : 20),
+                    vertical: 20, horizontal: isWideScreen ? 50 : 20),
                 child: Form(
                   key: _formKey,
                   child: SingleChildScrollView(
@@ -218,12 +218,37 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20), 
+                        const SizedBox(height: 20),
                         buildTextField(_titleController, 'اسم المعرض',
                             'يرجى إدخال اسم المعرض', true),
                         const SizedBox(height: 16),
-                        buildTextField(_locationController, 'الموقع',
-                            'يرجى إدخال الموقع', true),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: buildTextField(
+                                _locationController,
+                                'الموقع',
+                                'أدخل موقع المعرض هنا',
+                                true,
+                              ),
+                            ),
+                            const SizedBox(width: 7),
+                            ElevatedButton(
+                              onPressed: () async {
+                                const imgurUrl = 'https://maps.google.com/';
+                                await launchUrl(Uri.parse(imgurUrl));
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 15),
+                                child: Text(
+                                  'google maps',
+                                  style: TextStyle(
+                                      fontFamily: mainFont, fontSize: 8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 16),
                         buildTextField(_qrCodeController, 'رمز الQR',
                             'يرجى إدخال رمز QR', false),
@@ -271,7 +296,6 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _isUploading
@@ -317,10 +341,6 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // buildTextField(_mapController, 'رابط صورة خارطة المعرض',
-                        //     'يرجى إدخال رابط الصورة', false),
-                        // const SizedBox(height: 16),
-                        // City Dropdown
                         CityDropdown(
                           selectedCity: _selectedCity,
                           onChanged: (value) => setState(() {
@@ -373,7 +393,6 @@ class _EditGalleryScreenState extends State<EditGalleryScreen> {
                             });
                           },
                         ),
-
                         const SizedBox(height: 16),
                         buildTextField(_descriptionController, 'الوصف',
                             'يرجى إدخال وصف المعرض', true,

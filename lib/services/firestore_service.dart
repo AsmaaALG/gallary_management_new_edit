@@ -22,40 +22,40 @@ class FirestoreService {
   }
 
   Future<bool> createUser({
-  required String firstName,
-  required String lastName,
-  required String email,
-  required String password,
-  required int state,
-  required String currentEmail,
-  required String currentPassword,
-}) async {
-  try {
-    UserCredential newUser =
-        await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+    required int state,
+    required String currentEmail,
+    required String currentPassword,
+  }) async {
+    try {
+      UserCredential newUser = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
 
-    await _firestore.collection('admin').doc(newUser.user!.uid).set({
-      'id': newUser.user!.uid,
-      'first_name': firstName,
-      'last_name': lastName,
-      'email': email,
-      'password': password,
-      'state': state,
-    });
+      await _firestore.collection('admin').doc(newUser.user!.uid).set({
+        'id': newUser.user!.uid,
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'password': password,
+        'state': state,
+      });
 
-    await _auth.signOut();
+      await _auth.signOut();
 
-    await _auth.signInWithEmailAndPassword(
-      email: currentEmail,
-      password: currentPassword,
-    );
+      await _auth.signInWithEmailAndPassword(
+        email: currentEmail,
+        password: currentPassword,
+      );
 
-    return true;
-  } catch (e) {
-    print("خطأ أثناء إنشاء المستخدم: $e");
-    return false;
+      return true;
+    } catch (e) {
+      print("خطأ أثناء إنشاء المستخدم: $e");
+      return false;
+    }
   }
-}
 
 ////////////////////////////
   Future<bool> createOrganizer({
@@ -65,7 +65,7 @@ class FirestoreService {
     required String password,
     required String companyId,
     required String currentEmail,
-  required String currentPassword,
+    required String currentPassword,
   }) async {
     try {
       // حفظ الجلسة الحالية قبل التسجيل
@@ -95,12 +95,12 @@ class FirestoreService {
       //     password: currentPassword,
       //   );
       // }
-    await _auth.signOut();
+      await _auth.signOut();
 
-    await _auth.signInWithEmailAndPassword(
-      email: currentEmail,
-      password: currentPassword,
-    );
+      await _auth.signInWithEmailAndPassword(
+        email: currentEmail,
+        password: currentPassword,
+      );
 
       return true;
     } catch (e) {
@@ -248,7 +248,7 @@ class FirestoreService {
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); 
+          doc.reference.delete();
         }
       });
 
@@ -259,7 +259,7 @@ class FirestoreService {
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); 
+          doc.reference.delete();
         }
       });
 
@@ -292,7 +292,7 @@ class FirestoreService {
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); 
+          doc.reference.delete();
         }
       });
 
@@ -306,7 +306,7 @@ class FirestoreService {
           .get()
           .then((snapshot) {
         for (var doc in snapshot.docs) {
-          doc.reference.delete(); 
+          doc.reference.delete();
         }
       });
 
@@ -323,7 +323,7 @@ class FirestoreService {
       print('تم تحديث بيانات المعرض بنجاح');
     } catch (e) {
       print('حدث خطأ أثناء تحديث بيانات المعرض: $e');
-      throw e; 
+      throw e;
     }
   }
 
@@ -374,7 +374,7 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data();
-              data['docId'] = doc.id; 
+              data['docId'] = doc.id;
               return data;
             }).toList());
   }
@@ -448,18 +448,19 @@ class FirestoreService {
       print("فشل إزالة حالة القبول: $e");
     }
   }
-Future<String?> getGalleryIdByAdId(String adId) async {
-  final snapshot = await FirebaseFirestore.instance
-      .collection('2')
-      .where('ad_id', isEqualTo: adId)
-      .limit(1)
-      .get();
 
-  if (snapshot.docs.isNotEmpty) {
-    return snapshot.docs.first.id;
+  Future<String?> getGalleryIdByAdId(String adId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('2')
+        .where('ad_id', isEqualTo: adId)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return snapshot.docs.first.id;
+    }
+    return null; // لم يتم فتح المعرض بعد
   }
-  return null; // لم يتم فتح المعرض بعد
-}
 
   Future<List<Map<String, dynamic>>> getAcceptedBookingRequests(
       String adId) async {
@@ -585,11 +586,13 @@ Future<String?> getGalleryIdByAdId(String adId) async {
     required String name,
     required String imageUrl,
     required String galleryId,
+    required String adId,
   }) async {
     await _firestore.collection('partners').add({
       'name': name,
       'image': imageUrl,
       'gallery id': galleryId,
+      'ad_id':adId,
     });
   }
 
@@ -623,7 +626,7 @@ Future<String?> getGalleryIdByAdId(String adId) async {
       for (final doc in adsSnapshot.docs) {
         final ad = AdModel.fromMap(doc.data(), doc.id);
 
-        // تحويل الإعلان إلى معرض عند تاريخ البداية 
+        // تحويل الإعلان إلى معرض عند تاريخ البداية
         if (ad.startDate.isNotEmpty) {
           try {
             final startDate = DateFormat('dd-MM-yyyy').parse(ad.startDate);
@@ -653,8 +656,31 @@ Future<String?> getGalleryIdByAdId(String adId) async {
                 });
 
                 print("تم تحويل الإعلان '${ad.id}' إلى معرض.");
+                // تحديث الشركاء المرتبطين بالإعلان لإضافة gallery_id
+                // final partnersSnapshot = await FirebaseFirestore.instance
+                //     .collection('partners')
+                //     .where('ad_id', isEqualTo: ad.id)
+                //     .get();
 
-                // تحويل الطلبات المقبولة إلى أجنحة 
+                // for (final partnerDoc in partnersSnapshot.docs) {
+                //   await partnerDoc.reference.update({
+                //     'gallery id': galleryDoc.id,
+                //   });
+                // }
+                final partnersSnapshot = await FirebaseFirestore.instance
+                    .collection('partners')
+                    .where('adId', isEqualTo: ad.id)
+                    .where('gallery id', isNull: true)
+                    .get();
+
+                for (var doc in partnersSnapshot.docs) {
+                  await doc.reference.update({'galleryId': galleryDoc.id});
+                }
+
+                print(
+                    "تم ربط الشركاء بالإعلان '${ad.id}' بالمعرض '${galleryDoc.id}'.");
+
+                // تحويل الطلبات المقبولة إلى أجنحة
                 final acceptedForms = await spaceFormRef
                     .where('accepted', isEqualTo: true)
                     .where('adId', isEqualTo: ad.id)
@@ -711,7 +737,16 @@ Future<String?> getGalleryIdByAdId(String adId) async {
 
                   // حذف الطلب بعد التحويل
                   await spaceFormRef.doc(formDoc.id).delete();
+                  // تحديث الشركاء المرتبطين بالإعلان لإضافة gallery_id
+                  final partnersSnapshot = await FirebaseFirestore.instance
+                      .collection('partners')
+                      .where('adId', isEqualTo: ad.id)
+                      .where('gallery id', isNull: true)
+                      .get();
 
+                  for (var doc in partnersSnapshot.docs) {
+                    await doc.reference.update({'galleryId': galleryId});
+                  }
                   print("تم تحويل الإعلان '${ad.id}' مسبقًا.");
                 }
               }
@@ -721,7 +756,7 @@ Future<String?> getGalleryIdByAdId(String adId) async {
           }
         }
 
-        //حذف الإعلان عند الوصول لتاريخ stopAd 
+        //حذف الإعلان عند الوصول لتاريخ stopAd
         if (ad.stopAd.isNotEmpty) {
           try {
             final stopDate = DateFormat('dd-MM-yyyy').parse(ad.stopAd);

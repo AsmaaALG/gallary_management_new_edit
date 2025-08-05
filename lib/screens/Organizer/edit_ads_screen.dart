@@ -8,6 +8,7 @@ import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gallery_management/services/firestore_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EditAdsScreen extends StatefulWidget {
   final String adId;
@@ -34,6 +35,8 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   DateTime? _endDate;
   DateTime? _stopDate;
   List<Map<String, dynamic>> _suites = [];
+  List<Map<String, dynamic>> _partners = [];
+  List<String> _deletedPartnerIds = [];
   String? uploadedImageUrl;
   bool _isUploading = false;
 
@@ -43,6 +46,24 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
   void initState() {
     super.initState();
     _loadAdData();
+    _loadPartners();
+  }
+
+  Future<void> _loadPartners() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('partners')
+        .where('ad_id', isEqualTo: widget.adId)
+        .get();
+
+    setState(() {
+      _partners = snapshot.docs
+          .map((doc) => {
+                'id': doc.id,
+                'name': doc['name'],
+                'image': doc['image'],
+              })
+          .toList();
+    });
   }
 
   Future<void> _loadAdData() async {
@@ -131,6 +152,35 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
       };
 
       await _firestoreService.updateAd(widget.adId, updatedData);
+      //  حذف الشركاء السابقين
+
+      final oldPartners = await FirebaseFirestore.instance
+          .collection('partners')
+          .where('ad_id', isEqualTo: widget.adId)
+          .get();
+
+      for (var doc in oldPartners.docs) {
+        await doc.reference.delete();
+      }
+      final gallerySnapshot = await FirebaseFirestore.instance
+          .collection('2')
+          .where('ad_id', isEqualTo: widget.adId)
+          .limit(1)
+          .get();
+
+      String? galleryId = null;
+      if (gallerySnapshot.docs.isNotEmpty) {
+        galleryId = gallerySnapshot.docs.first.id;
+      }
+      //  إضافة الشركاء الجدد
+      for (var partner in _partners) {
+        await FirebaseFirestore.instance.collection('partners').add({
+          'name': partner['name'],
+          'image': partner['image'],
+          'ad_id': widget.adId,
+          'gallery id': galleryId,
+        });
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تم تحديث الإعلان بنجاح')),
@@ -284,8 +334,7 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: EdgeInsets.symmetric(
-                    vertical: 20,
-                    horizontal: isWideScreen ? 50 : 20), 
+                    vertical: 20, horizontal: isWideScreen ? 50 : 20),
                 child: Form(
                   key: _formKey,
                   child: SingleChildScrollView(
@@ -299,8 +348,33 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         buildTextField(_qrCodeController, 'رمز QR',
                             'يرجى إدخال رمز QR', false),
                         const SizedBox(height: 16),
-                        buildTextField(_locationController, 'الموقع',
-                            'يرجى إدخال الموقع', true),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: buildTextField(
+                                _locationController,
+                                'الموقع',
+                                'أدخل موقع المعرض هنا',
+                                true,
+                              ),
+                            ),
+                            const SizedBox(width: 7),
+                            ElevatedButton(
+                              onPressed: () async {
+                                const imgurUrl = 'https://maps.google.com/';
+                                await launchUrl(Uri.parse(imgurUrl));
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 15),
+                                child: Text(
+                                  'google maps',
+                                  style: TextStyle(
+                                      fontFamily: mainFont, fontSize: 8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _isUploading
@@ -459,6 +533,45 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                         buildTextField(_descriptionController, 'الوصف',
                             'يرجى إدخال وصف الإعلان', true,
                             maxLines: 3),
+                        Text('الشركاء المضافين:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        ..._partners.map((partner) => ListTile(
+                              title: Text(partner['name']),
+                              leading: partner['image'] != null
+                                  ? Image.network(partner['image'],
+                                      width: 40, height: 40)
+                                  : null,
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () =>
+                                    setState(() => _partners.remove(partner)),
+                              ),
+                            )),
+                        TextButton.icon(
+                          onPressed: () async {
+                            final newPartner = await showAddPartnerDialog();
+
+                            if (newPartner != null) {
+                              final exists = _partners.any((p) =>
+                                  p['name'].toString().toLowerCase() ==
+                                  newPartner['name']!.toLowerCase());
+
+                              if (exists) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('اسم الشريك مكرر')),
+                                );
+                                return;
+                              }
+
+                              setState(() {
+                                _partners.add(newPartner);
+                              });
+                            }
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text('إضافة شريك'),
+                        ),
                         const SizedBox(height: 16),
                         const Text('الأجنحة المضافة:',
                             style: TextStyle(fontWeight: FontWeight.bold)),
@@ -510,6 +623,106 @@ class _EditAdsScreenState extends State<EditAdsScreen> {
                   ),
                 ),
               ),
+      ),
+    );
+  }
+
+  Future<Map<String, String>?> showAddPartnerDialog() async {
+    final nameCtl = TextEditingController();
+    String? partnerImageUrl;
+    bool isUploading = false;
+
+    return showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (context, localSetState) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('إضافة شريك', textAlign: TextAlign.right),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  TextField(
+                    controller: nameCtl,
+                    textAlign: TextAlign.right,
+                    decoration: InputDecoration(
+                      hintText: 'اسم الشريك',
+                      hintTextDirection: TextDirection.rtl,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: isUploading
+                        ? null
+                        : () async {
+                            localSetState(() => isUploading = true);
+
+                            final imageUrl = await pickAndUploadImage(
+                              imgbbApiKey: '95daff58b10157f2de7ddd93301132e2',
+                            );
+
+                            if (imageUrl != null) {
+                              localSetState(() => partnerImageUrl = imageUrl);
+                            }
+
+                            localSetState(() => isUploading = false);
+                          },
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: isUploading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(partnerImageUrl == null
+                              ? 'اختر صورة الشريك'
+                              : 'تم اختيار الصورة'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () {
+                      final name = nameCtl.text.trim();
+
+                      if (name.isEmpty || partnerImageUrl == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('يرجى إدخال جميع البيانات')),
+                        );
+                        return;
+                      }
+
+                      Navigator.pop(context, {
+                        'name': name,
+                        'image': partnerImageUrl!,
+                      });
+                    },
+                    child: const Text('إضافة'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

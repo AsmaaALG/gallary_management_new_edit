@@ -9,6 +9,7 @@ import 'package:gallery_management/widgets/city_dropdown.dart';
 import 'package:gallery_management/widgets/classification_dropdown.dart';
 import 'package:gallery_management/widgets/date_picker_widget.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:url_launcher/url_launcher.dart';
 
 class RequestAddGalleryScreen extends StatefulWidget {
   final String companyId;
@@ -88,7 +89,8 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
       return;
     }
 
-    if (!_isValidImageUrl(_imageUrlController.text)||!_isValidImageUrl(_mapController.text)) {
+    if (!_isValidImageUrl(_imageUrlController.text) ||
+        !_isValidImageUrl(_mapController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يرجى إدخال رابط صورة صحيح')),
       );
@@ -188,8 +190,7 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(
-              vertical: 20.0,
-              horizontal: isWideScreen ? 30 : 10), 
+              vertical: 20.0, horizontal: isWideScreen ? 30 : 10),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -212,12 +213,36 @@ class _RequestAddGalleryScreenState extends State<RequestAddGalleryScreen> {
                   buildTextField(
                       _qrCodeController, 'رمز QR', 'أدخل رمز', false),
                   const SizedBox(height: 16),
-                  buildTextField(
-                      _locationController, 'الموقع', 'أدخل موقع المعرض', true),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: buildTextField(
+                          _locationController,
+                          'الموقع',
+                          'أدخل موقع المعرض هنا',
+                          true,
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      ElevatedButton(
+                        onPressed: () async {
+                          const imgurUrl = 'https://maps.google.com/';
+                          await launchUrl(Uri.parse(imgurUrl));
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 15),
+                          child: Text(
+                            'google maps',
+                            style: TextStyle(fontFamily: mainFont, fontSize: 8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                   // buildTextField(_imageUrlController, 'رابط صورة الغلاف',
                   //     'رابط مباشر للصورة', true),
-                   ElevatedButton(
+                  ElevatedButton(
                     onPressed: _isUploading
                         ? null
                         : () async {
